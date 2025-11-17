@@ -1,0 +1,504 @@
+<Page
+    x:Class="Station.Views.DevicesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Station.ViewModels"
+    Background="{StaticResource BackgroundSecondaryBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Section with Stats and Filters -->
+        <Grid Grid.Row="0"
+              Background="{StaticResource BackgroundSecondaryBrush}"
+              Padding="24,16"
+              BorderBrush="{StaticResource BorderLightBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title and Stats Row -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title -->
+                <TextBlock Grid.Column="0"
+                           Text="Quản lý Thiết bị"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           VerticalAlignment="Center"/>
+
+                <!-- Statistics Cards -->
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            Spacing="12">
+                    <!-- Total Devices -->
+                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16,12"
+                            MinWidth="140">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Tổng thiết bị"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.TotalDevices, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource PrimaryDarkBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Online Devices -->
+                    <Border Background="{StaticResource SeverityLowLightBrush}"
+                            BorderBrush="{StaticResource SeverityLowBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16,12"
+                            MinWidth="140">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Hoạt động"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.OnlineDevices, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource SeverityLowBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Offline Devices -->
+                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16,12"
+                            MinWidth="140">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Ngoại tuyến"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.OfflineDevices, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Fault Devices -->
+                    <Border Background="{StaticResource SeverityCriticalLightBrush}"
+                            BorderBrush="{StaticResource SeverityCriticalBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16,12"
+                            MinWidth="140">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Lỗi"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.FaultDevices, Mode=OneWay}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource SeverityCriticalBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Filters Row -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Box -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12,0"
+                        Height="36"
+                        MaxWidth="400"
+                        HorizontalAlignment="Left">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon Grid.Column="0"
+                                  Glyph="&#xE721;"
+                                  FontSize="14"
+                                  Foreground="{StaticResource TextTertiaryBrush}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,8,0"/>
+
+                        <TextBox Grid.Column="1"
+                                 Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="Tìm kiếm thiết bị..."
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 FontSize="13"
+                                 VerticalAlignment="Center"
+                                 Padding="0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Filter Buttons -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="12">
+                    <!-- Status Filter -->
+                    <Button MinWidth="160"
+                            Style="{StaticResource FilterDropdownButtonStyle}"
+                            x:Name="StatusFilterButton">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom"
+                                    FlyoutPresenterStyle="{StaticResource DarkFlyoutPresenterStyle}"
+                                    x:Name="StatusFlyout">
+                                <ListView ItemsSource="{x:Bind ViewModel.StatusFilters, Mode=OneWay}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"
+                                          Style="{StaticResource FlyoutListViewStyle}"
+                                          MinWidth="200"
+                                          ItemClick="FilterListView_ItemClick">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource FlyoutListViewItemStyle}"/>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <TextBlock Text="{x:Bind}"
+                                                       FontSize="13"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Flyout>
+                        </Button.Flyout>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE8F8;"
+
+                                      FontSize="14"
+                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind ViewModel.SelectedStatus, Mode=OneWay}"
+                                       FontSize="13"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"/>
+                            <FontIcon Grid.Column="2"
+                                      Glyph="&#xE70D;"
+                                      FontSize="10"
+                                      Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- Type Filter -->
+                    <Button MinWidth="160"
+                            Style="{StaticResource FilterDropdownButtonStyle}"
+                            x:Name="TypeFilterButton">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom"
+                                    FlyoutPresenterStyle="{StaticResource DarkFlyoutPresenterStyle}"
+                                    x:Name="TypeFlyout">
+                                <ListView ItemsSource="{x:Bind ViewModel.TypeFilters, Mode=OneWay}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedType, Mode=TwoWay}"
+                                          Style="{StaticResource FlyoutListViewStyle}"
+                                          MinWidth="200"
+                                          ItemClick="FilterListView_ItemClick">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource FlyoutListViewItemStyle}"/>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <TextBlock Text="{x:Bind}"
+                                                       FontSize="13"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Flyout>
+                        </Button.Flyout>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE8EA;"
+                                      FontSize="14"
+                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind ViewModel.SelectedType, Mode=OneWay}"
+                                       FontSize="13"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"/>
+                            <FontIcon Grid.Column="2"
+                                      Glyph="&#xE70D;"
+                                      FontSize="10"
+                                      Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Devices Grid -->
+        <Border Grid.Row="1"
+                Margin="24"
+                Background="{StaticResource BackgroundPrimaryBrush}"
+                CornerRadius="{StaticResource CornerRadiusLarge}"
+                BorderBrush="{StaticResource BorderLightBrush}"
+                BorderThickness="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredDevices, Mode=OneWay}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout MinItemWidth="380"
+                                           MinItemHeight="200"
+                                           ItemsStretch="Fill"
+                                           MinColumnSpacing="16"
+                                           MinRowSpacing="16"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource BackgroundPrimaryBrush}"
+                                    BorderBrush="{StaticResource BorderLightBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="20"
+                                    PointerEntered="DeviceCard_PointerEntered"
+                                    PointerExited="DeviceCard_PointerExited">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header: Type Icon + Name + Status Badge -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Type Icon -->
+                                        <Border Grid.Column="0"
+                                                Background="{StaticResource BackgroundAccentBrush}"
+                                                CornerRadius="8"
+                                                Width="40"
+                                                Height="40"
+                                                Margin="0,0,12,0">
+                                            <FontIcon Glyph="{Binding TypeIcon}"
+                                                      FontSize="20"
+                                                      Foreground="{StaticResource PrimaryDarkBrush}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Device Name -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="{Binding DeviceId}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
+
+                                        <!-- Status Badge -->
+                                        <Border Grid.Column="2"
+                                                Background="{Binding StatusBackgroundColor}"
+                                                CornerRadius="6"
+                                                Padding="10,6"
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,8,0">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="{Binding StatusIcon}"
+                                                          FontSize="12"
+                                                          Foreground="{Binding StatusColor}"/>
+                                                <TextBlock Text="{Binding StatusText}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{Binding StatusColor}"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Menu Button -->
+                                        <Button Grid.Column="3"
+                                                Style="{StaticResource DeviceMenuButtonStyle}">
+                                            <Button.Flyout>
+                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                    <!-- Edit Device -->
+                                                    <MenuFlyoutItem Text="Chỉnh sửa"
+                                                                    Command="{Binding EditDeviceCommand}">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE70F;"
+                                                                      FontSize="16"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+
+                                                    <!-- Control Device -->
+                                                    <MenuFlyoutItem Text="Điều khiển"
+                                                                    Command="{Binding ControlDeviceCommand}">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE7EE;"
+                                                                      FontSize="16"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+
+                                                    <!-- View Data -->
+                                                    <MenuFlyoutItem Text="Dữ liệu đo"
+                                                                    Command="{Binding ViewDataCommand}">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE9D9;"
+                                                                      FontSize="16"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+
+                                                    <MenuFlyoutSeparator/>
+
+                                                    <!-- Playback -->
+                                                    <MenuFlyoutItem Text="Phát lại"
+                                                                    Command="{Binding PlaybackDeviceCommand}">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE768;"
+                                                                      FontSize="16"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                </MenuFlyout>
+                                            </Button.Flyout>
+                                            <FontIcon Glyph="&#xE712;"
+                                                      FontSize="16"
+                                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- Device Type Display -->
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding TypeDisplay}"
+                                               FontSize="14"
+                                               Foreground="{StaticResource PrimaryMediumBrush}"
+                                               FontWeight="Medium"
+                                               Margin="0,0,0,12"/>
+
+                                    <!-- Device Details -->
+                                    <StackPanel Grid.Row="2" Spacing="8">
+                                        <!-- Location -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE81D;"
+                                                      FontSize="14"
+                                                      Foreground="{StaticResource TextTertiaryBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                                <Run Text="Vị trí:" FontWeight="SemiBold"/>
+                                                <Run Text="{Binding Location}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- IP Address -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE968;"
+                                                      FontSize="14"
+                                                      Foreground="{StaticResource TextTertiaryBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                                <Run Text="IP:" FontWeight="SemiBold"/>
+                                                <Run Text="{Binding IpAddress}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Manufacturer -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE7F8;"
+                                                      FontSize="14"
+                                                      Foreground="{StaticResource TextTertiaryBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                                <Run Text="NSX:" FontWeight="SemiBold"/>
+                                                <Run Text="{Binding Manufacturer}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Firmware Version -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE895;"
+                                                      FontSize="14"
+                                                      Foreground="{StaticResource TextTertiaryBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                                <Run Text="Firmware:" FontWeight="SemiBold"/>
+                                                <Run Text="{Binding FirmwareVersion}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Footer: Last Online + Alert Count -->
+                                    <Grid Grid.Row="3" Margin="0,12,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Last Online -->
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE121;"
+                                                      FontSize="12"
+                                                      Foreground="{StaticResource TextTertiaryBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding LastOnlineText}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- Alert Count Badge -->
+                                        <Border Grid.Column="1"
+                                                Background="{StaticResource SeverityCriticalBrush}"
+                                                CornerRadius="10"
+                                                MinWidth="28"
+                                                Height="20"
+                                                Padding="6,0"
+                                                Visibility="{Binding HasAlerts}">
+                                            <TextBlock Text="{Binding AlertCountText}"
+                                                       FontSize="11"
+                                                       FontWeight="Bold"
+                                                       Foreground="White"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Page>

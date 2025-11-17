@@ -1,0 +1,526 @@
+<Page
+    x:Class="Station.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    Background="{StaticResource BackgroundSecondaryBrush}">
+
+    <ScrollViewer Background="{StaticResource BackgroundSecondaryBrush}">
+        <StackPanel Padding="32,24" Spacing="20" Background="{StaticResource BackgroundSecondaryBrush}">
+
+            <!-- Header with Title and Time -->
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Dashboard"/>
+                    <TextBlock Text="{x:Bind ViewModel.StationName, Mode=OneWay}"
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Border Grid.Column="1"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusMedium}"
+                        Padding="12,8"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.CurrentTime, Mode=OneWay}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   HorizontalAlignment="Right"/>
+                        <TextBlock Text="Tuyến Cát Linh - Hà Đông"
+                                   FontSize="12"
+                                   Foreground="{StaticResource TextTertiaryBrush}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Statistics Cards Row -->
+            <Grid ColumnSpacing="12" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Devices Card -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="16"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="Thiết bị"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource PrimaryLightBrush}"
+                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                    Padding="8"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="📡" FontSize="18"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- KPI Section -->
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{x:Bind ViewModel.TotalDevices, Mode=OneWay}"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Margin="12,0,0,0">
+                                <TextBlock Text="{x:Bind ViewModel.OnlineDevices, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0} online'}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource SeverityLowBrush}"/>
+                                <TextBlock Text="{x:Bind ViewModel.OfflineDevices, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0} offline'}"
+                                           FontSize="12"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Alerts Today Card -->
+                <Border Grid.Column="1"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="16"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="Cảnh báo"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource SeverityMediumLightBrush}"
+                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                    Padding="8"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="⚠️" FontSize="18"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{x:Bind ViewModel.TodayAlerts, Mode=OneWay}"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind ViewModel.TodayAlertsChange, Mode=OneWay}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Unprocessed Alerts Card -->
+                <Border Grid.Column="2"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="16"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="Chưa xử lý"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource SeverityHighLightBrush}"
+                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                    Padding="8"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="🔴" FontSize="18"/>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{x:Bind ViewModel.UnprocessedAlerts, Mode=OneWay}"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource SeverityHighBrush}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="Cần xử lý&#x0a;ngay"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Connection Status Card -->
+                <Border Grid.Column="3"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="16"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="Trạng thái kết nối"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource SeverityLowLightBrush}"
+                                    CornerRadius="{StaticResource CornerRadiusMedium}"
+                                    Padding="8"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="🔗" FontSize="18"/>
+                            </Border>
+                        </Grid>
+
+                        <StackPanel Grid.Row="1" Margin="0,12,0,0" Spacing="4">
+                            <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay}"/>
+                            <TextBlock Text="{x:Bind ViewModel.LastHeartbeat, Mode=OneWay}"
+                                       FontSize="11"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Charts Row -->
+            <Grid ColumnSpacing="20" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Alerts Timeline Chart - LINE CHART -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="24"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,20">
+                            <TextBlock Text="Xu hướng cảnh báo 24h qua"
+                                       FontWeight="Bold"
+                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Grid>
+
+                        <!-- LiveCharts Line Chart -->
+                        <lvc:CartesianChart Height="300"
+                                            Series="{x:Bind ViewModel.AlertsTrendSeries, Mode=OneWay}"
+                                            XAxes="{x:Bind ViewModel.AlertsTrendXAxes, Mode=OneWay}"
+                                            YAxes="{x:Bind ViewModel.AlertsTrendYAxes, Mode=OneWay}"
+                                            LegendPosition="Hidden"
+                                            TooltipPosition="Top"
+                                            Background="{StaticResource BackgroundSecondaryBrush}"
+                                            CornerRadius="8"
+                                            AnimationsSpeed="00:00:00.5"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Alert Severity Distribution - PIE CHART -->
+                <Border Grid.Column="1"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="24"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <TextBlock Text="Phân bố mức độ"
+                                       FontWeight="Bold"
+                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Grid>
+
+                        <!-- LiveCharts Pie Chart (Donut) -->
+                        <lvc:PieChart Height="220"
+                                      Series="{x:Bind ViewModel.SeverityDistributionSeries, Mode=OneWay}"
+                                      LegendPosition="Hidden"
+                                      InitialRotation="-90"
+                                      Background="{StaticResource BackgroundSecondaryBrush}"
+                                      CornerRadius="8"
+                                      AnimationsSpeed="00:00:00.4"
+                                      TooltipPosition="Top"/>
+
+                        <!-- Custom Legend -->
+                        <Grid Margin="0,16,0,0" Background="Transparent" HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="12"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Low -->
+                            <StackPanel Grid.Row="0" Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{StaticResource SeverityLowBrush}"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="13"
+                                           VerticalAlignment="Center">
+                                    <Run Text="Thấp ("/>
+                                    <Run Text="{x:Bind ViewModel.LowAlerts, Mode=OneWay}"/>
+                                    <Run Text=")"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Medium -->
+                            <StackPanel Grid.Row="0" Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{StaticResource SeverityMediumBrush}"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="13"
+                                           VerticalAlignment="Center">
+                                    <Run Text="Trung bình ("/>
+                                    <Run Text="{x:Bind ViewModel.MediumAlerts, Mode=OneWay}"/>
+                                    <Run Text=")"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- High -->
+                            <StackPanel Grid.Row="2" Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{StaticResource SeverityHighBrush}"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="13"
+                                           VerticalAlignment="Center">
+                                    <Run Text="Cao ("/>
+                                    <Run Text="{x:Bind ViewModel.HighAlerts, Mode=OneWay}"/>
+                                    <Run Text=")"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Critical -->
+                            <StackPanel Grid.Row="2" Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{StaticResource SeverityCriticalBrush}"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="13"
+                                           VerticalAlignment="Center">
+                                    <Run Text="Nghiêm trọng ("/>
+                                    <Run Text="{x:Bind ViewModel.CriticalAlerts, Mode=OneWay}"/>
+                                    <Run Text=")"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Device Status + Recent Alerts Row -->
+            <Grid ColumnSpacing="20" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Device Status List -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="24"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <TextBlock Text="Trạng thái thiết bị"
+                                       FontWeight="Bold"
+                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.TotalDevices, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0} thiết bị'}"
+                                       FontSize="13"
+                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <ScrollViewer Height="340" VerticalScrollBarVisibility="Auto">
+                            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                                CornerRadius="{StaticResource CornerRadiusMedium}"
+                                                Padding="12"
+                                                Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Status Indicator -->
+                                                <Ellipse Grid.Column="0"
+                                                         Width="10"
+                                                         Height="10"
+                                                         Fill="{Binding StatusColor}"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,12,0"/>
+
+                                                <!-- Device Info -->
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="13"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                    <TextBlock Text="{Binding Type}"
+                                                               FontSize="11"
+                                                               Foreground="{StaticResource TextTertiaryBrush}"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- Status Text -->
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding StatusText}"
+                                                           FontSize="11"
+                                                           Foreground="{Binding StatusColor}"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recent Alerts List -->
+                <Border Grid.Column="1"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="24"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <TextBlock Text="Cảnh báo mới nhất"
+                                       FontWeight="Bold"
+                                       FontSize="18"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.RecentAlertsCount, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0} sự kiện'}"
+                                       FontSize="13"
+                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <ScrollViewer Height="340" VerticalScrollBarVisibility="Auto">
+                            <ItemsRepeater ItemsSource="{x:Bind ViewModel.RecentAlerts, Mode=OneWay}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding SeverityBackground}"
+                                                BorderBrush="{Binding SeverityBrush}"
+                                                BorderThickness="2,0,0,0"
+                                                CornerRadius="{StaticResource CornerRadiusSmall}"
+                                                Padding="12"
+                                                Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Alert Header -->
+                                                <Grid Grid.Row="0">
+                                                    <TextBlock Text="{Binding DeviceName}"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="13"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                    <TextBlock Text="{Binding TimeAgo}"
+                                                               FontSize="11"
+                                                               Foreground="{StaticResource TextTertiaryBrush}"
+                                                               HorizontalAlignment="Right"/>
+                                                </Grid>
+
+                                                <!-- Alert Message -->
+                                                <TextBlock Grid.Row="1"
+                                                           Text="{Binding Message}"
+                                                           FontSize="12"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           TextWrapping="Wrap"
+                                                           MaxLines="2"
+                                                           Margin="0,4,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

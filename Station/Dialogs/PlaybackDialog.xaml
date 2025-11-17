@@ -1,0 +1,312 @@
+<ContentDialog
+    x:Class="Station.Dialogs.PlaybackDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Station.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Phát lại"
+    CloseButtonText="Đóng"
+    DefaultButton="Close"
+    RequestedTheme="Light"
+    Background="{StaticResource BackgroundPrimaryBrush}"
+    CornerRadius="12"
+    Padding="0">
+
+    <ContentDialog.Resources>
+        <!-- Value Converter -->
+        <local:DoubleToIntConverter x:Key="DoubleToIntConverter"/>
+
+        <!-- Player Control Button Style -->
+        <Style x:Key="PlayerControlButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+    </ContentDialog.Resources>
+
+    <!-- Main Grid -->
+    <Grid MinWidth="800" MinHeight="550" MaxWidth="900" Padding="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- InfoBar for notifications at the top -->
+        <InfoBar x:Name="NotificationBar"
+                 Grid.Row="0"
+                 IsOpen="False"
+                 Severity="Success"
+                 Margin="0,0,0,0"/>
+
+        <!-- Video Player Area -->
+        <Grid Grid.Row="1" Background="#000000">
+            <!-- Mock Video Display -->
+            <Border Background="#000000">
+                <!-- Diagonal stripes pattern for mock video -->
+                <Grid>
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" SpreadMethod="Repeat">
+                            <GradientStop Color="#0A0A0A" Offset="0"/>
+                            <GradientStop Color="#1A1A1A" Offset="0.25"/>
+                            <GradientStop Color="#0A0A0A" Offset="0.5"/>
+                            <GradientStop Color="#1A1A1A" Offset="0.75"/>
+                            <GradientStop Color="#0A0A0A" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <!-- Video Overlay Info -->
+                    <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20">
+                        <TextBlock x:Name="DeviceNameOverlay"
+                                   Text="Playback mock - D1"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   Opacity="0.9"/>
+                    </StackPanel>
+
+                    <!-- Status Info at Bottom Left -->
+                    <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20">
+                        <TextBlock FontSize="13" Foreground="White" Opacity="0.8">
+                            <Run Text="IR:"/>
+                            <Run x:Name="IRStatus" Text="ON" FontWeight="SemiBold"/>
+                            <Run Text=" - HDR:"/>
+                            <Run x:Name="HDRStatus" Text="AUTO" FontWeight="SemiBold"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Resolution Info at Bottom Right -->
+                    <TextBlock VerticalAlignment="Bottom"
+                               HorizontalAlignment="Right"
+                               Margin="20"
+                               FontSize="13"
+                               Foreground="White"
+                               Opacity="0.8">
+                        <Run Text="Resolution:"/>
+                        <Run x:Name="ResolutionText" Text="1280×720" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- Loading Indicator (Hidden by default) -->
+            <Grid x:Name="LoadingPanel" Visibility="Collapsed" Background="#80000000">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <ProgressRing IsActive="True" Width="40" Height="40" Foreground="White"/>
+                    <TextBlock Text="Đang tải video..."
+                               FontSize="14"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Controls Area -->
+        <Grid Grid.Row="2" Background="{StaticResource BackgroundSecondaryBrush}" Padding="20,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Playback Controls -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Transport Controls -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                    <!-- Play/Pause Button -->
+                    <Button x:Name="PlayPauseButton"
+                            Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="PlayPauseButton_Click"
+                            ToolTipService.ToolTip="Phát/Tạm dừng">
+                        <FontIcon x:Name="PlayPauseIcon"
+                                  Glyph="&#xE768;"
+                                  FontSize="20"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Stop Button -->
+                    <Button x:Name="StopButton"
+                            Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="StopButton_Click"
+                            ToolTipService.ToolTip="Dừng">
+                        <FontIcon Glyph="&#xE71A;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Rewind Button -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="RewindButton_Click"
+                            ToolTipService.ToolTip="Tua lùi 10s">
+                        <FontIcon Glyph="&#xE892;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Fast Forward Button -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="FastForwardButton_Click"
+                            ToolTipService.ToolTip="Tua tới 10s">
+                        <FontIcon Glyph="&#xE893;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Time Display -->
+                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,6"
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0">
+                        <TextBlock x:Name="TimeDisplay"
+                                   Text="00:00:00 / 01:30:00"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Progress Slider -->
+                <Slider Grid.Column="1"
+                        x:Name="ProgressSlider"
+                        Minimum="0"
+                        Maximum="5400"
+                        Value="0"
+                        Margin="20,0"
+                        VerticalAlignment="Center"
+                        ValueChanged="ProgressSlider_ValueChanged"/>
+
+                <!-- Volume and Settings -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <!-- Volume Control -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            ToolTipService.ToolTip="Âm lượng">
+                        <Button.Flyout>
+                            <Flyout Placement="Top">
+                                <StackPanel Width="40" Height="120">
+                                    <Slider x:Name="VolumeSlider"
+                                            Orientation="Vertical"
+                                            Minimum="0"
+                                            Maximum="100"
+                                            Value="50"
+                                            TickFrequency="10"
+                                            Height="100"/>
+                                    <TextBlock Text="{x:Bind VolumeSlider.Value, Mode=OneWay, Converter={StaticResource DoubleToIntConverter}}"
+                                               FontSize="12"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                        <FontIcon Glyph="&#xE767;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Speed Control -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            ToolTipService.ToolTip="Tốc độ phát">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="Top">
+                                <MenuFlyoutItem Text="0.5x" Click="SpeedOption_Click" Tag="0.5"/>
+                                <MenuFlyoutItem Text="1x" Click="SpeedOption_Click" Tag="1"/>
+                                <MenuFlyoutItem Text="1.5x" Click="SpeedOption_Click" Tag="1.5"/>
+                                <MenuFlyoutItem Text="2x" Click="SpeedOption_Click" Tag="2"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock x:Name="SpeedText"
+                                       Text="1x"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                            <FontIcon Glyph="&#xE70D;"
+                                      FontSize="10"
+                                      Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Snapshot Button -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="SnapshotButton_Click"
+                            ToolTipService.ToolTip="Chụp ảnh">
+                        <FontIcon Glyph="&#xE722;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+
+                    <!-- Fullscreen Button -->
+                    <Button Style="{StaticResource PlayerControlButtonStyle}"
+                            Click="FullscreenButton_Click"
+                            ToolTipService.ToolTip="Toàn màn hình">
+                        <FontIcon Glyph="&#xE740;"
+                                  FontSize="18"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Date/Time Picker -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Date Picker -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundPrimaryBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12,8"
+                        Height="40">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE787;"
+                                  FontSize="16"
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  VerticalAlignment="Center"/>
+                        <CalendarDatePicker x:Name="PlaybackDatePicker"
+                                            PlaceholderText="Chọn ngày"
+                                            Date="{x:Bind CurrentDate, Mode=TwoWay}"
+                                            DateChanged="PlaybackDatePicker_DateChanged"
+                                            BorderThickness="0"
+                                            Background="Transparent"
+                                            MinWidth="150"
+                                            VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Download Button -->
+                <Button Grid.Column="2"
+                        Height="40"
+                        MinWidth="120"
+                        CornerRadius="8"
+                        Background="{StaticResource PrimaryDarkBrush}"
+                        Foreground="White"
+                        Click="DownloadButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE896;"
+                                  FontSize="16"/>
+                        <TextBlock Text="Tải đoạn"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentDialog>

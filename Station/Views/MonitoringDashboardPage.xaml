@@ -1,0 +1,696 @@
+<Page
+    x:Class="Station.Views.MonitoringDashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:Station.ViewModels"
+    mc:Ignorable="d"
+    Background="{StaticResource MonitoringBackgroundBrush}">
+
+    <Page.DataContext>
+        <viewmodels:MonitoringDashboardViewModel/>
+    </Page.DataContext>
+
+    <Grid Padding="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="REGIONAL SECURITY MONITORING SYSTEM"
+                       FontFamily="Segoe UI Variable"
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="24"
+                        VerticalAlignment="Center">
+                <TextBlock FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                    <Run Text="{x:Bind ViewModel.CurrentDate, Mode=OneWay}"/>
+                    <Run Text=" "/>
+                    <Run Text="{x:Bind ViewModel.CurrentTime, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Text="Admin"
+                           FontSize="16"
+                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Sensor Overview -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,8,0">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Sensor Overview"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+
+                    <!-- Temperature & Humidity -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Temperature -->
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Temperature"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="{x:Bind ViewModel.AverageTemperature, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:F1}'}"/>
+                                <Run Text="°C" FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock Text="▼9.1 °C /Lu"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <!-- Humidity -->
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Humidity"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="66"/>
+                                <Run Text="%" FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock Text="31% ⚬ 191%"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="{StaticResource MonitoringBorderBrush}" Margin="0,8"/>
+
+                    <!-- Radar & Vibration -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Radar -->
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Radar"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="42"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            <TextBlock Text="Active Ns/s"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <!-- Vibration -->
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Vibration"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="34"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            <TextBlock Text="3 Orticem"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="{StaticResource MonitoringBorderBrush}" Margin="0,8"/>
+
+                    <!-- Light & Gas -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Light"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="174"/>
+                                <Run Text="lux" FontSize="12"/>
+                            </TextBlock>
+                            <TextBlock Text="67%"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Gas"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="0.25"/>
+                                <Run Text="cm/h" FontSize="12"/>
+                            </TextBlock>
+                            <TextBlock Text="0/7 Threshold"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="{StaticResource MonitoringBorderBrush}" Margin="0,8"/>
+
+                    <!-- Smoke/Fire & Water -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="Smoke/Fire"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="0"/>
+                                <Run Text="%" FontSize="12"/>
+                            </TextBlock>
+                            <TextBlock Text="Alarm"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTempHighBrush}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Water"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}">
+                                <Run Text="4"/>
+                                <Run Text="cm" FontSize="12"/>
+                            </TextBlock>
+                            <TextBlock Text="2 Ising Nodes"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Center Panel - Security Map -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,8,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Security Map"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Map Placeholder -->
+                    <Grid Grid.Row="1">
+                        <!-- Map visualization would go here -->
+                        <Canvas>
+                            <!-- Area Labels -->
+                            <TextBlock Text="Area D" Canvas.Left="600" Canvas.Top="20"
+                                       FontSize="13" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="Area B" Canvas.Left="100" Canvas.Top="180"
+                                       FontSize="13" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="Area C" Canvas.Left="50" Canvas.Top="380"
+                                       FontSize="13" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+
+                            <!-- Legend -->
+                            <StackPanel Canvas.Left="520" Canvas.Top="380" Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{StaticResource MonitoringNodeNormalBrush}"/>
+                                    <TextBlock Text="Secure" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{StaticResource MonitoringNodeOfflineBrush}"/>
+                                    <TextBlock Text="Grid" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{StaticResource MonitoringTempHighBrush}"/>
+                                    <TextBlock Text="Offline" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{StaticResource MonitoringRadarWarningBrush}"/>
+                                    <TextBlock Text="Hurb" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Node Detail Popup -->
+                            <Border Canvas.Left="250" Canvas.Top="280"
+                                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="12">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Node A-7"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+
+                                    <StackPanel Spacing="4">
+                                        <Grid>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="#FF5252"/>
+                                                <TextBlock Text="Radar" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="2.4m/m" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="#FF5252"/>
+                                                <TextBlock Text="Vibration" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="3.3 mm/s" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="{StaticResource MonitoringNodeNormalBrush}"/>
+                                                <TextBlock Text="Smoke/Fire" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="43 L" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <Grid ColumnSpacing="8" Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Content="View Camera"
+                                                Grid.Column="0"
+                                                Background="{StaticResource MonitoringAccentButtonBrush}"
+                                                Foreground="White"
+                                                FontSize="10"
+                                                Padding="8,4"
+                                                CornerRadius="4"/>
+                                        <Button Content="Manage Device"
+                                                Grid.Column="1"
+                                                Background="#1F2429"
+                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                                                FontSize="10"
+                                                Padding="8,4"
+                                                CornerRadius="4"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel - Alert Overview -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Alert Overview -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                        BorderBrush="{StaticResource MonitoringBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,8">
+                    <StackPanel Spacing="12">
+                        <Grid>
+                            <TextBlock Text="Alert Overview"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                <TextBlock Text="Day" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                <TextBlock Text="Week" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                <TextBlock Text="Month" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Donut Chart Placeholder -->
+                        <Grid Height="140">
+                            <Viewbox Width="140" Height="140">
+                                <!-- Simplified donut representation -->
+                                <Canvas Width="140" Height="140">
+                                    <Ellipse Width="140" Height="140"
+                                             Stroke="{StaticResource MonitoringBorderBrush}"
+                                             StrokeThickness="30"
+                                             Fill="Transparent"/>
+                                    <Ellipse Width="140" Height="140"
+                                             Stroke="#FF9800"
+                                             StrokeThickness="30"
+                                             Fill="Transparent"
+                                             StrokeDashArray="250,100"/>
+                                </Canvas>
+                            </Viewbox>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="60"
+                                           FontSize="32"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Alerts"
+                                           FontSize="13"
+                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Bretail 60%"
+                                   FontSize="12"
+                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                   HorizontalAlignment="Center"/>
+
+                        <!-- Alert Types -->
+                        <StackPanel Spacing="6">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="#FFB74D"/>
+                                    <TextBlock Text="Intru" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="60" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource MonitoringNodeNormalBrush}"/>
+                                    <TextBlock Text="Motion" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="5" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource MonitoringTempHighBrush}"/>
+                                    <TextBlock Text="Fire" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="3" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="#7E57C2"/>
+                                    <TextBlock Text="Smoke" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="4" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="#42A5F5"/>
+                                    <TextBlock Text="Water" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="4" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Real-Time Alert Feed -->
+                <Border Grid.Row="1"
+                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                        BorderBrush="{StaticResource MonitoringBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <TextBlock Text="Real-Time Alert Feed"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            <Grid HorizontalAlignment="Right">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Time" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,0,20,0"/>
+                                <TextBlock Grid.Column="1" Text="Line" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,0,20,0"/>
+                                <TextBlock Grid.Column="2" Text="Type" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,0,20,0"/>
+                                <TextBlock Grid.Column="3" Text="Severity" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Alert List -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="6">
+                                <!-- Sample Alerts -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="4:20 A" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Arm A lert" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="2" Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="Critical" FontSize="11" Foreground="{StaticResource MonitoringTempHighBrush}" HorizontalAlignment="Right"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="4:20 A" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Arm C Ral" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="2" Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="Motion" FontSize="11" Foreground="#FF9800" HorizontalAlignment="Right"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="4:21 A" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Arm A Res" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="2" Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="Motion" FontSize="11" Foreground="#FF9800" HorizontalAlignment="Right"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="4:36 A" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Amnd crosolv" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="2" Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="Offline" FontSize="11" Foreground="{StaticResource MonitoringNodeOfflineBrush}" HorizontalAlignment="Right"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="4:38 A" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="1" Text="Seesor mix" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <TextBlock Grid.Column="2" Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="Offline" FontSize="11" Foreground="{StaticResource MonitoringNodeOfflineBrush}" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Bottom Section - Trend Analysis, System Status, Operations Log -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Trend Analysis -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,8,0"
+                    Height="180">
+                <StackPanel>
+                    <TextBlock Text="Trend Analysis"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                               Margin="0,0,0,12"/>
+                    <TextBlock Text="Intrusion Frequency by Line (Last 24h)"
+                               FontSize="11"
+                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <!-- Chart placeholder -->
+                    <Canvas Height="80">
+                        <!-- Simplified line chart -->
+                    </Canvas>
+                </StackPanel>
+            </Border>
+
+            <!-- System Status -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,8,0"
+                    Height="180">
+                <StackPanel>
+                    <TextBlock Text="System Status"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="4" FontSize="24" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Lines" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="45" FontSize="24" FontWeight="Bold" Foreground="{StaticResource MonitoringNodeNormalBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Healthy" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="4">
+                            <TextBlock Text="39" FontSize="24" FontWeight="Bold" Foreground="{StaticResource MonitoringRadarWarningBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Faulty" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Spacing="4">
+                            <TextBlock Text="6" FontSize="24" FontWeight="Bold" Foreground="{StaticResource MonitoringAccentButtonBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Active" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Margin="0,16,0,0" Spacing="8">
+                        <TextBlock Text="Avg Signal Quality" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        <ProgressBar Value="75" Maximum="100" Height="6" Foreground="#FF9800" Background="#1F2429"/>
+
+                        <TextBlock Text="Security Index" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,4,0,0"/>
+                        <ProgressBar Value="82" Maximum="100" Height="6" Foreground="{StaticResource MonitoringAccentButtonBrush}" Background="#1F2429"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Operations Log -->
+            <Border Grid.Column="2"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Height="180">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="Operations Log"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
+                            <TextBlock Text="Time" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="Action" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            <TextBlock Text="Note" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="6">
+                            <Grid>
+                                <TextBlock Text="4:21 am" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                <TextBlock Text="Acknowledge alert" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" Margin="80,0,0,0"/>
+                                <TextBlock Text="Alert" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <TextBlock Text="4:24 am" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                <TextBlock Text="Resolve an alert" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" Margin="80,0,0,0"/>
+                                <TextBlock Text="Adjust" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid>
+                                <TextBlock Text="4:24 am" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                <TextBlock Text="Adjust a sensor" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" Margin="80,0,0,0"/>
+                                <TextBlock Text="Sensor" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
