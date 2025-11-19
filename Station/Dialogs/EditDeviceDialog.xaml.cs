@@ -1,7 +1,9 @@
-using System;
+﻿using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Station.ViewModels;
+using Windows.UI;
 
 namespace Station.Dialogs;
 
@@ -40,14 +42,14 @@ public sealed partial class EditDeviceDialog : ContentDialog
         if (string.IsNullOrWhiteSpace(DeviceNameTextBox.Text))
         {
             args.Cancel = true;
-            _ = ShowValidationErrorAsync("Vui l�ng nh?p t�n thi?t b?");
+            _ = ShowValidationErrorAsync("Vui lòng nhập tên thiết bị");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(IpAddressTextBox.Text))
         {
             args.Cancel = true;
-            _ = ShowValidationErrorAsync("Vui l�ng nh?p ??a ch? IP");
+            _ = ShowValidationErrorAsync("Vui lòng nhập địa chỉ IP");
             return;
         }
 
@@ -66,11 +68,15 @@ public sealed partial class EditDeviceDialog : ContentDialog
     {
         var errorDialog = new ContentDialog
         {
-            Title = "L?i x�c th?c",
+            Title = "Lỗi xác thực",
             Content = message,
-            CloseButtonText = "?�ng",
+            CloseButtonText = "Đóng",
             XamlRoot = this.XamlRoot,
-            RequestedTheme = ElementTheme.Light
+            RequestedTheme = ElementTheme.Dark,
+            // Apply 4K monitoring theme colors
+            Background = new SolidColorBrush(Color.FromArgb(255, 17, 24, 39)), // #111827
+            Foreground = new SolidColorBrush(Color.FromArgb(255, 230, 238, 243)), // #E6EEF3
+            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 31, 36, 41)) // #1F2429
         };
 
         await errorDialog.ShowAsync();

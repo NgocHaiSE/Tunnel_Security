@@ -31,7 +31,7 @@ namespace Station
             {
                 // Set API key (optional for basic basemaps, but recommended)
                 // Get your free API key at: https://developers.arcgis.com/
-                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.ApiKey = "AAPTxy8BH1VEsoebNVZXo8HurBHPuRuPZica8Rhed5m-n7B5cMrNHa4NpHsBxhhNvfjc7bhhLR2kIHFMyPSkBk131jRg65s7pRbWdgm06q2S2OExkLc7suvcbtiXBHjcdAhYdeaNUpb1cIxiUnRZmwvs8uF_klAGOU2D_zrOwWW7mn0Jr1T41UtpPVr3_oz9zZmgbaG_YEjqazp4EuqS56m5eKM5-JYPIKaLNMkuR8Pv7F4.AT1_OAgey3rQ"; // Leave empty for now - public basemaps will still work
+                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.ApiKey = "AAPTxy8BH1VEsoebNVZXo8HurBHPuRuPZica8Rhed5m-n7B5cMrNHa4NpHsBxhhNvfjc7bhhLR2kIHFMyPSkBk131jRg65s7pRbWdgm06q2S2OExkLc7suvcbtiXBHjcdAhYdeaNUpb1cIxiUnRZmwvs8uF_klAGOU2D_zrOwWW7mn0Jr1T41UtpPVr3_oz9zZmgbaG_YEjqazp4EuqS56m5eKM5-JYPIKaLNMkuR8Pv7F4.AT1_OAgey3rQ"; 
             }
             catch (Exception ex)
             {

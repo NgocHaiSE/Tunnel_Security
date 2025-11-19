@@ -51,7 +51,7 @@ namespace Center
                 LoadingRing.IsActive = true;
 
                 // Create map with OpenStreetMap (free, no API key needed)
-                var myMap = new Map(BasemapStyle.OSMStandard);
+                var myMap = new Map(BasemapStyle.ArcGISNavigation);
 
                 // Subscribe to map events
                 myMap.Loaded += (s, args) =>

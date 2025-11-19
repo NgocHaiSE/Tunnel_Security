@@ -43,7 +43,7 @@
                             Spacing="12">
                     <!-- Total Devices -->
                     <Border Background="{StaticResource BackgroundPrimaryBrush}"
-                            BorderBrush="{StaticResource BorderLightBrush}"
+
                             BorderThickness="1"
                             CornerRadius="8"
                             Padding="16,12"
@@ -51,7 +51,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock Text="Tổng thiết bị"
                                        FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                       Foreground="{StaticResource PrimaryDarkBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.TotalDevices, Mode=OneWay}"
                                        FontSize="24"
                                        FontWeight="Bold"
@@ -60,16 +60,14 @@
                     </Border>
 
                     <!-- Online Devices -->
-                    <Border Background="{StaticResource SeverityLowLightBrush}"
-                            BorderBrush="{StaticResource SeverityLowBrush}"
-                            BorderThickness="1"
+                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
                             CornerRadius="8"
                             Padding="16,12"
                             MinWidth="140">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Hoạt động"
                                        FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                       Foreground="{StaticResource SeverityLowBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.OnlineDevices, Mode=OneWay}"
                                        FontSize="24"
                                        FontWeight="Bold"
@@ -79,8 +77,6 @@
 
                     <!-- Offline Devices -->
                     <Border Background="{StaticResource BackgroundPrimaryBrush}"
-                            BorderBrush="{StaticResource BorderLightBrush}"
-                            BorderThickness="1"
                             CornerRadius="8"
                             Padding="16,12"
                             MinWidth="140">
@@ -96,16 +92,14 @@
                     </Border>
 
                     <!-- Fault Devices -->
-                    <Border Background="{StaticResource SeverityCriticalLightBrush}"
-                            BorderBrush="{StaticResource SeverityCriticalBrush}"
-                            BorderThickness="1"
+                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
                             CornerRadius="8"
                             Padding="16,12"
                             MinWidth="140">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Lỗi"
                                        FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                       Foreground="{StaticResource SeverityCriticalBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.FaultDevices, Mode=OneWay}"
                                        FontSize="24"
                                        FontWeight="Bold"
@@ -266,10 +260,9 @@
         <!-- Devices Grid -->
         <Border Grid.Row="1"
                 Margin="24"
-                Background="{StaticResource BackgroundPrimaryBrush}"
+                Background="{StaticResource BackgroundSecondaryBrush}"
                 CornerRadius="{StaticResource CornerRadiusLarge}"
-                BorderBrush="{StaticResource BorderLightBrush}"
-                BorderThickness="1">
+                >
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredDevices, Mode=OneWay}">
                     <ItemsRepeater.Layout>

@@ -9,9 +9,10 @@
     Title="Phát lại"
     CloseButtonText="Đóng"
     DefaultButton="Close"
-    RequestedTheme="Light"
-    Background="{StaticResource BackgroundPrimaryBrush}"
-    CornerRadius="12"
+    RequestedTheme="Dark"
+    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+    BorderBrush="{StaticResource MonitoringBorderBrush}"
+    CornerRadius="8"
     Padding="0">
 
     <ContentDialog.Resources>
@@ -20,11 +21,12 @@
 
         <!-- Player Control Button Style -->
         <Style x:Key="PlayerControlButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{StaticResource MonitoringBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MonitoringBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="40"/>
-            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
     </ContentDialog.Resources>
@@ -106,7 +108,7 @@
         </Grid>
 
         <!-- Controls Area -->
-        <Grid Grid.Row="2" Background="{StaticResource BackgroundSecondaryBrush}" Padding="20,16">
+        <Grid Grid.Row="2" Background="{StaticResource MonitoringBackgroundBrush}" Padding="20,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -130,7 +132,7 @@
                         <FontIcon x:Name="PlayPauseIcon"
                                   Glyph="&#xE768;"
                                   FontSize="20"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Stop Button -->
@@ -140,7 +142,7 @@
                             ToolTipService.ToolTip="Dừng">
                         <FontIcon Glyph="&#xE71A;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Rewind Button -->
@@ -149,7 +151,7 @@
                             ToolTipService.ToolTip="Tua lùi 10s">
                         <FontIcon Glyph="&#xE892;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Fast Forward Button -->
@@ -158,12 +160,12 @@
                             ToolTipService.ToolTip="Tua tới 10s">
                         <FontIcon Glyph="&#xE893;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Time Display -->
-                    <Border Background="{StaticResource BackgroundPrimaryBrush}"
-                            BorderBrush="{StaticResource BorderLightBrush}"
+                    <Border Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                            BorderBrush="{StaticResource MonitoringBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="12,6"
@@ -173,7 +175,7 @@
                                    Text="00:00:00 / 01:30:00"
                                    FontSize="13"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Border>
                 </StackPanel>
 
@@ -211,7 +213,7 @@
                         </Button.Flyout>
                         <FontIcon Glyph="&#xE767;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Speed Control -->
@@ -230,11 +232,11 @@
                                        Text="1x"
                                        FontSize="13"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                        VerticalAlignment="Center"/>
                             <FontIcon Glyph="&#xE70D;"
                                       FontSize="10"
-                                      Foreground="{StaticResource TextTertiaryBrush}"/>
+                                      Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                         </StackPanel>
                     </Button>
 
@@ -244,7 +246,7 @@
                             ToolTipService.ToolTip="Chụp ảnh">
                         <FontIcon Glyph="&#xE722;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
 
                     <!-- Fullscreen Button -->
@@ -253,7 +255,7 @@
                             ToolTipService.ToolTip="Toàn màn hình">
                         <FontIcon Glyph="&#xE740;"
                                   FontSize="18"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -268,16 +270,16 @@
 
                 <!-- Date Picker -->
                 <Border Grid.Column="0"
-                        Background="{StaticResource BackgroundPrimaryBrush}"
-                        BorderBrush="{StaticResource BorderLightBrush}"
+                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                        BorderBrush="{StaticResource MonitoringBorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="8"
+                        CornerRadius="6"
                         Padding="12,8"
                         Height="40">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE787;"
                                   FontSize="16"
-                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  Foreground="{StaticResource MonitoringTextSecondaryBrush}"
                                   VerticalAlignment="Center"/>
                         <CalendarDatePicker x:Name="PlaybackDatePicker"
                                             PlaceholderText="Chọn ngày"
@@ -294,9 +296,10 @@
                 <Button Grid.Column="2"
                         Height="40"
                         MinWidth="120"
-                        CornerRadius="8"
-                        Background="{StaticResource PrimaryDarkBrush}"
-                        Foreground="White"
+                        CornerRadius="6"
+                        Background="{StaticResource MonitoringAccentButtonBrush}"
+                        Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                        BorderThickness="0"
                         Click="DownloadButton_Click">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE896;"

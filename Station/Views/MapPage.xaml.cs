@@ -16,6 +16,7 @@ using Esri.ArcGISRuntime;
 using Esri.ArcGISRuntime.Mapping;
 using Esri.ArcGISRuntime.UI.Controls;
 using Esri.ArcGISRuntime.Geometry;
+using Windows.UI;
 
 namespace Station.Views;
 
@@ -77,8 +78,17 @@ public sealed partial class MapPage : Page
                             Title = "Lỗi tải bản đồ",
                             Content = "Không thể tải bản đồ. Vui lòng kiểm tra kết nối internet.\n\nLưu ý: ArcGIS Runtime cần kết nối internet để tải basemap.",
                             CloseButtonText = "Đóng",
-                            XamlRoot = this.XamlRoot
+                            XamlRoot = this.XamlRoot,
+                            // Apply 4K monitoring theme colors
+                            Background = new SolidColorBrush(Color.FromArgb(255, 17, 24, 39)), // #111827
+                            Foreground = new SolidColorBrush(Color.FromArgb(255, 230, 238, 243)), // #E6EEF3
+                            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 31, 36, 41)), // #1F2429
+                            RequestedTheme = ElementTheme.Dark
                         };
+
+                        // Style the close button
+                        dialog.Resources["ContentDialogButtonStyle"] = CreateDialogButtonStyle();
+
                         await dialog.ShowAsync();
                     }
                 });
@@ -114,43 +124,78 @@ public sealed partial class MapPage : Page
                 Title = "Lỗi",
                 Content = $"Không thể khởi tạo bản đồ:\n{ex.Message}\n\nChi tiết: {ex.InnerException?.Message}",
                 CloseButtonText = "Đóng",
-                XamlRoot = this.XamlRoot
+                XamlRoot = this.XamlRoot,
+                // Apply 4K monitoring theme colors
+                Background = new SolidColorBrush(Color.FromArgb(255, 17, 24, 39)), // #111827
+                Foreground = new SolidColorBrush(Color.FromArgb(255, 230, 238, 243)), // #E6EEF3
+                BorderBrush = new SolidColorBrush(Color.FromArgb(255, 31, 36, 41)), // #1F2429
+                RequestedTheme = ElementTheme.Dark
             };
+
+            // Style the close button
+            dialog.Resources["ContentDialogButtonStyle"] = CreateDialogButtonStyle();
+
             await dialog.ShowAsync();
         }
+    }
+
+    /// <summary>
+    /// Create styled button for ContentDialog using 4K monitoring theme
+    /// </summary>
+    private Style CreateDialogButtonStyle()
+    {
+        var style = new Style(typeof(Button));
+
+        // Background color - Accent button color
+        style.Setters.Add(new Setter(Button.BackgroundProperty,
+            new SolidColorBrush(Color.FromArgb(255, 41, 121, 255)))); // #2979FF
+
+        // Foreground color - Light text
+        style.Setters.Add(new Setter(Button.ForegroundProperty,
+            new SolidColorBrush(Color.FromArgb(255, 230, 238, 243)))); // #E6EEF3
+
+        // Border
+        style.Setters.Add(new Setter(Button.BorderBrushProperty,
+     new SolidColorBrush(Color.FromArgb(255, 31, 36, 41)))); // #1F2429
+
+        style.Setters.Add(new Setter(Button.BorderThicknessProperty, new Thickness(1)));
+        style.Setters.Add(new Setter(Button.CornerRadiusProperty, new CornerRadius(4)));
+      style.Setters.Add(new Setter(Button.PaddingProperty, new Thickness(16, 8, 16, 8)));
+
+        return style;
     }
 
     private void BasemapSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (MyMapView?.Map == null || BasemapSelector.SelectedItem == null)
-            return;
+         return;
 
-        try
+try
         {
-            var selectedItem = (ComboBoxItem)BasemapSelector.SelectedItem;
+   var selectedItem = (ComboBoxItem)BasemapSelector.SelectedItem;
             var tag = selectedItem.Tag?.ToString();
 
-            BasemapStyle basemapStyle = tag switch
+       BasemapStyle basemapStyle = tag switch
             {
-                "Imagery" => BasemapStyle.ArcGISImagery,
-                "Topographic" => BasemapStyle.ArcGISTopographic,
-                "Oceans" => BasemapStyle.ArcGISOceans,
-                _ => BasemapStyle.ArcGISStreets
+  "Imagery" => BasemapStyle.ArcGISImagery,
+           "Topographic" => BasemapStyle.ArcGISTopographic,
+    "Oceans" => BasemapStyle.ArcGISOceans,
+     _ => BasemapStyle.ArcGISStreets
             };
 
             LoadingRing.IsActive = true;
-            MyMapView.Map.Basemap = new Basemap(basemapStyle);
+         MyMapView.Map.Basemap = new Basemap(basemapStyle);
 
-            // Hide loading after basemap change
-            System.Threading.Tasks.Task.Delay(2000).ContinueWith(_ =>
-                   {
-                       DispatcherQueue.TryEnqueue(() => LoadingRing.IsActive = false);
-                   });
-        }
-        catch (Exception ex)
-        {
+        // Hide loading after basemap change
+    System.Threading.Tasks.Task.Delay(2000).ContinueWith(_ =>
+       {
+     DispatcherQueue.TryEnqueue(() => LoadingRing.IsActive = false);
+       });
+    }
+    catch (Exception ex)
+      {
             LoadingRing.IsActive = false;
-            System.Diagnostics.Debug.WriteLine($"Basemap change error: {ex.Message}");
+       System.Diagnostics.Debug.WriteLine($"Basemap change error: {ex.Message}");
         }
     }
 
@@ -159,9 +204,9 @@ public sealed partial class MapPage : Page
         if (MyMapView == null) return;
 
         try
-        {
+   {
             var currentScale = MyMapView.MapScale;
-            await MyMapView.SetViewpointScaleAsync(currentScale / 2);
+  await MyMapView.SetViewpointScaleAsync(currentScale / 2);
         }
         catch (Exception ex)
         {
@@ -171,30 +216,30 @@ public sealed partial class MapPage : Page
 
     private async void ZoomOutButton_Click(object sender, RoutedEventArgs e)
     {
-        if (MyMapView == null) return;
+  if (MyMapView == null) return;
 
         try
         {
             var currentScale = MyMapView.MapScale;
             await MyMapView.SetViewpointScaleAsync(currentScale * 2);
-        }
+ }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Zoom out error: {ex.Message}");
+     System.Diagnostics.Debug.WriteLine($"Zoom out error: {ex.Message}");
         }
     }
 
     private async void ResetButton_Click(object sender, RoutedEventArgs e)
     {
-        if (MyMapView == null || _initialViewpoint == null) return;
+     if (MyMapView == null || _initialViewpoint == null) return;
 
-        try
+     try
         {
-            await MyMapView.SetViewpointCenterAsync(_initialViewpoint, 50000);
+     await MyMapView.SetViewpointCenterAsync(_initialViewpoint, 50000);
         }
-        catch (Exception ex)
+   catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Reset view error: {ex.Message}");
+       System.Diagnostics.Debug.WriteLine($"Reset view error: {ex.Message}");
         }
     }
 }

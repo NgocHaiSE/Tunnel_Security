@@ -34,6 +34,17 @@ namespace Station.Dialogs
             LoadDeviceInfo();
         }
 
+        public PlaybackDialog(string cameraId) : this()
+        {
+            // Create a temporary device object for display
+            _device = new DeviceItemViewModel
+            {
+                DeviceId = cameraId,
+                Name = $"Camera {cameraId}"
+            };
+            LoadDeviceInfo();
+        }
+
         private void LoadInitialData()
         {
             // Set current date

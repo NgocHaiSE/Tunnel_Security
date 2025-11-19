@@ -4,131 +4,319 @@
 
     <!--
     ====================================
-    HN Security Color Palette
-    ====================================
-    Main Theme: Professional Blue
-    Palette: Deep Blue, Sky Blue, Light Blue, Cream
-    -->
-
-    <!-- Primary Colors - Blue Theme -->
-    <Color x:Key="PrimaryDark">#1E3A8A</Color>
-    <Color x:Key="PrimaryMedium">#3B82F6</Color>
-    <Color x:Key="PrimaryLight">#DBEAFE</Color>
-    <Color x:Key="PrimaryCream">#F0F9FF</Color>
-
-    <!-- Text Colors -->
-    <Color x:Key="TextPrimary">#1E293B</Color>
-    <Color x:Key="TextSecondary">#475569</Color>
-    <Color x:Key="TextTertiary">#94A3B8</Color>
-
-    <!-- Severity Colors -->
-    <Color x:Key="SeverityLow">#22C55E</Color>
-    <Color x:Key="SeverityMedium">#EAB308</Color>
-    <Color x:Key="SeverityHigh">#F97316</Color>
-    <Color x:Key="SeverityCritical">#EF4444</Color>
-
-    <!-- Severity Light Colors -->
-    <Color x:Key="SeverityLowLight">#DCFCE7</Color>
-    <Color x:Key="SeverityMediumLight">#FEF9C3</Color>
-    <Color x:Key="SeverityHighLight">#FFEDD5</Color>
-    <Color x:Key="SeverityCriticalLight">#FEE2E2</Color>
-
-    <!-- Status Colors -->
-    <Color x:Key="StatusAcknowledged">#DBEAFE</Color>
-    <Color x:Key="StatusUnacknowledged">#FEF9C3</Color>
-    <Color x:Key="StatusProcessing">#3B82F6</Color>
-
-    <!-- Background Colors -->
-    <Color x:Key="BackgroundPrimary">#FFFFFF</Color>
-    <Color x:Key="BackgroundSecondary">#F8FAFC</Color>
-    <Color x:Key="BackgroundAccent">#EFF6FF</Color>
-
-    <!-- Border Colors -->
-    <Color x:Key="BorderPrimary">#3B82F6</Color>
-    <Color x:Key="BorderSecondary">#BFDBFE</Color>
-    <Color x:Key="BorderLight">#E2E8F0</Color>
-
-    <!-- Button Colors -->
-    <Color x:Key="ButtonPrimary">#1E3A8A</Color>
-    <Color x:Key="ButtonPrimaryHover">#1E40AF</Color>
-    <Color x:Key="ButtonPrimaryPressed">#1D4ED8</Color>
-    <Color x:Key="ButtonSuccess">#22C55E</Color>
-    <Color x:Key="ButtonSuccessHover">#16A34A</Color>
-
-    <!-- Solid Color Brushes -->
-    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
-    <SolidColorBrush x:Key="PrimaryMediumBrush" Color="{StaticResource PrimaryMedium}"/>
-    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLight}"/>
-    <SolidColorBrush x:Key="PrimaryCreamBrush" Color="{StaticResource PrimaryCream}"/>
-
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
-    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiary}"/>
-
-    <SolidColorBrush x:Key="SeverityLowBrush" Color="{StaticResource SeverityLow}"/>
-    <SolidColorBrush x:Key="SeverityMediumBrush" Color="{StaticResource SeverityMedium}"/>
-    <SolidColorBrush x:Key="SeverityHighBrush" Color="{StaticResource SeverityHigh}"/>
-    <SolidColorBrush x:Key="SeverityCriticalBrush" Color="{StaticResource SeverityCritical}"/>
-
-    <SolidColorBrush x:Key="SeverityLowLightBrush" Color="{StaticResource SeverityLowLight}"/>
-    <SolidColorBrush x:Key="SeverityMediumLightBrush" Color="{StaticResource SeverityMediumLight}"/>
-    <SolidColorBrush x:Key="SeverityHighLightBrush" Color="{StaticResource SeverityHighLight}"/>
-    <SolidColorBrush x:Key="SeverityCriticalLightBrush" Color="{StaticResource SeverityCriticalLight}"/>
-
-    <SolidColorBrush x:Key="StatusAcknowledgedBrush" Color="{StaticResource StatusAcknowledged}"/>
-    <SolidColorBrush x:Key="StatusUnacknowledgedBrush" Color="{StaticResource StatusUnacknowledged}"/>
-    <SolidColorBrush x:Key="StatusProcessingBrush" Color="{StaticResource StatusProcessing}"/>
-
-    <SolidColorBrush x:Key="BackgroundPrimaryBrush" Color="{StaticResource BackgroundPrimary}"/>
-    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{StaticResource BackgroundSecondary}"/>
-    <SolidColorBrush x:Key="BackgroundAccentBrush" Color="{StaticResource BackgroundAccent}"/>
-
-    <SolidColorBrush x:Key="BorderPrimaryBrush" Color="{StaticResource BorderPrimary}"/>
-    <SolidColorBrush x:Key="BorderSecondaryBrush" Color="{StaticResource BorderSecondary}"/>
-    <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource BorderLight}"/>
-
-    <SolidColorBrush x:Key="ButtonPrimaryBrush" Color="{StaticResource ButtonPrimary}"/>
-    <SolidColorBrush x:Key="ButtonPrimaryHoverBrush" Color="{StaticResource ButtonPrimaryHover}"/>
-    <SolidColorBrush x:Key="ButtonPrimaryPressedBrush" Color="{StaticResource ButtonPrimaryPressed}"/>
-    <SolidColorBrush x:Key="ButtonSuccessBrush" Color="{StaticResource ButtonSuccess}"/>
-    <SolidColorBrush x:Key="ButtonSuccessHoverBrush" Color="{StaticResource ButtonSuccessHover}"/>
-
-    <!-- Gradient Brushes -->
-    <LinearGradientBrush x:Key="BackgroundGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource PrimaryDark}" Offset="0"/>
-        <GradientStop Color="{StaticResource PrimaryMedium}" Offset="0.33"/>
-        <GradientStop Color="{StaticResource PrimaryLight}" Offset="0.66"/>
-        <GradientStop Color="{StaticResource PrimaryCream}" Offset="1"/>
-    </LinearGradientBrush>
-
-    <!-- Monitoring Dashboard Colors (4K Display)
-    From rule.md specifications
+    Theme-Aware Color System
+    Automatically switches between Light and Dark themes
     ====================================
     -->
 
-    <!-- Dark Theme Colors -->
-    <Color x:Key="MonitoringBackground">#0A0F17</Color>
-    <Color x:Key="MonitoringPanelBackground">#111827</Color>
-    <Color x:Key="MonitoringBorder">#1F2429</Color>
-    <Color x:Key="MonitoringTextPrimary">#E6EEF3</Color>
-    <Color x:Key="MonitoringTextSecondary">#9AA6B2</Color>
-    <Color x:Key="MonitoringTempHigh">#F0625D</Color>
-    <Color x:Key="MonitoringRadarWarning">#FFD166</Color>
-    <Color x:Key="MonitoringNodeNormal">#3FCF8E</Color>
-    <Color x:Key="MonitoringNodeOffline">#7B7E85</Color>
-    <Color x:Key="MonitoringAccentButton">#2979FF</Color>
+    <!-- Theme Dictionaries -->
+    <ResourceDictionary.ThemeDictionaries>
+        <!-- Light Theme -->
+        <ResourceDictionary x:Key="Light">
+            <!-- Primary Colors -->
+            <Color x:Key="PrimaryDark">#1E3A8A</Color>
+            <Color x:Key="PrimaryMedium">#3B82F6</Color>
+            <Color x:Key="PrimaryLight">#DBEAFE</Color>
+            <Color x:Key="PrimaryCream">#F0F9FF</Color>
 
-    <!-- Monitoring Brushes -->
-    <SolidColorBrush x:Key="MonitoringBackgroundBrush" Color="{StaticResource MonitoringBackground}"/>
-    <SolidColorBrush x:Key="MonitoringPanelBackgroundBrush" Color="{StaticResource MonitoringPanelBackground}"/>
-    <SolidColorBrush x:Key="MonitoringBorderBrush" Color="{StaticResource MonitoringBorder}"/>
-    <SolidColorBrush x:Key="MonitoringTextPrimaryBrush" Color="{StaticResource MonitoringTextPrimary}"/>
-    <SolidColorBrush x:Key="MonitoringTextSecondaryBrush" Color="{StaticResource MonitoringTextSecondary}"/>
-    <SolidColorBrush x:Key="MonitoringTempHighBrush" Color="{StaticResource MonitoringTempHigh}"/>
-    <SolidColorBrush x:Key="MonitoringRadarWarningBrush" Color="{StaticResource MonitoringRadarWarning}"/>
-    <SolidColorBrush x:Key="MonitoringNodeNormalBrush" Color="{StaticResource MonitoringNodeNormal}"/>
-    <SolidColorBrush x:Key="MonitoringNodeOfflineBrush" Color="{StaticResource MonitoringNodeOffline}"/>
-    <SolidColorBrush x:Key="MonitoringAccentButtonBrush" Color="{StaticResource MonitoringAccentButton}"/>
+            <!-- Text Colors -->
+            <Color x:Key="TextPrimary">#1E293B</Color>
+            <Color x:Key="TextSecondary">#475569</Color>
+            <Color x:Key="TextTertiary">#94A3B8</Color>
+
+            <!-- Background Colors -->
+            <Color x:Key="BackgroundPrimary">#FFFFFF</Color>
+            <Color x:Key="BackgroundSecondary">#F8FAFC</Color>
+            <Color x:Key="BackgroundAccent">#EFF6FF</Color>
+
+            <!-- Border Colors -->
+            <Color x:Key="BorderPrimary">#3B82F6</Color>
+            <Color x:Key="BorderSecondary">#BFDBFE</Color>
+            <Color x:Key="BorderLight">#E2E8F0</Color>
+
+            <!-- Button Colors -->
+            <Color x:Key="ButtonPrimary">#1E3A8A</Color>
+            <Color x:Key="ButtonPrimaryHover">#1E40AF</Color>
+            <Color x:Key="ButtonPrimaryPressed">#1D4ED8</Color>
+            <Color x:Key="ButtonSuccess">#22C55E</Color>
+            <Color x:Key="ButtonSuccessHover">#16A34A</Color>
+
+            <!-- Severity Colors -->
+            <Color x:Key="SeverityLow">#22C55E</Color>
+            <Color x:Key="SeverityMedium">#EAB308</Color>
+            <Color x:Key="SeverityHigh">#F97316</Color>
+            <Color x:Key="SeverityCritical">#EF4444</Color>
+            <Color x:Key="SeverityLowLight">#DCFCE7</Color>
+            <Color x:Key="SeverityMediumLight">#FEF9C3</Color>
+            <Color x:Key="SeverityHighLight">#FFEDD5</Color>
+            <Color x:Key="SeverityCriticalLight">#FEE2E2</Color>
+
+            <!-- Status Colors -->
+            <Color x:Key="StatusAcknowledged">#DBEAFE</Color>
+            <Color x:Key="StatusUnacknowledged">#FEF9C3</Color>
+            <Color x:Key="StatusProcessing">#3B82F6</Color>
+
+            <!-- Monitoring Colors (Light mode) -->
+            <Color x:Key="MonitoringBackground">#F8FAFC</Color>
+            <Color x:Key="MonitoringPanelBackground">#FFFFFF</Color>
+            <Color x:Key="MonitoringBorder">#E2E8F0</Color>
+            <Color x:Key="MonitoringTextPrimary">#1E293B</Color>
+            <Color x:Key="MonitoringTextSecondary">#64748B</Color>
+            <Color x:Key="MonitoringTempHigh">#F0625D</Color>
+            <Color x:Key="MonitoringRadarWarning">#FFD166</Color>
+            <Color x:Key="MonitoringNodeNormal">#3FCF8E</Color>
+            <Color x:Key="MonitoringNodeOffline">#94A3B8</Color>
+            <Color x:Key="MonitoringAccentButton">#2979FF</Color>
+
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{ThemeResource PrimaryDark}"/>
+            <SolidColorBrush x:Key="PrimaryMediumBrush" Color="{ThemeResource PrimaryMedium}"/>
+            <SolidColorBrush x:Key="PrimaryLightBrush" Color="{ThemeResource PrimaryLight}"/>
+            <SolidColorBrush x:Key="PrimaryCreamBrush" Color="{ThemeResource PrimaryCream}"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{ThemeResource TextPrimary}"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{ThemeResource TextSecondary}"/>
+            <SolidColorBrush x:Key="TextTertiaryBrush" Color="{ThemeResource TextTertiary}"/>
+            <SolidColorBrush x:Key="SeverityLowBrush" Color="{ThemeResource SeverityLow}"/>
+            <SolidColorBrush x:Key="SeverityMediumBrush" Color="{ThemeResource SeverityMedium}"/>
+            <SolidColorBrush x:Key="SeverityHighBrush" Color="{ThemeResource SeverityHigh}"/>
+            <SolidColorBrush x:Key="SeverityCriticalBrush" Color="{ThemeResource SeverityCritical}"/>
+            <SolidColorBrush x:Key="SeverityLowLightBrush" Color="{ThemeResource SeverityLowLight}"/>
+            <SolidColorBrush x:Key="SeverityMediumLightBrush" Color="{ThemeResource SeverityMediumLight}"/>
+            <SolidColorBrush x:Key="SeverityHighLightBrush" Color="{ThemeResource SeverityHighLight}"/>
+            <SolidColorBrush x:Key="SeverityCriticalLightBrush" Color="{ThemeResource SeverityCriticalLight}"/>
+            <SolidColorBrush x:Key="StatusAcknowledgedBrush" Color="{ThemeResource StatusAcknowledged}"/>
+            <SolidColorBrush x:Key="StatusUnacknowledgedBrush" Color="{ThemeResource StatusUnacknowledged}"/>
+            <SolidColorBrush x:Key="StatusProcessingBrush" Color="{ThemeResource StatusProcessing}"/>
+            <SolidColorBrush x:Key="BackgroundPrimaryBrush" Color="{ThemeResource BackgroundPrimary}"/>
+            <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{ThemeResource BackgroundSecondary}"/>
+            <SolidColorBrush x:Key="BackgroundAccentBrush" Color="{ThemeResource BackgroundAccent}"/>
+            <SolidColorBrush x:Key="BorderPrimaryBrush" Color="{ThemeResource BorderPrimary}"/>
+            <SolidColorBrush x:Key="BorderSecondaryBrush" Color="{ThemeResource BorderSecondary}"/>
+            <SolidColorBrush x:Key="BorderLightBrush" Color="{ThemeResource BorderLight}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryBrush" Color="{ThemeResource ButtonPrimary}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryHoverBrush" Color="{ThemeResource ButtonPrimaryHover}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryPressedBrush" Color="{ThemeResource ButtonPrimaryPressed}"/>
+            <SolidColorBrush x:Key="ButtonSuccessBrush" Color="{ThemeResource ButtonSuccess}"/>
+            <SolidColorBrush x:Key="ButtonSuccessHoverBrush" Color="{ThemeResource ButtonSuccessHover}"/>
+            <SolidColorBrush x:Key="MonitoringBackgroundBrush" Color="{ThemeResource MonitoringBackground}"/>
+            <SolidColorBrush x:Key="MonitoringPanelBackgroundBrush" Color="{ThemeResource MonitoringPanelBackground}"/>
+            <SolidColorBrush x:Key="MonitoringBorderBrush" Color="{ThemeResource MonitoringBorder}"/>
+            <SolidColorBrush x:Key="MonitoringTextPrimaryBrush" Color="{ThemeResource MonitoringTextPrimary}"/>
+            <SolidColorBrush x:Key="MonitoringTextSecondaryBrush" Color="{ThemeResource MonitoringTextSecondary}"/>
+            <SolidColorBrush x:Key="MonitoringTempHighBrush" Color="{ThemeResource MonitoringTempHigh}"/>
+            <SolidColorBrush x:Key="MonitoringRadarWarningBrush" Color="{ThemeResource MonitoringRadarWarning}"/>
+            <SolidColorBrush x:Key="MonitoringNodeNormalBrush" Color="{ThemeResource MonitoringNodeNormal}"/>
+            <SolidColorBrush x:Key="MonitoringNodeOfflineBrush" Color="{ThemeResource MonitoringNodeOffline}"/>
+            <SolidColorBrush x:Key="MonitoringAccentButtonBrush" Color="{ThemeResource MonitoringAccentButton}"/>
+            
+            <!-- TextBox Control Resources - Light Theme -->
+            <SolidColorBrush x:Key="TextControlBorderBrush" Color="#E2E8F0"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="#E2E8F0"/>
+            
+            <SolidColorBrush x:Key="TextControlBackground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="#F8FAFC"/>
+            
+            <SolidColorBrush x:Key="TextControlForeground" Color="#1E293B"/>
+            <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#1E293B"/>
+            <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#1E293B"/>
+            <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#94A3B8"/>
+            
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#94A3B8"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#94A3B8"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#475569"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="#94A3B8"/>
+            
+            <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#3B82F6" Opacity="0.4"/>
+            
+            <SolidColorBrush x:Key="TextControlHeaderForeground" Color="#1E293B"/>
+            <SolidColorBrush x:Key="TextControlHeaderForegroundDisabled" Color="#94A3B8"/>
+            
+            <SolidColorBrush x:Key="TextControlButtonForeground" Color="#475569"/>
+            <SolidColorBrush x:Key="TextControlButtonForegroundPointerOver" Color="#1E293B"/>
+            <SolidColorBrush x:Key="TextControlButtonForegroundPressed" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="TextControlButtonBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBackgroundPointerOver" Color="#F8FAFC"/>
+            <SolidColorBrush x:Key="TextControlButtonBackgroundPressed" Color="#EFF6FF"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrushPointerOver" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrushPressed" Color="Transparent"/>
+            
+            <!-- NavigationView Resources - Light Theme -->
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FAFBFC"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#FAFBFC"/>
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#F8FAFC"/>
+            <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="#E2E8F0"/>
+            <SolidColorBrush x:Key="NavigationViewBorderBrush" Color="#E2E8F0"/>
+            <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewItemForeground" Color="#1E293B"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundPressed" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#DBEAFE"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#F0F4F8"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="#E6EDF5"/>
+            <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#1E3A8A"/>
+        </ResourceDictionary>
+
+        <!-- Dark Theme -->
+        <ResourceDictionary x:Key="Dark">
+            <!-- Primary Colors - Adjusted for Dark -->
+            <Color x:Key="PrimaryDark">#60A5FA</Color>
+            <Color x:Key="PrimaryMedium">#3B82F6</Color>
+            <Color x:Key="PrimaryLight">#1E3A8A</Color>
+            <Color x:Key="PrimaryCream">#1E293B</Color>
+
+            <!-- Text Colors - Inverted -->
+            <Color x:Key="TextPrimary">#E6EEF3</Color>
+            <Color x:Key="TextSecondary">#C4C8CF</Color>
+            <Color x:Key="TextTertiary">#96A0B3</Color>
+
+            <!-- Background Colors - Dark -->
+            <Color x:Key="BackgroundPrimary">#171E33</Color>
+            <Color x:Key="BackgroundSecondary">#060B17</Color>
+            <Color x:Key="BackgroundAccent">#1F2429</Color>
+
+            <!-- Border Colors - Dark -->
+            <Color x:Key="BorderPrimary">#2979FF</Color>
+            <Color x:Key="BorderSecondary">#1F2429</Color>
+            <Color x:Key="BorderLight">#2D3238</Color>
+
+            <!-- Button Colors - Dark -->
+            <Color x:Key="ButtonPrimary">#2979FF</Color>
+            <Color x:Key="ButtonPrimaryHover">#3D8BFF</Color>
+            <Color x:Key="ButtonPrimaryPressed">#1E6FE6</Color>
+            <Color x:Key="ButtonSuccess">#3FCF8E</Color>
+            <Color x:Key="ButtonSuccessHover">#2EBE7E</Color>
+
+            <!-- Severity Colors - Dark -->
+            <Color x:Key="SeverityLow">#3FCF8E</Color>
+            <Color x:Key="SeverityMedium">#FFD166</Color>
+            <Color x:Key="SeverityHigh">#FF8C42</Color>
+            <Color x:Key="SeverityCritical">#FF5252</Color>
+            <Color x:Key="SeverityLowLight">#1A3A2E</Color>
+            <Color x:Key="SeverityMediumLight">#3D2E14</Color>
+            <Color x:Key="SeverityHighLight">#3D2218</Color>
+            <Color x:Key="SeverityCriticalLight">#3D1A1A</Color>
+
+            <!-- Status Colors - Dark -->
+            <Color x:Key="StatusAcknowledged">#1E3A5F</Color>
+            <Color x:Key="StatusUnacknowledged">#3D2E14</Color>
+            <Color x:Key="StatusProcessing">#2979FF</Color>
+
+            <!-- Monitoring Colors (4K Display - Dark) -->
+            <Color x:Key="MonitoringBackground">#0F1526</Color>
+            <Color x:Key="MonitoringPanelBackground">#171E33</Color>
+            <Color x:Key="MonitoringBorder">#1F2429</Color>
+            <Color x:Key="MonitoringTextPrimary">#E6EEF3</Color>
+            <Color x:Key="MonitoringTextSecondary">#C4C8CF</Color>
+            <Color x:Key="MonitoringTempHigh">#FF5252</Color>
+            <Color x:Key="MonitoringRadarWarning">#FFD166</Color>
+            <Color x:Key="MonitoringNodeNormal">#3FCF8E</Color>
+            <Color x:Key="MonitoringNodeOffline">#7B7E85</Color>
+            <Color x:Key="MonitoringAccentButton">#2979FF</Color>
+
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{ThemeResource PrimaryDark}"/>
+            <SolidColorBrush x:Key="PrimaryMediumBrush" Color="{ThemeResource PrimaryMedium}"/>
+            <SolidColorBrush x:Key="PrimaryLightBrush" Color="{ThemeResource PrimaryLight}"/>
+            <SolidColorBrush x:Key="PrimaryCreamBrush" Color="{ThemeResource PrimaryCream}"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{ThemeResource TextPrimary}"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{ThemeResource TextSecondary}"/>
+            <SolidColorBrush x:Key="TextTertiaryBrush" Color="{ThemeResource TextTertiary}"/>
+            <SolidColorBrush x:Key="SeverityLowBrush" Color="{ThemeResource SeverityLow}"/>
+            <SolidColorBrush x:Key="SeverityMediumBrush" Color="{ThemeResource SeverityMedium}"/>
+            <SolidColorBrush x:Key="SeverityHighBrush" Color="{ThemeResource SeverityHigh}"/>
+            <SolidColorBrush x:Key="SeverityCriticalBrush" Color="{ThemeResource SeverityCritical}"/>
+            <SolidColorBrush x:Key="SeverityLowLightBrush" Color="{ThemeResource SeverityLowLight}"/>
+            <SolidColorBrush x:Key="SeverityMediumLightBrush" Color="{ThemeResource SeverityMediumLight}"/>
+            <SolidColorBrush x:Key="SeverityHighLightBrush" Color="{ThemeResource SeverityHighLight}"/>
+            <SolidColorBrush x:Key="SeverityCriticalLightBrush" Color="{ThemeResource SeverityCriticalLight}"/>
+            <SolidColorBrush x:Key="StatusAcknowledgedBrush" Color="{ThemeResource StatusAcknowledged}"/>
+            <SolidColorBrush x:Key="StatusUnacknowledgedBrush" Color="{ThemeResource StatusUnacknowledged}"/>
+            <SolidColorBrush x:Key="StatusProcessingBrush" Color="{ThemeResource StatusProcessing}"/>
+            <SolidColorBrush x:Key="BackgroundPrimaryBrush" Color="{ThemeResource BackgroundPrimary}"/>
+            <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{ThemeResource BackgroundSecondary}"/>
+            <SolidColorBrush x:Key="BackgroundAccentBrush" Color="{ThemeResource BackgroundAccent}"/>
+            <SolidColorBrush x:Key="BorderPrimaryBrush" Color="{ThemeResource BorderPrimary}"/>
+            <SolidColorBrush x:Key="BorderSecondaryBrush" Color="{ThemeResource BorderSecondary}"/>
+            <SolidColorBrush x:Key="BorderLightBrush" Color="{ThemeResource BorderLight}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryBrush" Color="{ThemeResource ButtonPrimary}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryHoverBrush" Color="{ThemeResource ButtonPrimaryHover}"/>
+            <SolidColorBrush x:Key="ButtonPrimaryPressedBrush" Color="{ThemeResource ButtonPrimaryPressed}"/>
+            <SolidColorBrush x:Key="ButtonSuccessBrush" Color="{ThemeResource ButtonSuccess}"/>
+            <SolidColorBrush x:Key="ButtonSuccessHoverBrush" Color="{ThemeResource ButtonSuccessHover}"/>
+            <SolidColorBrush x:Key="MonitoringBackgroundBrush" Color="{ThemeResource MonitoringBackground}"/>
+            <SolidColorBrush x:Key="MonitoringPanelBackgroundBrush" Color="{ThemeResource MonitoringPanelBackground}"/>
+            <SolidColorBrush x:Key="MonitoringBorderBrush" Color="{ThemeResource MonitoringBorder}"/>
+            <SolidColorBrush x:Key="MonitoringTextPrimaryBrush" Color="{ThemeResource MonitoringTextPrimary}"/>
+            <SolidColorBrush x:Key="MonitoringTextSecondaryBrush" Color="{ThemeResource MonitoringTextSecondary}"/>
+            <SolidColorBrush x:Key="MonitoringTempHighBrush" Color="{ThemeResource MonitoringTempHigh}"/>
+            <SolidColorBrush x:Key="MonitoringRadarWarningBrush" Color="{ThemeResource MonitoringRadarWarning}"/>
+            <SolidColorBrush x:Key="MonitoringNodeNormalBrush" Color="{ThemeResource MonitoringNodeNormal}"/>
+            <SolidColorBrush x:Key="MonitoringNodeOfflineBrush" Color="{ThemeResource MonitoringNodeOffline}"/>
+            <SolidColorBrush x:Key="MonitoringAccentButtonBrush" Color="{ThemeResource MonitoringAccentButton}"/>
+            
+            <!-- TextBox Control Resources - Dark Theme -->
+            <SolidColorBrush x:Key="TextControlBorderBrush" Color="#2D3238"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#2979FF"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#2979FF"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="#2D3238"/>
+            
+            <SolidColorBrush x:Key="TextControlBackground" Color="#171E33"/>
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#171E33"/>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#171E33"/>
+            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="#060B17"/>
+            
+            <SolidColorBrush x:Key="TextControlForeground" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#96A0B3"/>
+            
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#96A0B3"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#96A0B3"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#C4C8CF"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="#96A0B3"/>
+            
+            <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#3B82F6" Opacity="0.4"/>
+            
+            <SolidColorBrush x:Key="TextControlHeaderForeground" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="TextControlHeaderForegroundDisabled" Color="#96A0B3"/>
+            
+            <SolidColorBrush x:Key="TextControlButtonForeground" Color="#C4C8CF"/>
+            <SolidColorBrush x:Key="TextControlButtonForegroundPointerOver" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="TextControlButtonForegroundPressed" Color="#60A5FA"/>
+            <SolidColorBrush x:Key="TextControlButtonBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBackgroundPointerOver" Color="#060B17"/>
+            <SolidColorBrush x:Key="TextControlButtonBackgroundPressed" Color="#1F2429"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrushPointerOver" Color="Transparent"/>
+            <SolidColorBrush x:Key="TextControlButtonBorderBrushPressed" Color="Transparent"/>
+            
+            <!-- NavigationView Resources - Dark Theme -->
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#0F1526"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#0F1526"/>
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#060B17"/>
+            <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="#2D3238"/>
+            <SolidColorBrush x:Key="NavigationViewBorderBrush" Color="#2D3238"/>
+            <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="#60A5FA"/>
+            <SolidColorBrush x:Key="NavigationViewItemForeground" Color="#E6EEF3"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="#60A5FA"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="#60A5FA"/>
+            <SolidColorBrush x:Key="NavigationViewItemForegroundPressed" Color="#60A5FA"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#3B82F6"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#1F2429"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="#2D3238"/>
+            <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#60A5FA"/>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
 
     <!-- Typography & Spacing -->
     <x:Double x:Key="FontSizeSmall">12</x:Double>

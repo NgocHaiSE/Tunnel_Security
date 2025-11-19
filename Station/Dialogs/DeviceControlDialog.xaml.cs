@@ -8,6 +8,8 @@ namespace Station.Dialogs
     public sealed partial class DeviceControlDialog : ContentDialog
     {
         private DeviceItemViewModel _device;
+        private string _nodeId;
+        private string _deviceType;
 
         public DeviceControlDialog()
         {
@@ -17,7 +19,43 @@ namespace Station.Dialogs
         public DeviceControlDialog(DeviceItemViewModel device) : this()
         {
             _device = device;
+            _deviceType = device.Type ?? "Sensor";
             LoadDeviceInfo();
+            ConfigureUIForDeviceType();
+        }
+
+        public DeviceControlDialog(string nodeId, string deviceType) : this()
+        {
+            _nodeId = nodeId;
+            _deviceType = deviceType;
+            LoadNodeInfo(nodeId, deviceType);
+            ConfigureUIForDeviceType();
+        }
+
+        private void LoadNodeInfo(string nodeId, string deviceType)
+        {
+            // Set device info based on node ID
+            DeviceNameText.Text = $"{deviceType} - {nodeId}";
+            DeviceIdText.Text = nodeId;
+
+            // Set initial power state (default to online)
+            PowerToggle.IsChecked = true;
+            UpdatePowerButtonUI(true);
+        }
+
+        private void ConfigureUIForDeviceType()
+        {
+            // Show "View Camera" button only for cameras
+            if (_deviceType.Equals("Camera", StringComparison.OrdinalIgnoreCase))
+            {
+                ViewCameraCard.Visibility = Visibility.Visible;
+                Title = "Điều khiển Camera";
+            }
+            else
+            {
+                ViewCameraCard.Visibility = Visibility.Collapsed;
+                Title = $"Điều khiển {_deviceType}";
+            }
         }
 
         private void LoadDeviceInfo()
@@ -31,6 +69,20 @@ namespace Station.Dialogs
                 PowerToggle.IsChecked = _device.Status == Station.Models.DeviceStatus.Online;
                 UpdatePowerButtonUI(PowerToggle.IsChecked == true);
             }
+        }
+
+        private async void ViewCameraButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Close current dialog
+            this.Hide();
+            
+            // Get camera ID from device or node
+            string cameraId = _device?.DeviceId ?? _nodeId ?? "CAM-001";
+            
+            // Open PlaybackDialog with camera ID
+            var playbackDialog = new PlaybackDialog(cameraId);
+            playbackDialog.XamlRoot = this.XamlRoot;
+            await playbackDialog.ShowAsync();
         }
 
         private void PowerToggle_Click(object sender, RoutedEventArgs e)
@@ -56,19 +108,21 @@ namespace Station.Dialogs
             {
                 PowerText.Text = "Đang bật";
                 PowerIcon.Glyph = "\uE7E8"; // PowerButton
+                // Use MonitoringNodeNormal color (#3FCF8E)
                 PowerToggle.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                          Microsoft.UI.ColorHelper.FromArgb(255, 16, 185, 129)); // Green
+                          Microsoft.UI.ColorHelper.FromArgb(255, 63, 207, 142));
                 PowerToggle.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-           Microsoft.UI.Colors.White);
+           Microsoft.UI.ColorHelper.FromArgb(255, 230, 238, 243)); // MonitoringTextPrimary
             }
             else
             {
                 PowerText.Text = "Đang tắt";
                 PowerIcon.Glyph = "\uE7E8"; // PowerButton
+                // Use MonitoringTempHigh color (#F0625D)
                 PowerToggle.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-       Microsoft.UI.ColorHelper.FromArgb(255, 239, 68, 68)); // Red
+       Microsoft.UI.ColorHelper.FromArgb(255, 240, 98, 93));
                 PowerToggle.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                        Microsoft.UI.Colors.White);
+                        Microsoft.UI.ColorHelper.FromArgb(255, 230, 238, 243)); // MonitoringTextPrimary
             }
         }
 

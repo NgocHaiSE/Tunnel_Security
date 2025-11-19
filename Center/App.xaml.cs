@@ -4,33 +4,17 @@ using Esri.ArcGISRuntime;
 
 namespace Center
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
         private Window? _window;
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain();
-        /// </summary>
         public App()
         {
             InitializeComponent();
 
-            // Initialize ArcGIS Runtime
-            // Get your FREE API key from: https://developers.arcgis.com/
             try
             {
-                // OPTION 1: Use API key for ArcGIS basemaps (recommended)
-                // Sign up at https://developers.arcgis.com/ and create API key
-                // Make sure to enable "Basemap styles service" when creating key
-                // ArcGISRuntimeEnvironment.ApiKey = "PASTE_YOUR_API_KEY_HERE";
-
-                // OPTION 2: Use OpenStreetMap (FREE, no API key needed)
-                ArcGISRuntimeEnvironment.ApiKey = ""; // Empty = use OSM
-
+                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.ApiKey = "AAPTxy8BH1VEsoebNVZXo8HurBHPuRuPZica8Rhed5m-n7AFkMnLsrCwK3gDIGNQy02avEYsa1pMFxSHBelsSwL8uSTQLglhWVCVYKR0ohqXZDVqwOLyETQGepBvW6s9DKmlSDkhdyzKF5j_bzBrcTa0nXSg8hb4exXcd3yq7Jt91zJbeaI9UdqbOedgq7GxqkA20s_XUdyXKRfxFGws6VNKVTkxGK8ZH0qvhixUAVTa-Rc.AT1_OAgey3rQ";
                 System.Diagnostics.Debug.WriteLine("ArcGIS Runtime initialized for Center");
             }
             catch (Exception ex)
@@ -39,14 +23,11 @@ namespace Center
             }
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             _window = new MainWindow();
             _window.Activate();
         }
+
     }
 }

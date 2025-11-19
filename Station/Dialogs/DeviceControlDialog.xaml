@@ -9,18 +9,19 @@
     Title="Điều khiển thiết bị"
     CloseButtonText="Đóng"
     DefaultButton="Close"
-    RequestedTheme="Light"
-    Background="{StaticResource BackgroundPrimaryBrush}"
-    CornerRadius="12"
+    RequestedTheme="Dark"
+    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+    BorderBrush="{StaticResource MonitoringBorderBrush}"
+    CornerRadius="8"
     Padding="0">
 
     <ContentDialog.Resources>
         <!-- Control Card Style -->
         <Style x:Key="ControlCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource BackgroundPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}"/>
+            <Setter Property="Background" Value="{StaticResource MonitoringBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MonitoringBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="24"/>
             <Setter Property="Margin" Value="0,0,0,16"/>
         </Style>
@@ -29,22 +30,22 @@
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="MinWidth" Value="120"/>
             <Setter Property="Height" Value="40"/>
-            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
 
         <!-- Primary Action Button -->
         <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
-            <Setter Property="Background" Value="#10B981"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource MonitoringNodeNormalBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource MonitoringTextPrimaryBrush}"/>
         </Style>
 
         <!-- Secondary Action Button -->
         <Style x:Key="SecondaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource BackgroundSecondaryBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}"/>
+            <Setter Property="Background" Value="{StaticResource MonitoringPanelBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource MonitoringTextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MonitoringBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </ContentDialog.Resources>
@@ -54,6 +55,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- InfoBar for notifications -->
@@ -64,6 +66,43 @@
                  Margin="0,0,0,16"/>
 
         <StackPanel Grid.Row="1" Spacing="16">
+            <!-- View Camera Card (Only for Cameras) -->
+            <Border x:Name="ViewCameraCard"
+                    Style="{StaticResource ControlCardStyle}"
+                    Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Info Section -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="6">
+                        <TextBlock Text="Xem Camera"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                        <TextBlock Text="Mở luồng video trực tiếp từ camera"
+                                   FontSize="12"
+                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                    </StackPanel>
+
+                    <!-- View Camera Button -->
+                    <Button Grid.Column="1"
+                            x:Name="ViewCameraButton"
+                            Style="{StaticResource PrimaryActionButtonStyle}"
+                            Click="ViewCameraButton_Click"
+                            VerticalAlignment="Center">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE714;" FontSize="16"/>
+                                <TextBlock Text="Xem Camera"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+            </Border>
+
             <!-- Power Control Card -->
             <Border Style="{StaticResource ControlCardStyle}">
                 <Grid>
@@ -75,12 +114,12 @@
                     <!-- Info Section -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="6">
                         <TextBlock Text="Bật/Tắt thiết bị"
-                                   FontSize="18"
+                                   FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                         <TextBlock Text="Đổi trạng thái nhanh (online/offline)"
-                                   FontSize="13"
-                                   Foreground="{StaticResource TextTertiaryBrush}"/>
+                                   FontSize="12"
+                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                     </StackPanel>
 
                     <!-- Toggle Button -->
@@ -89,7 +128,7 @@
                                   VerticalAlignment="Center"
                                   MinWidth="100"
                                   Height="40"
-                                  CornerRadius="8"
+                                  CornerRadius="6"
                                   Click="PowerToggle_Click">
                         <ToggleButton.Content>
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -116,12 +155,12 @@
                     <!-- Info Section -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="6">
                         <TextBlock Text="Khởi động lại"
-                                   FontSize="18"
+                                   FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                         <TextBlock Text="Gửi lệnh reboot (mở phỏng)"
-                                   FontSize="13"
-                                   Foreground="{StaticResource TextTertiaryBrush}"/>
+                                   FontSize="12"
+                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                     </StackPanel>
 
                     <!-- Reboot Button -->
@@ -130,55 +169,51 @@
                             Content="Reboot"
                             Style="{StaticResource SecondaryActionButtonStyle}"
                             Click="RebootButton_Click"
-                            VerticalAlignment="Center">
-                        <Button.Resources>
-                            <SolidColorBrush x:Key="ButtonBackground" Color="{StaticResource BackgroundSecondary}"/>
-                        </Button.Resources>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- Device Info Footer -->
-            <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                    BorderBrush="{StaticResource BorderLightBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="16"
-                    Margin="0,8,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Device Icon -->
-                    <Border Grid.Column="0"
-                            Background="{StaticResource BackgroundAccentBrush}"
-                            CornerRadius="6"
-                            Width="36"
-                            Height="36"
-                            Margin="0,0,12,0">
-                        <FontIcon Glyph="&#xE957;"
-                                  FontSize="18"
-                                  Foreground="{StaticResource PrimaryDarkBrush}"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
-                    </Border>
-
-                    <!-- Device Info -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                        <TextBlock x:Name="DeviceNameText"
-                                   Text="Sensor01"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock x:Name="DeviceIdText"
-                                   Text="SEN-001"
-                                   FontSize="12"
-                                   Foreground="{StaticResource TextTertiaryBrush}"/>
-                    </StackPanel>
+                            VerticalAlignment="Center"/>
                 </Grid>
             </Border>
         </StackPanel>
+
+        <!-- Device Info Footer -->
+        <Border Grid.Row="2"
+                Background="{StaticResource MonitoringBackgroundBrush}"
+                BorderBrush="{StaticResource MonitoringBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Device Icon -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource MonitoringAccentButtonBrush}"
+                        CornerRadius="6"
+                        Width="36"
+                        Height="36"
+                        Margin="0,0,12,0">
+                    <FontIcon Glyph="&#xE957;"
+                              FontSize="18"
+                              Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Device Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock x:Name="DeviceNameText"
+                               Text="Sensor01"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                    <TextBlock x:Name="DeviceIdText"
+                               Text="SEN-001"
+                               FontSize="12"
+                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </ContentDialog>

@@ -10,11 +10,13 @@ namespace Station
     public sealed partial class MainWindow : Window
     {
         private readonly StationConfigService _configService;
+        private readonly ThemeService _themeService;
 
         public MainWindow()
         {
             InitializeComponent();
             _configService = new StationConfigService();
+            _themeService = ThemeService.Instance;
 
             Title = "Trạm Nghĩa Đô - Hệ thống giám sát xâm nhập";
 
@@ -24,6 +26,12 @@ namespace Station
             // Always show sidebar
             NavView.IsPaneVisible = true;
             NavView.IsPaneOpen = true;
+
+            // Subscribe to theme changes
+            _themeService.ThemeChanged += OnThemeChanged;
+
+            // Apply current theme
+            ApplyTheme(_themeService.CurrentTheme);
 
             // Load station info and navigate
             _ = InitializeAsync();
@@ -49,6 +57,65 @@ namespace Station
 
             // Always navigate to dashboard
             ContentFrame.Navigate(typeof(DashboardPage));
+        }
+
+        /// <summary>
+        /// Reload station configuration (called after saving new config)
+        /// </summary>
+        public async System.Threading.Tasks.Task ReloadStationConfigAsync()
+        {
+            try
+            {
+                var config = await _configService.GetConfigAsync();
+                if (config != null)
+                {
+                    StationNameText.Text = $"{config.StationCode} - {config.StationName}";
+                    StationAreaText.Text = $"Khu vực: {config.Area ?? "Chưa xác định"}";
+                    Title = $"{config.StationName} - Hệ thống giám sát xâm nhập";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error reloading config: {ex.Message}");
+            }
+        }
+
+        private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            _themeService.ToggleTheme();
+        }
+
+        private void OnThemeChanged(object? sender, ElementTheme theme)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ApplyTheme(theme);
+            });
+        }
+
+        private void ApplyTheme(ElementTheme theme)
+        {
+            // Apply theme to the root content
+            if (Content is FrameworkElement rootElement)
+            {
+                rootElement.RequestedTheme = theme;
+            }
+
+            // Update theme toggle icon
+            if (theme == ElementTheme.Dark)
+            {
+                // In dark mode, show sun icon (click to go light)
+                MoonIcon.Visibility = Visibility.Collapsed;
+                SunIcon.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // In light mode, show moon icon (click to go dark)
+                MoonIcon.Visibility = Visibility.Visible;
+                SunIcon.Visibility = Visibility.Collapsed;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Theme changed to: {theme}");
         }
 
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -112,31 +179,14 @@ namespace Station
             ContentFrame.Navigate(pageType);
 
             // Update NavigationView selection
-            var pageTag = pageType.Name.Replace("Page", "");
-            var matchingItem = NavView.MenuItems
+            var menuItem = NavView.MenuItems
                 .OfType<NavigationViewItem>()
-                .FirstOrDefault(item => item.Tag?.ToString() == pageTag);
+                .FirstOrDefault(item => item.Tag?.ToString() == pageType.Name.Replace("Page", ""));
 
-            if (matchingItem != null)
+            if (menuItem != null)
             {
-                NavView.SelectedItem = matchingItem;
+                NavView.SelectedItem = menuItem;
             }
-        }
-
-        /// <summary>
-        /// Reload station configuration
-        /// </summary>
-        public async System.Threading.Tasks.Task ReloadConfigAsync()
-        {
-            await InitializeAsync();
-        }
-
-        /// <summary>
-        /// Reload station configuration (alias for compatibility)
-        /// </summary>
-        public async System.Threading.Tasks.Task ReloadStationConfigAsync()
-        {
-            await InitializeAsync();
         }
     }
 }
