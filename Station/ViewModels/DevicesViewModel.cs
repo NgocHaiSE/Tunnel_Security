@@ -152,7 +152,6 @@ AlertCount = 3
         {
     Name = "Radar 01",
        DeviceId = "RAD-001",
-           Type = "Radar",
         TypeDisplay = "Radar phát hiện",
          Location = "A2 / R4 / N7",
         IpAddress = "192.168.1.301",

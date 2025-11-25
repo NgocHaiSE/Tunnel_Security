@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Map trạm</title>
+
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.17.0-beta.1/mapbox-gl.css" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .mapboxgl-popup-content {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 13px;
+            padding: 8px;
+        }
+
+        body[data-theme="Dark"] {
+            background: #000;
+        }
+
+        body[data-theme="Light"] {
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body data-theme="Light">
+    <div id="map"></div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.17.0-beta.1/mapbox-gl.js"></script>
+    <script>
+        // -------- GLOBAL VARIABLES --------
+        let backendBaseUrl = "";
+        let stationId = "";
+        let mapboxToken = "";
+
+        let mapInitialized = false;
+        let currentTheme = "Light";
+
+        let sensorsGeoJson = null; // lưu lại để updateNode/updateNodes
+
+        // helper: gửi message ngược về C#
+        function sendMessage(obj) {
+            try {
+                if (window.chrome && window.chrome.webview) {
+                    window.chrome.webview.postMessage(JSON.stringify(obj));
+                } else {
+                    console.log("sendMessage (no webview)", obj);
+                }
+            } catch (e) {
+                console.error("sendMessage error", e);
+            }
+        }
+
+        // -------- HANDLERS FOR POPUP BUTTONS --------
+        window.onViewCamera = function (cameraId, nodeId) {
+            console.log(`onViewCamera called: cameraId=${cameraId}, nodeId=${nodeId}`);
+            sendMessage({
+                type: "viewcamera",
+                cameraId: cameraId,
+                nodeId: nodeId
+            });
+        };
+
+        window.onManageDevice = function (nodeId) {
+            console.log(`onManageDevice called: nodeId=${nodeId}`);
+            sendMessage({
+                type: "managedevice",
+                nodeId: nodeId
+            });
+        };
+
+        // -------- NHẬN MESSAGE TỪ C# --------
+        if (window.chrome && window.chrome.webview) {
+            window.chrome.webview.addEventListener('message', event => {
+                const msg = event.data;
+                console.log("Received from C#:", msg);
+
+                if (msg.type === "init") {
+                    backendBaseUrl = msg.backend;
+                    stationId = msg.station;
+                    mapboxToken = msg.token;
+
+                    console.log("HTML received config:", msg);
+                    initMap();
+                }
+
+                if (msg.type === "refresh-data" && mapInitialized) {
+                    loadSensors();
+                    loadRoutes();
+                }
+            });
+        } else {
+            console.warn("chrome.webview not found (running in browser preview?)");
+        }
+
+        // -------- MAPBOX INIT --------
+        function initMap() {
+            if (mapInitialized) return;
+            mapInitialized = true;
+
+            mapboxgl.accessToken = mapboxToken;
+
+            window.map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [105.8040, 21.0330],
+                zoom: 14,
+                minZoom: 10,
+                maxZoom: 18
+            });
+
+            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+            map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+
+            map.on('load', () => {
+                loadSensors();
+                loadRoutes();
+
+                // báo cho C# biết map đã sẵn sàng
+                sendMessage({ type: "mapready" });
+            });
+        }
+
+        // -------- LOAD GEOJSON DATA --------
+        async function loadSensors() {
+            try {
+                const res = await fetch(`${backendBaseUrl}/api/stations/${stationId}/nodes`);
+                if (!res.ok) {
+                    console.error("Failed nodes", res.status);
+                    return;
+                }
+
+                const geojson = await res.json();
+                console.log("GeoJSON received:", geojson);
+                
+                // Log một feature để xem structure
+                if (geojson.features && geojson.features.length > 0) {
+                    console.log("First feature properties:", geojson.features[0].properties);
+                    // Tìm hub node
+                    const hubNode = geojson.features.find(f => f.properties.isHub === true || f.properties.IsHub === true);
+                    console.log("Hub node:", hubNode);
+                }
+                
+                sensorsGeoJson = geojson; // lưu lại
+
+                if (map.getSource('sensors')) {
+                    map.getSource('sensors').setData(geojson);
+                } else {
+                    map.addSource('sensors', {
+                        type: 'geojson',
+                        data: geojson
+                    });
+
+                    // Layer cho nodes thường (không phải hub)
+                    map.addLayer({
+                        id: 'sensors-circle',
+                        type: 'circle',
+                        source: 'sensors',
+                        filter: ['!=', ['get', 'isHub'], true],
+                        paint: {
+                            'circle-color': [
+                                'match',
+                                ['get', 'status'],
+                                'Online', '#10B981',
+                                'Warning', '#F59E0B',
+                                'Critical', '#EF4444',
+                                'Offline', '#6B7280',
+                                '#94A3B8'
+                            ],
+                            'circle-radius': 8,
+                            'circle-stroke-color': '#ffffff',
+                            'circle-stroke-width': 2,
+                            'circle-opacity': 0.95
+                        }
+                    });
+
+                    // Layer cho Hub/Trạm - Vòng ngoài thứ 2 (lớn nhất)
+                    map.addLayer({
+                        id: 'station-outer-ring-2',
+                        type: 'circle',
+                        source: 'sensors',
+                        filter: ['==', ['get', 'isHub'], true],
+                        paint: {
+                            'circle-color': 'transparent',
+                            'circle-radius': 22,
+                            'circle-stroke-color': '#3B82F6',
+                            'circle-stroke-width': 1.5,
+                            'circle-stroke-opacity': 0.4
+                        }
+                    });
+
+                    // Vòng ngoài thứ 1
+                    map.addLayer({
+                        id: 'station-outer-ring',
+                        type: 'circle',
+                        source: 'sensors',
+                        filter: ['==', ['get', 'isHub'], true],
+                        paint: {
+                            'circle-color': 'transparent',
+                            'circle-radius': 17,
+                            'circle-stroke-color': '#3B82F6',
+                            'circle-stroke-width': 2.5,
+                            'circle-stroke-opacity': 0.7
+                        }
+                    });
+
+                    // Trung tâm trạm - To, đậm hơn
+                    map.addLayer({
+                        id: 'station-circle',
+                        type: 'circle',
+                        source: 'sensors',
+                        filter: ['==', ['get', 'isHub'], true],
+                        paint: {
+                            'circle-color': '#2563EB',
+                            'circle-radius': 12,
+                            'circle-stroke-color': '#ffffff',
+                            'circle-stroke-width': 3,
+                            'circle-opacity': 1
+                        }
+                    });
+
+                    // Label cho Hub/Trạm - Variable Label Placement
+                    map.addLayer({
+                        id: 'station-label',
+                        type: 'symbol',
+                        source: 'sensors',
+                        filter: ['==', ['get', 'isHub'], true],
+                        layout: {
+                            'text-field': ['get', 'name'],
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                            'text-size': 13,
+                            'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                            'text-radial-offset': 1.5,
+                            'text-justify': 'auto',
+                            'text-allow-overlap': false
+                        },
+                        paint: {
+                            'text-color': '#1e3a8a',
+                            'text-halo-color': '#ffffff',
+                            'text-halo-width': 2,
+                            'text-halo-blur': 0
+                        }
+                    });
+
+                    // Label cho nodes thường
+                    map.addLayer({
+                        id: 'relay-label',
+                        type: 'symbol',
+                        source: 'sensors',
+                        filter: ['!=', ['get', 'isHub'], true],
+                        layout: {
+                            'text-field': ['get', 'code'],
+                            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Regular'],
+                            'text-size': 11,
+                            'text-offset': [0, 1.7],
+                            'text-anchor': 'top'
+                        },
+                        paint: {
+                            'text-color': '#1f2937',
+                            'text-halo-color': '#ffffff',
+                            'text-halo-width': 2
+                        }
+                    });
+
+                    // Click events
+                    map.on('click', 'sensors-circle', (e) => {
+                        const p = e.features[0].properties;
+                        const coords = e.features[0].geometry.coordinates;
+
+                        const cameraId = p.CameraId || p.Id;
+                        const nodeId = p.Id;
+
+                        // Tạo popup content
+                        const popupContent = document.createElement('div');
+                        popupContent.innerHTML = `
+                            <strong>${p.Name}</strong><br>
+                            Code: ${p.Code}<br>
+                            Line: ${p.Line}<br>
+                            Trạng thái: ${p.Status}<br>
+                            Pin: ${p.BatteryLevel}%<br>
+                            RSSI: ${p.RSSI} dBm<br>
+                            Số sensor: ${p.SensorCount}<br>
+                        `;
+
+                        // Thêm buttons
+                        const buttonsDiv = document.createElement('div');
+                        buttonsDiv.style.marginTop = '10px';
+
+                        if (p.CameraId) {
+                            const viewCameraBtn = document.createElement('button');
+                            viewCameraBtn.textContent = 'Xem camera';
+                            viewCameraBtn.style.marginRight = '5px';
+                            viewCameraBtn.onclick = () => {
+                                console.log('Calling onViewCamera with:', cameraId, nodeId);
+                                window.onViewCamera(cameraId, nodeId);
+                            };
+                            buttonsDiv.appendChild(viewCameraBtn);
+                        }
+
+                        const manageDeviceBtn = document.createElement('button');
+                        manageDeviceBtn.textContent = 'Xem chi tiết';
+                        manageDeviceBtn.onclick = () => {
+                            console.log('Calling onManageDevice with:', nodeId);
+                            window.onManageDevice(nodeId);
+                        };
+
+                        buttonsDiv.appendChild(manageDeviceBtn);
+                        popupContent.appendChild(buttonsDiv);
+
+                        new mapboxgl.Popup()
+                            .setLngLat(coords)
+                            .setDOMContent(popupContent)
+                            .addTo(map);
+                    });
+
+                    map.on('click', 'station-circle', (e) => {
+                        const p = e.features[0].properties;
+                        const coords = e.features[0].geometry.coordinates;
+
+                        new mapboxgl.Popup()
+                            .setLngLat(coords)
+                            .setHTML(`
+                                <strong>🏢 ${p.Name}</strong><br>
+                                Code: ${p.Code}<br>
+                                Line: ${p.Line}<br>
+                                Trạng thái: ${p.Status}<br>
+                                Pin: ${p.BatteryLevel}%<br>
+                                RSSI: ${p.RSSI} dBm<br>
+                                Số sensor: ${p.SensorCount}
+                            `)
+                            .addTo(map);
+                    });
+
+                    // Cursor pointer
+                    map.on('mouseenter', 'sensors-circle', () => { map.getCanvas().style.cursor = 'pointer'; });
+                    map.on('mouseleave', 'sensors-circle', () => { map.getCanvas().style.cursor = ''; });
+                    map.on('mouseenter', 'station-circle', () => { map.getCanvas().style.cursor = 'pointer'; });
+                    map.on('mouseleave', 'station-circle', () => { map.getCanvas().style.cursor = ''; });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadRoutes() {
+            try {
+                const res = await fetch(`${backendBaseUrl}/api/stations/${stationId}/lines-geojson`);
+                if (!res.ok) {
+                    console.error("Failed lines", res.status);
+                    return;
+                }
+
+                const geojson = await res.json();
+
+                if (map.getSource('routes')) {
+                    map.getSource('routes').setData(geojson);
+                } else {
+                    map.addSource('routes', { type: 'geojson', data: geojson });
+
+                    map.addLayer({
+                        id: 'routes-line',
+                        type: 'line',
+                        source: 'routes',
+                        layout: {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        paint: {
+                            'line-color': [
+                                'match',
+                                ['get', 'Status'],
+                                'active', '#10B981',
+                                'warning', '#F59E0B',
+                                'critical', '#EF4444',
+                                '#94A3B8'
+                            ],
+                            'line-width': 3,
+                            'line-opacity': 0.8
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // -------- CÁC HÀM GỌI NGƯỢC VỀ C# (BUTTON TRONG POPUP) --------
+        window.onViewCamera = function (cameraId, nodeId) {
+            sendMessage({
+                type: "viewcamera",
+                cameraId: cameraId,
+                nodeId: nodeId
+            });
+        };
+
+        window.onManageDevice = function (nodeId) {
+            sendMessage({
+                type: "managedevice",
+                nodeId: nodeId
+            });
+        };
+
+        // -------- HỖ TRỢ THEME: setTheme("Light" | "Dark") từ C# --------
+        function setTheme(theme) {
+            currentTheme = theme || "Light";
+            document.body.dataset.theme = currentTheme;
+
+            // Nếu bạn muốn đổi style map luôn:
+            if (typeof map !== "undefined" && map && map.style) {
+                const styleUrl = currentTheme === "Dark"
+                    ? "mapbox://styles/mapbox/dark-v11"
+                    : "mapbox://styles/mapbox/streets-v12";
+
+                // đổi style, sau đó load lại data
+                map.setStyle(styleUrl);
+                map.once('style.load', () => {
+                    // Load lại tất cả data và layers
+                    loadSensors();
+                    loadRoutes();
+                });
+            }
+        }
+
+        // expose cho C#
+        window.setTheme = setTheme;
+
+        // -------- HỖ TRỢ UPDATE NODE TỪ C# (UpdateNodeInMap / UpdateNodesInMap) --------
+        window.updateNode = function (node) {
+            try {
+                if (!sensorsGeoJson || !node || !node.id) return;
+
+                const features = sensorsGeoJson.features || [];
+                const idx = features.findIndex(f => f.properties && f.properties.id === node.id);
+
+                if (idx >= 0) {
+                    // merge properties
+                    Object.assign(features[idx].properties, node);
+                } else {
+                    // nếu chưa có, có thể push thêm feature mới (tùy ý bạn)
+                    // ở đây mình chỉ log:
+                    console.log("updateNode: id not found in sensorsGeoJson", node.id);
+                    return;
+                }
+
+                if (map && map.getSource('sensors')) {
+                    map.getSource('sensors').setData(sensorsGeoJson);
+                }
+            } catch (e) {
+                console.error("updateNode error", e);
+            }
+        };
+
+        window.updateNodes = function (nodes) {
+            try {
+                if (!Array.isArray(nodes)) return;
+                nodes.forEach(n => window.updateNode(n));
+            } catch (e) {
+                console.error("updateNodes error", e);
+            }
+        };
+    </script>
+</body>
+
+</html>

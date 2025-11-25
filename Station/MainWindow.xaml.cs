@@ -1,7 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Station.Services;
 using Station.Views;
 
@@ -11,6 +12,7 @@ namespace Station
     {
         private readonly StationConfigService _configService;
         private readonly ThemeService _themeService;
+        private readonly Dictionary<Type, Window> _openWindows = new();
 
         public MainWindow()
         {
@@ -20,20 +22,17 @@ namespace Station
 
             Title = "Trạm Nghĩa Đô - Hệ thống giám sát xâm nhập";
 
-            // Set window size
-            AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
-
-            // Always show sidebar
-            NavView.IsPaneVisible = true;
-            NavView.IsPaneOpen = true;
+            // Set window to maximized for 4K dashboard
+            AppWindow.Resize(new Windows.Graphics.SizeInt32(1920, 1080));
 
             // Subscribe to theme changes
             _themeService.ThemeChanged += OnThemeChanged;
 
-            // Apply current theme
-            ApplyTheme(_themeService.CurrentTheme);
+            // Apply current theme (default to Dark for 4K monitoring)
+            _themeService.SetTheme(ElementTheme.Dark);
+            ApplyTheme(ElementTheme.Dark);
 
-            // Load station info and navigate
+            // Load station info
             _ = InitializeAsync();
         }
 
@@ -45,8 +44,6 @@ namespace Station
                 var config = await _configService.GetConfigAsync();
                 if (config != null)
                 {
-                    StationNameText.Text = $"{config.StationCode} - {config.StationName}";
-                    StationAreaText.Text = $"Khu vực: {config.Area ?? "Chưa xác định"}";
                     Title = $"{config.StationName} - Hệ thống giám sát xâm nhập";
                 }
             }
@@ -55,8 +52,8 @@ namespace Station
                 System.Diagnostics.Debug.WriteLine($"Error loading config: {ex.Message}");
             }
 
-            // Always navigate to dashboard
-            ContentFrame.Navigate(typeof(DashboardPage));
+            // Navigate to MonitoringDashboard in the main frame
+            MonitoringFrame.Navigate(typeof(MonitoringDashboardPage));
         }
 
         /// <summary>
@@ -69,8 +66,6 @@ namespace Station
                 var config = await _configService.GetConfigAsync();
                 if (config != null)
                 {
-                    StationNameText.Text = $"{config.StationCode} - {config.StationName}";
-                    StationAreaText.Text = $"Khu vực: {config.Area ?? "Chưa xác định"}";
                     Title = $"{config.StationName} - Hệ thống giám sát xâm nhập";
                 }
             }
@@ -78,11 +73,6 @@ namespace Station
             {
                 System.Diagnostics.Debug.WriteLine($"Error reloading config: {ex.Message}");
             }
-        }
-
-        private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
-        {
-            _themeService.ToggleTheme();
         }
 
         private void OnThemeChanged(object? sender, ElementTheme theme)
@@ -101,92 +91,69 @@ namespace Station
                 rootElement.RequestedTheme = theme;
             }
 
-            // Update theme toggle icon
-            if (theme == ElementTheme.Dark)
+            // Apply theme to all open windows
+            foreach (var window in _openWindows.Values)
             {
-                // In dark mode, show sun icon (click to go light)
-                MoonIcon.Visibility = Visibility.Collapsed;
-                SunIcon.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                // In light mode, show moon icon (click to go dark)
-                MoonIcon.Visibility = Visibility.Visible;
-                SunIcon.Visibility = Visibility.Collapsed;
+                if (window.Content is FrameworkElement element)
+                {
+                    element.RequestedTheme = theme;
+                }
             }
 
             System.Diagnostics.Debug.WriteLine($"Theme changed to: {theme}");
         }
 
-        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        public void OpenPageInNewWindow<TPage>(string title) where TPage : Page, new()
         {
-            if (args.IsSettingsSelected)
+            var pageType = typeof(TPage);
+
+            // Check if window is already open
+            if (_openWindows.ContainsKey(pageType))
             {
-                ContentFrame.Navigate(typeof(ConfigurationPage));
+                // Activate existing window
+                _openWindows[pageType].Activate();
                 return;
             }
 
-            if (args.SelectedItemContainer is NavigationViewItem selectedItem)
+            // Create new window
+            var newWindow = new Window
             {
-                var tag = selectedItem.Tag?.ToString();
+                Title = $"{title} - Trạm Nghĩa Đô",
+                SystemBackdrop = new MicaBackdrop()
+            };
 
-                switch (tag)
-                {
-                    case "Dashboard":
-                        ContentFrame.Navigate(typeof(DashboardPage));
-                        break;
-
-                    case "MonitoringDashboard":
-                        ContentFrame.Navigate(typeof(MonitoringDashboardPage));
-                        break;
-
-                    case "Devices":
-                        ContentFrame.Navigate(typeof(DevicesPage));
-                        break;
-
-                    case "LiveVideo":
-                        ContentFrame.Navigate(typeof(LiveVideoPage));
-                        break;
-
-                    case "Alerts":
-                        ContentFrame.Navigate(typeof(AlertsPage));
-                        break;
-
-                    case "Data":
-                        ContentFrame.Navigate(typeof(DataPage));
-                        break;
-
-                    case "Map":
-                        ContentFrame.Navigate(typeof(MapPage));
-                        break;
-
-                    case "Configuration":
-                        ContentFrame.Navigate(typeof(ConfigurationPage));
-                        break;
-
-                    default:
-                        ContentFrame.Navigate(typeof(DashboardPage));
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Navigate programmatically to a specific page
-        /// </summary>
-        public void NavigateTo(Type pageType)
-        {
-            ContentFrame.Navigate(pageType);
-
-            // Update NavigationView selection
-            var menuItem = NavView.MenuItems
-                .OfType<NavigationViewItem>()
-                .FirstOrDefault(item => item.Tag?.ToString() == pageType.Name.Replace("Page", ""));
-
-            if (menuItem != null)
+            // Create frame with the page
+            var frame = new Frame
             {
-                NavView.SelectedItem = menuItem;
+                Background = Application.Current.Resources["BackgroundSecondaryBrush"] as Microsoft.UI.Xaml.Media.Brush
+            };
+            
+            frame.Navigate(pageType);
+            newWindow.Content = frame;
+
+            // Apply current theme
+            if (frame is FrameworkElement element)
+            {
+                element.RequestedTheme = _themeService.CurrentTheme;
             }
+
+            // Set window size
+            newWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
+
+            // Handle window closed event
+            newWindow.Closed += (s, e) =>
+            {
+                _openWindows.Remove(pageType);
+                System.Diagnostics.Debug.WriteLine($"Closed window: {title}");
+            };
+
+            // Track the window
+            _openWindows[pageType] = newWindow;
+
+            // Activate the window
+            newWindow.Activate();
+
+            System.Diagnostics.Debug.WriteLine($"Opened new window: {title}");
         }
     }
 }

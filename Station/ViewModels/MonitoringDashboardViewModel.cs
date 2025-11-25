@@ -3,6 +3,12 @@ using System;
 using System.Collections.ObjectModel;
 using Windows.UI;
 using Microsoft.UI.Xaml.Media;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
+using System.Linq;
+using Station.Models;
 
 namespace Station.ViewModels
 {
@@ -50,6 +56,37 @@ namespace Station.ViewModels
         [ObservableProperty]
         private double memoryUsage = 68.7;
 
+        public ISeries[] AlertDistributionSeries { get; set; }
+
+        // Mini chart series for sensor data
+        public ISeries[] TemperatureSeries { get; set; }
+        public ISeries[] HumiditySeries { get; set; }
+        public ISeries[] VibrationSeries { get; set; }
+        public ISeries[] WaterLevelSeries { get; set; }
+        public ISeries[] LightSeries { get; set; }
+
+        // Hidden axes for mini charts
+        public System.Collections.Generic.IEnumerable<LiveChartsCore.Kernel.Sketches.ICartesianAxis> HiddenXAxis { get; set; }
+        public System.Collections.Generic.IEnumerable<LiveChartsCore.Kernel.Sketches.ICartesianAxis> HiddenYAxis { get; set; }
+
+        // Alert type counts
+        [ObservableProperty]
+        private int intruAlerts = 0;
+
+        [ObservableProperty]
+        private int motionAlerts = 0;
+
+        [ObservableProperty]
+        private int fireAlerts = 0;
+
+        [ObservableProperty]
+        private int smokeAlerts = 0;
+
+        [ObservableProperty]
+        private int waterAlerts = 0;
+
+        private readonly AlertsViewModel _alertsViewModel;
+
         public ObservableCollection<NodeStatus> Nodes { get; } = new();
         public ObservableCollection<RealtimeAlert> RealtimeAlerts { get; } = new();
         public ObservableCollection<TemperatureReading> TemperatureReadings { get; } = new();
@@ -57,8 +94,217 @@ namespace Station.ViewModels
 
         public MonitoringDashboardViewModel()
         {
+            _alertsViewModel = new AlertsViewModel();
+            CalculateAlertDistribution();
+            InitializeCharts();
+            InitializeMiniCharts();
             InitializeSampleData();
             StartRealtimeUpdates();
+        }
+
+        private void CalculateAlertDistribution()
+        {
+            // Calculate alert distribution based on AlertsViewModel data
+            var allAlerts = _alertsViewModel.AllAlerts;
+
+            // Map severity levels to chart values
+            IntruAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Low);
+            MotionAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Medium);
+            FireAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.High);
+            SmokeAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Critical);
+            WaterAlerts = 0; // Not used in current dataset
+
+            // Update total alerts
+            TodayAlerts = allAlerts.Count;
+            CriticalAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Critical);
+            WarningAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.High || a.Severity == AlertSeverity.Medium);
+        }
+
+        private void InitializeCharts()
+        {
+            // Alert Distribution Pie Chart with data from AlertsViewModel
+            // Only show severity levels that have alerts
+            var seriesList = new System.Collections.Generic.List<ISeries>();
+
+            if (IntruAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Thấp",
+                    Values = new int[] { IntruAlerts },
+                    Fill = new SolidColorPaint(new SKColor(34, 197, 94)), // #22C55E - Green
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (MotionAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Trung bình",
+                    Values = new int[] { MotionAlerts },
+                    Fill = new SolidColorPaint(new SKColor(234, 179, 8)), // #EAB308 - Yellow
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (FireAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Cao",
+                    Values = new int[] { FireAlerts },
+                    Fill = new SolidColorPaint(new SKColor(249, 115, 22)), // #F97316 - Orange
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (SmokeAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Nghiêm trọng",
+                    Values = new int[] { SmokeAlerts },
+                    Fill = new SolidColorPaint(new SKColor(239, 68, 68)), // #EF4444 - Red
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            AlertDistributionSeries = seriesList.ToArray();
+        }
+
+        private void InitializeMiniCharts()
+        {
+            var random = new Random();
+
+            // Hidden axes configuration
+            HiddenXAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            {
+                new Axis
+                {
+                    IsVisible = false,
+                    MinLimit = 0,
+                    MaxLimit = 24
+                }
+            };
+
+            HiddenYAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            {
+                new Axis
+                {
+                    IsVisible = false
+                }
+            };
+
+            // Temperature mini chart (last 24 points)
+            var tempValues = new double[24];
+            for (int i = 0; i < 24; i++)
+            {
+                tempValues[i] = 26 + random.NextDouble() * 6; // 26-32°C
+            }
+            TemperatureSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = tempValues,
+                    Fill = new SolidColorPaint(new SKColor(239, 68, 68, 30)), // #EF4444 with transparency
+                    Stroke = new SolidColorPaint(new SKColor(239, 68, 68)) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
+
+            // Humidity mini chart
+            var humidityValues = new double[24];
+            for (int i = 0; i < 24; i++)
+            {
+                humidityValues[i] = 60 + random.NextDouble() * 15; // 60-75%
+            }
+            HumiditySeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = humidityValues,
+                    Fill = new SolidColorPaint(new SKColor(59, 130, 246, 30)), // #3B82F6 with transparency
+                    Stroke = new SolidColorPaint(new SKColor(59, 130, 246)) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
+
+            // Vibration mini chart
+            var vibrationValues = new double[24];
+            for (int i = 0; i < 24; i++)
+            {
+                vibrationValues[i] = 0.1 + random.NextDouble() * 0.5; // 0.1-0.6 m/s²
+            }
+            VibrationSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = vibrationValues,
+                    Fill = new SolidColorPaint(new SKColor(245, 158, 11, 30)), // #F59E0B with transparency
+                    Stroke = new SolidColorPaint(new SKColor(245, 158, 11)) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
+
+            // Water Level mini chart
+            var waterValues = new double[24];
+            for (int i = 0; i < 24; i++)
+            {
+                waterValues[i] = 5 + random.NextDouble() * 15; // 5-20 cm
+            }
+            WaterLevelSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = waterValues,
+                    Fill = new SolidColorPaint(new SKColor(239, 68, 68, 30)), // #EF4444 with transparency
+                    Stroke = new SolidColorPaint(new SKColor(239, 68, 68)) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
+
+            // Light Level mini chart
+            var lightValues = new double[24];
+            for (int i = 0; i < 24; i++)
+            {
+                lightValues[i] = 150 + random.NextDouble() * 50; // 150-200 lux
+            }
+            LightSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = lightValues,
+                    Fill = new SolidColorPaint(new SKColor(139, 92, 246, 30)), // #8B5CF6 with transparency
+                    Stroke = new SolidColorPaint(new SKColor(139, 92, 246)) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
         }
 
         private void InitializeSampleData()

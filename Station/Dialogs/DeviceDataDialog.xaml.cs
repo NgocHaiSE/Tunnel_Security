@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Station.ViewModels;
+using Station.Models;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -47,6 +49,52 @@ public sealed partial class DeviceDataDialog : ContentDialog
 
         // Handle time range change
         TimeRangeComboBox.SelectionChanged += TimeRangeComboBox_SelectionChanged;
+    }
+
+    // Constructor for Relay Station by ID
+    public DeviceDataDialog(string relayId)
+    {
+        // Create a mock device for relay station
+        _device = new DeviceItemViewModel
+        {
+            DeviceId = relayId,
+            Name = GetRelayName(relayId),
+            Type = "relay",
+            Status = DeviceStatus.Online,
+            Location = GetRelayLocation(relayId),
+            LastOnline = DateTimeOffset.Now
+        };
+
+        this.InitializeComponent();
+        
+        InitializeCharts();
+        LoadDeviceInfo();
+        LoadMockData();
+
+        // Handle time range change
+        TimeRangeComboBox.SelectionChanged += TimeRangeComboBox_SelectionChanged;
+    }
+
+    private string GetRelayName(string relayId)
+    {
+        return relayId switch
+        {
+            "RELAY_A" => "Điểm Trung Chuyển Khu A",
+            "RELAY_B" => "Điểm Trung Chuyển Khu B",
+            "RELAY_C" => "Điểm Trung Chuyển Khu C",
+            _ => "Điểm Trung Chuyển"
+        };
+    }
+
+    private string GetRelayLocation(string relayId)
+    {
+        return relayId switch
+        {
+            "RELAY_A" => "Khu vực A",
+            "RELAY_B" => "Khu vực B",
+            "RELAY_C" => "Khu vực C",
+            _ => "Không xác định"
+        };
     }
 
     private void InitializeCharts()

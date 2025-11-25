@@ -1,12 +1,17 @@
 using Microsoft.UI.Xaml.Controls;
-using Station.ViewModels;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Diagnostics;
 using Station.Dialogs;
+using Station.Services;
+using Microsoft.UI.Xaml;
+using Station.ViewModels;
 
 namespace Station.Views
 {
@@ -14,36 +19,171 @@ namespace Station.Views
     {
         public MonitoringDashboardViewModel ViewModel { get; }
 
+        private readonly ThemeService _themeService;
+
+        // Config cho map – bạn chỉnh lại cho đúng
+        private const string BackendBaseUrl = "http://localhost:5280";
+        private const string StationId = "ST01";
+        private const string MapboxToken = "pk.eyJ1IjoiZGV2bm5oYWkiLCJhIjoiY21pOTQwbHlsMGRjZjJpc2E2N2ZvZnMwYyJ9.pwZUdwKuQkFC_X1pWSTcVg";
+        private bool _securityMapInitialized = false;
+
+        public ObservableCollection<SystemLogItem> SystemLogs { get; } = new();
+
+        // Camera rotation variables
+        private DispatcherTimer _cameraRotationTimer;
+        private DispatcherTimer _cameraTimeTimer;
+        private int _currentCameraIndex = 0;
+        private int _rotationCountdown = 10;
+        private bool _isPaused = false;
+        private string _focusedCamera = null; // Camera to focus when alert detected
+        private readonly string[] _cameraList = { "CAM 01", "CAM 02", "CAM 03", "CAM 04", "CAM 05" };
+        private readonly Dictionary<string, string> _cameraLocations = new()
+        {
+            { "CAM 01", "Khu vực A - Cổng vào chính" },
+            { "CAM 02", "Khu vực B - Hành lang trung tâm" },
+            { "CAM 03", "Khu vực C - Lối ra khẩn cấp" },
+            { "CAM 04", "Khu vực D - Khu vực nguy hiểm" },
+            { "CAM 05", "Khu vực E - Phòng kiểm soát" }
+        };
+        private readonly Dictionary<string, bool> _cameraStatus = new()
+        {
+            { "CAM 01", true },
+            { "CAM 02", true },
+            { "CAM 03", true },
+            { "CAM 04", false }, // Offline
+            { "CAM 05", true }
+        };
+
         public MonitoringDashboardPage()
         {
             InitializeComponent();
+
             ViewModel = (MonitoringDashboardViewModel)DataContext;
 
-            // Initialize WebView2 for security map
+            _themeService = ThemeService.Instance;
+
+            // Subscribe theme changes
+            _themeService.ThemeChanged += OnThemeChanged;
+
+            // Apply current theme to icons
+            UpdateThemeIcons(_themeService.CurrentTheme);
+
+            // Initialize WebView2 + Mapbox HTML
             InitializeSecurityMap();
+
+            // Initialize system logs
+            InitializeSystemLogs();
+
+            // Initialize camera rotation
+            InitializeCameraRotation();
+        }
+
+        private void InitializeSystemLogs()
+        {
+            // Bind to ItemsControl
+            SystemLogsItems.ItemsSource = SystemLogs;
+
+            // Add mock data
+            AddSystemLog("✅", "Hệ thống khởi động thành công", "SYSTEM", "INFO", DateTime.Now.AddMinutes(-5));
+            AddSystemLog("🔌", "RELAY_A kết nối thành công", "RELAY_A", "SUCCESS", DateTime.Now.AddMinutes(-4));
+            AddSystemLog("🔌", "RELAY_B kết nối thành công", "RELAY_B", "SUCCESS", DateTime.Now.AddMinutes(-4));
+            AddSystemLog("🔌", "RELAY_C kết nối thành công", "RELAY_C", "SUCCESS", DateTime.Now.AddMinutes(-3));
+            AddSystemLog("📡", "S01: Radar đang hoạt động", "SENSOR", "INFO", DateTime.Now.AddMinutes(-2));
+            AddSystemLog("🌡️", "S04: Nhiệt độ: 28.5°C", "SENSOR", "INFO", DateTime.Now.AddMinutes(-1));
+            AddSystemLog("💧", "S05: Độ ẩm: 65%", "SENSOR", "INFO", DateTime.Now.AddSeconds(-30));
+            AddSystemLog("⚠️", "S12: Phát hiện chuyển động", "ALERT", "WARNING", DateTime.Now.AddSeconds(-10));
+
+            // Auto update logs every 10 seconds
+            StartLogUpdateTimer();
+        }
+
+        private void AddSystemLog(string icon, string message, string source, string level, DateTime time)
+        {
+            var log = new SystemLogItem
+            {
+                Icon = icon,
+                Message = message,
+                Source = source,
+                Level = level,
+                Time = time.ToString("HH:mm:ss"),
+                Timestamp = time
+            };
+
+            SystemLogs.Insert(0, log);
+
+            // Keep only last 20 logs
+            while (SystemLogs.Count > 20)
+            {
+                SystemLogs.RemoveAt(SystemLogs.Count - 1);
+            }
+        }
+
+        private async void StartLogUpdateTimer()
+        {
+            while (true)
+            {
+                await System.Threading.Tasks.Task.Delay(10000); // 10 seconds
+
+                var random = new Random();
+                var logTypes = new[]
+                {
+                    ("📡", "Dữ liệu cảm biến cập nhật", "SENSOR", "INFO"),
+                    ("🌡️", $"Nhiệt độ: {25 + random.Next(10)}.{random.Next(10)}°C", "SENSOR", "INFO"),
+                    ("💧", $"Độ ẩm: {60 + random.Next(20)}%", "SENSOR", "INFO"),
+                    ("🔄", "Đồng bộ dữ liệu thành công", "SYSTEM", "SUCCESS"),
+                    ("📶", $"Tín hiệu mạng: {85 + random.Next(15)}%", "NETWORK", "INFO")
+                };
+
+                var selected = logTypes[random.Next(logTypes.Length)];
+                AddSystemLog(selected.Item1, selected.Item2, selected.Item3, selected.Item4, DateTime.Now);
+            }
+        }
+
+        private void RefreshLogs_Click(object sender, RoutedEventArgs e)
+        {
+            SystemLogs.Clear();
+            InitializeSystemLogs();
         }
 
         private async void InitializeSecurityMap()
         {
             try
             {
-                // Ensure WebView2 is initialized
                 await SecurityMapWebView.EnsureCoreWebView2Async();
 
-                // Set up message handler for communication from HTML to C#
+                // Enable settings for WebView2
+                SecurityMapWebView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+                SecurityMapWebView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+
+                // Nhận message từ JS (mapready / viewcamera / managedevice)
                 SecurityMapWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
 
-                // Navigate to the security map HTML
-                var htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "SecurityMap.html");
+                // Khi HTML load xông sẽ bắn NavigationCompleted
+                SecurityMapWebView.NavigationCompleted += SecurityMapWebView_NavigationCompleted;
 
-                if (File.Exists(htmlPath))
-                {
-                    SecurityMapWebView.Source = new Uri($"file:///{htmlPath.Replace("\\", "/")}");
-                }
-                else
+                // Đọc file HTML (Mapbox)
+                var htmlPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Assets",
+                    "Map",
+                    "map.html");
+
+                if (!File.Exists(htmlPath))
                 {
                     Debug.WriteLine($"Security map HTML not found at: {htmlPath}");
+                    return;
                 }
+
+                // Use SetVirtualHostNameToFolderMapping to allow external resources (Mapbox CDN)
+                var assetsFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets");
+                SecurityMapWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "app.local",
+                    assetsFolderPath,
+                    Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+
+                // Navigate using virtual host to avoid ERR_CONNECTION_RESET with CDN resources
+                SecurityMapWebView.CoreWebView2.Navigate("https://app.local/Map/map.html");
+                Debug.WriteLine($"Loading map from virtual host: https://app.local/Map/map.html");
             }
             catch (Exception ex)
             {
@@ -51,47 +191,115 @@ namespace Station.Views
             }
         }
 
+        private async void SecurityMapWebView_NavigationCompleted(
+            WebView2 sender,
+            CoreWebView2NavigationCompletedEventArgs args)
+        {
+            if (!args.IsSuccess)
+            {
+                Debug.WriteLine($"SecurityMap navigation failed: {args.WebErrorStatus}");
+                return;
+            }
+
+            // Đảm bảo chỉ init 1 lần
+            if (_securityMapInitialized)
+                return;
+
+            _securityMapInitialized = true;
+
+            try
+            {
+                // Chờ 1 chút cho JS khởi tạo xong
+                await System.Threading.Tasks.Task.Delay(300);
+
+                SendInitMessageToMap();
+                ApplyThemeToSecurityMap(_themeService.CurrentTheme);
+
+                Debug.WriteLine("Security map initialized & config sent.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in NavigationCompleted: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Gửi cấu hình ban đầu (backend, station, token) sang HTML (map.html)
+        /// JS trong map.html sẽ nhận qua window.chrome.webview.addEventListener('message', ...)
+        /// </summary>
+        private void SendInitMessageToMap()
+        {
+            try
+            {
+                if (SecurityMapWebView?.CoreWebView2 == null)
+                    return;
+
+                var initPayload = new
+                {
+                    type = "init",
+                    backend = BackendBaseUrl,
+                    station = StationId,
+                    token = MapboxToken
+                };
+
+                var json = JsonSerializer.Serialize(initPayload);
+                SecurityMapWebView.CoreWebView2.PostWebMessageAsJson(json);
+
+                Debug.WriteLine($"Sent init message to map: {json}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error sending init message: {ex.Message}");
+            }
+        }
+
         private void CoreWebView2_WebMessageReceived(CoreWebView2 sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             try
             {
-                var message = args.WebMessageAsJson;
-                Debug.WriteLine($"Received message: {message}");
-                
+                var message = args.TryGetWebMessageAsString();
+                Debug.WriteLine($"Received message from map: {message}");
+
+                if (string.IsNullOrEmpty(message))
+                {
+                    Debug.WriteLine("Empty message received");
+                    return;
+                }
+
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true
                 };
-                
+
                 var data = JsonSerializer.Deserialize<SecurityMapMessage>(message, options);
 
-                if (data != null)
-                {
-                    Debug.WriteLine($"Message type: {data.Type}, NodeId: {data.NodeId}");
-                    
-                    switch (data.Type?.ToLower())
-                    {
-                        case "mapready":
-                            Debug.WriteLine("Security map is ready");
-                            // You can send initial data to the map here
-                            break;
-
-                        case "viewcamera":
-                            HandleViewCamera(data.CameraId, data.NodeId);
-                            break;
-
-                        case "managedevice":
-                            HandleManageDevice(data.NodeId);
-                            break;
-
-                        default:
-                            Debug.WriteLine($"Unknown message type: {data.Type}");
-                            break;
-                    }
-                }
-                else
+                if (data == null)
                 {
                     Debug.WriteLine("Failed to deserialize message");
+                    return;
+                }
+
+                Debug.WriteLine($"Message type: {data.Type}, NodeId: {data.NodeId}, CameraId: {data.CameraId}");
+
+                switch (data.Type?.ToLower())
+                {
+                    case "mapready":
+                        Debug.WriteLine("Security map is ready");
+                        // Nếu cần, có thể gửi lại dữ liệu nodes ở đây
+                        break;
+
+                    case "viewcamera":
+                        HandleViewCamera(data.CameraId, data.NodeId);
+                        break;
+
+                    case "managedevice":
+                        HandleManageDevice(data.NodeId);
+                        break;
+
+                    default:
+                        Debug.WriteLine($"Unknown message type: {data.Type}");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -110,8 +318,7 @@ namespace Station.Views
 
             try
             {
-                // Open PlaybackDialog with camera ID
-                var playbackDialog = new Station.Dialogs.PlaybackDialog(cameraId)
+                var playbackDialog = new PlaybackDialog(cameraId)
                 {
                     XamlRoot = this.XamlRoot
                 };
@@ -121,8 +328,7 @@ namespace Station.Views
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error opening PlaybackDialog: {ex.Message}");
-                
-                // Show error dialog
+
                 var errorDialog = new ContentDialog
                 {
                     Title = "Lỗi",
@@ -130,7 +336,7 @@ namespace Station.Views
                     CloseButtonText = "Đóng",
                     XamlRoot = this.XamlRoot
                 };
-                
+
                 await errorDialog.ShowAsync();
             }
         }
@@ -142,11 +348,9 @@ namespace Station.Views
 
             Debug.WriteLine($"Manage device for node: {nodeId}");
 
-            // Determine device type from nodeId (you can customize this logic)
             string deviceType = GetDeviceTypeFromNodeId(nodeId);
-            
-            // Show device control dialog
-            var dialog = new Station.Dialogs.DeviceControlDialog(nodeId, deviceType)
+
+            var dialog = new DeviceControlDialog(nodeId, deviceType)
             {
                 XamlRoot = this.XamlRoot
             };
@@ -156,9 +360,7 @@ namespace Station.Views
 
         private string GetDeviceTypeFromNodeId(string nodeId)
         {
-            // Determine device type based on node ID pattern
-            // This is a simple implementation - adjust based on your actual node ID format
-            if (nodeId.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) || 
+            if (nodeId.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) ||
                 nodeId.Contains("Camera", StringComparison.OrdinalIgnoreCase))
             {
                 return "Camera";
@@ -173,20 +375,24 @@ namespace Station.Views
             {
                 return "Radar";
             }
-            
-            // Default to Sensor for other types
+
             return "Sensor";
         }
 
         /// <summary>
-        /// Update node data in the map (can be called from ViewModel)
+        /// Update 1 node trên map (JS phải có hàm updateNode(node))
         /// </summary>
         public async void UpdateNodeInMap(string nodeId, object nodeData)
         {
             try
             {
+                if (SecurityMapWebView?.CoreWebView2 == null)
+                    return;
+
                 var json = JsonSerializer.Serialize(nodeData);
-                await SecurityMapWebView.CoreWebView2.ExecuteScriptAsync($"updateNode({json})");
+                var script = $"updateNode({json})";
+
+                await SecurityMapWebView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
             {
@@ -195,14 +401,19 @@ namespace Station.Views
         }
 
         /// <summary>
-        /// Update multiple nodes in the map
+        /// Update nhiều node trên map (JS phải có hàm updateNodes(nodes))
         /// </summary>
         public async void UpdateNodesInMap(object[] nodesData)
         {
             try
             {
+                if (SecurityMapWebView?.CoreWebView2 == null)
+                    return;
+
                 var json = JsonSerializer.Serialize(nodesData);
-                await SecurityMapWebView.CoreWebView2.ExecuteScriptAsync($"updateNodes({json})");
+                var script = $"updateNodes({json})";
+
+                await SecurityMapWebView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
             {
@@ -210,16 +421,353 @@ namespace Station.Views
             }
         }
 
+        // ==== Relay Station Card Events ====
+
+        private void RelayCard_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.BorderThickness = new Thickness(2);
+                border.BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.DeepSkyBlue);
+            }
+        }
+
+        private void RelayCard_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.BorderThickness = new Thickness(1);
+            }
+        }
+
+        private async void RelayCard_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (sender is Border border && border.Tag is string relayId)
+            {
+                Debug.WriteLine($"Relay station clicked: {relayId}");
+                await ShowRelayDataDialog(relayId);
+            }
+        }
+
+        private async System.Threading.Tasks.Task ShowRelayDataDialog(string relayId)
+        {
+            try
+            {
+                var dialog = new DeviceDataDialog(relayId)
+                {
+                    XamlRoot = this.XamlRoot
+                };
+
+                await dialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error opening relay data dialog: {ex.Message}");
+
+                var errorDialog = new ContentDialog
+                {
+                    Title = "Lỗi",
+                    Content = $"Không thể mở thông tin trạm: {ex.Message}",
+                    CloseButtonText = "Đóng",
+                    XamlRoot = this.XamlRoot
+                };
+
+                await errorDialog.ShowAsync();
+            }
+        }
+
+        // ==== Phần menu & theme giữ nguyên ====
+
+        private void DataPanelMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Dữ liệu", typeof(DataPage));
+        }
+
+        private void AlertPanelMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Cảnh báo", typeof(AlertsPage));
+        }
+
+        private void DevicePanelMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Thiết bị", typeof(DevicesPage));
+        }
+
+        private void ConfigurationButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Cấu hình", typeof(ConfigurationPage));
+        }
+
+        private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            _themeService.ToggleTheme();
+        }
+
+        private void OnThemeChanged(object? sender, ElementTheme theme)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                UpdateThemeIcons(theme);
+                ApplyThemeToSecurityMap(theme);
+            });
+        }
+
+        private async void ApplyThemeToSecurityMap(ElementTheme theme)
+        {
+            try
+            {
+                if (SecurityMapWebView?.CoreWebView2 == null)
+                    return;
+
+                var themeString = theme == ElementTheme.Light ? "Light" : "Dark";
+                var script = $"setTheme('{themeString}')";
+
+                await SecurityMapWebView.CoreWebView2.ExecuteScriptAsync(script);
+                Debug.WriteLine($"Applied theme to security map: {themeString}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error applying theme to security map: {ex.Message}");
+            }
+        }
+
+        private void UpdateThemeIcons(ElementTheme theme)
+        {
+            if (theme == ElementTheme.Dark)
+            {
+                MoonIcon.Visibility = Visibility.Visible;
+                SunIcon.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                MoonIcon.Visibility = Visibility.Collapsed;
+                SunIcon.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void OpenModuleWindow(string title, Type pageType)
+        {
+            try
+            {
+                if (Application.Current is App app && app.m_window is MainWindow mainWindow)
+                {
+                    if (pageType == typeof(DataPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<DataPage>(title);
+                    }
+                    else if (pageType == typeof(AlertsPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<AlertsPage>(title);
+                    }
+                    else if (pageType == typeof(DevicesPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<DevicesPage>(title);
+                    }
+                    else if (pageType == typeof(ConfigurationPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<ConfigurationPage>(title);
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"Unknown page type: {pageType.Name}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("Could not get MainWindow instance");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error opening module window: {ex.Message}");
+            }
+        }
+
         private class SecurityMapMessage
         {
             [JsonPropertyName("type")]
             public string? Type { get; set; }
-            
+
             [JsonPropertyName("cameraId")]
             public string? CameraId { get; set; }
-            
+
             [JsonPropertyName("nodeId")]
             public string? NodeId { get; set; }
+        }
+
+        #region Camera Rotation Methods
+
+        private void InitializeCameraRotation()
+        {
+            // Timer for camera rotation
+            _cameraRotationTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _cameraRotationTimer.Tick += CameraRotationTimer_Tick;
+            _cameraRotationTimer.Start();
+
+            // Timer for camera time display
+            _cameraTimeTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _cameraTimeTimer.Tick += CameraTimeTimer_Tick;
+            _cameraTimeTimer.Start();
+
+            // Display first camera
+            UpdateCurrentCamera();
+
+            // Simulate alert detection after 15 seconds
+            SimulateAlertDetection();
+        }
+
+        private void CameraRotationTimer_Tick(object sender, object e)
+        {
+            if (_isPaused || _focusedCamera != null)
+                return;
+
+            _rotationCountdown--;
+
+            if (_rotationCountdown <= 0)
+            {
+                // Switch to next camera
+                _currentCameraIndex = (_currentCameraIndex + 1) % _cameraList.Length;
+                UpdateCurrentCamera();
+                _rotationCountdown = 10;
+            }
+
+            // Update next camera info
+            var nextIndex = (_currentCameraIndex + 1) % _cameraList.Length;
+            NextCameraInfo.Text = $"Tiếp: {_cameraList[nextIndex]} ({_rotationCountdown}s)";
+        }
+
+        private void CameraTimeTimer_Tick(object sender, object e)
+        {
+            CurrentCameraTime.Text = DateTime.Now.ToString("HH:mm:ss");
+        }
+
+        private void UpdateCurrentCamera()
+        {
+            var cameraName = _focusedCamera ?? _cameraList[_currentCameraIndex];
+            var isOnline = _cameraStatus[cameraName];
+
+            CurrentCameraName.Text = cameraName;
+            
+            if (_cameraLocations.TryGetValue(cameraName, out var location))
+            {
+                // Location info can be displayed if needed
+            }
+
+            // Update status badge
+            if (isOnline)
+            {
+                CurrentCameraStatus.Text = "Online";
+                CurrentCameraStatusBadge.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 34, 197, 94)); // Green
+                NoSignalOverlay.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                CurrentCameraStatus.Text = "Offline";
+                CurrentCameraStatusBadge.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 239, 68, 68)); // Red
+                NoSignalOverlay.Visibility = Visibility.Visible;
+            }
+
+            // Update rotation info
+            if (_focusedCamera != null)
+            {
+                CameraRotationInfo.Text = "🔴 Đang focus (Cảnh báo)";
+                NextCameraInfo.Text = "Chờ xử lý...";
+            }
+            else if (_isPaused)
+            {
+                CameraRotationInfo.Text = "⏸️ Đã tạm dừng";
+                NextCameraInfo.Text = "";
+            }
+            else
+            {
+                CameraRotationInfo.Text = "Tự động: 10s";
+            }
+        }
+
+        private void CameraPauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isPaused = !_isPaused;
+
+            if (_isPaused)
+            {
+                CameraPauseIcon.Glyph = "\uE768"; // Play icon
+                CameraRotationInfo.Text = "⏸️ Đã tạm dừng";
+                NextCameraInfo.Text = "";
+            }
+            else
+            {
+                CameraPauseIcon.Glyph = "\uE769"; // Pause icon
+                CameraRotationInfo.Text = "Tự động: 10s";
+                _rotationCountdown = 10;
+            }
+        }
+
+        private async void SimulateAlertDetection()
+        {
+            // Wait 15 seconds then simulate alert on CAM 03
+            await System.Threading.Tasks.Task.Delay(15000);
+
+            // Focus on camera with alert
+            FocusOnCameraAlert("CAM 03", "Phát hiện chuyển động bất thường");
+
+            // After 10 seconds, clear focus and resume rotation
+            await System.Threading.Tasks.Task.Delay(10000);
+            ClearCameraFocus();
+        }
+
+        private void FocusOnCameraAlert(string cameraName, string alertMessage)
+        {
+            _focusedCamera = cameraName;
+            _currentCameraIndex = Array.IndexOf(_cameraList, cameraName);
+            
+            UpdateCurrentCamera();
+            
+            // Show alert overlay
+            AlertMessageText.Text = $"⚠️ {alertMessage.ToUpper()}";
+            AlertOverlay.Visibility = Visibility.Visible;
+
+            Debug.WriteLine($"Camera focus: {cameraName} - {alertMessage}");
+        }
+
+        private void ClearCameraFocus()
+        {
+            _focusedCamera = null;
+            AlertOverlay.Visibility = Visibility.Collapsed;
+            _rotationCountdown = 10;
+            UpdateCurrentCamera();
+
+            Debug.WriteLine("Camera focus cleared, resuming rotation");
+        }
+
+        #endregion
+
+        public class SystemLogItem
+        {
+            public string Icon { get; set; } = string.Empty;
+            public string Message { get; set; } = string.Empty;
+            public string Source { get; set; } = string.Empty;
+            public string Level { get; set; } = string.Empty;
+            public string Time { get; set; } = string.Empty;
+            public DateTime Timestamp { get; set; }
+
+            public SolidColorBrush LevelBrush
+            {
+                get => Level switch
+                {
+                    "SUCCESS" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 34, 197, 94)), // #22C55E Green
+                    "INFO" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 59, 130, 246)), // #3B82F6 Blue
+                    "WARNING" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 245, 158, 11)), // #F59E0B Orange
+                    "ERROR" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 239, 68, 68)), // #EF4444 Red
+                    "ALERT" => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 234, 179, 8)), // #EAB308 Yellow
+                    _ => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 148, 163, 184)) // #94A3B8 Gray
+                };
+            }
         }
     }
 }
