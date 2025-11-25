@@ -278,73 +278,201 @@
                         }
                     });
 
-                    // Click events
-                    map.on('click', 'sensors-circle', (e) => {
+                    // Click events - Node popup với sensors
+                    map.on('click', 'sensors-circle', async (e) => {
                         const p = e.features[0].properties;
                         const coords = e.features[0].geometry.coordinates;
-
-                        const cameraId = p.CameraId || p.Id;
-                        const nodeId = p.Id;
+                        const nodeId = p.id;
 
                         // Tạo popup content
                         const popupContent = document.createElement('div');
+                        popupContent.style.minWidth = '280px';
+                        popupContent.style.maxWidth = '350px';
+                        
+                        // Header với status color
+                        const statusColors = {
+                            'Online': '#10B981',
+                            'Warning': '#F59E0B', 
+                            'Critical': '#EF4444',
+                            'Offline': '#6B7280',
+                            'Maintenance': '#8B5CF6'
+                        };
+                        const statusColor = statusColors[p.status] || '#94A3B8';
+                        
                         popupContent.innerHTML = `
-                            <strong>${p.Name}</strong><br>
-                            Code: ${p.Code}<br>
-                            Line: ${p.Line}<br>
-                            Trạng thái: ${p.Status}<br>
-                            Pin: ${p.BatteryLevel}%<br>
-                            RSSI: ${p.RSSI} dBm<br>
-                            Số sensor: ${p.SensorCount}<br>
+                            <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 8px;">
+                                <div style="font-size: 15px; font-weight: bold; color: #1f2937;">${p.name}</div>
+                                <div style="font-size: 12px; color: #6b7280;">${p.code} • ${p.line || 'N/A'}</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px; margin-bottom: 10px;">
+                                <div>
+                                    <span style="color: #6b7280;">Trạng thái:</span>
+                                    <span style="color: ${statusColor}; font-weight: 600;">● ${p.status}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">Pin:</span>
+                                    <span style="font-weight: 500;">${p.batteryLevel}%</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">RSSI:</span>
+                                    <span style="font-weight: 500;">${p.rssi} dBm</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">Sensors:</span>
+                                    <span style="font-weight: 500;">${p.sensorCount}</span>
+                                </div>
+                            </div>
+                            <div id="sensors-section-${nodeId}" style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                                <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                    📊 Cảm biến <span id="sensors-loading-${nodeId}" style="font-weight: normal; color: #9ca3af;">(đang tải...)</span>
+                                </div>
+                                <div id="sensors-list-${nodeId}" style="max-height: 180px; overflow-y: auto;"></div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 8px;">
+                                ${p.cameraId ? `<button onclick="window.onViewCamera('${p.cameraId}','${nodeId}')" style="flex: 1; padding: 6px 10px; background: #10B981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">📹 Camera</button>` : ''}
+                                <button onclick="window.onManageDevice('${nodeId}')" style="flex: 1; padding: 6px 10px; background: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">⚙️ Quản lý</button>
+                            </div>
                         `;
 
-                        // Thêm buttons
-                        const buttonsDiv = document.createElement('div');
-                        buttonsDiv.style.marginTop = '10px';
-
-                        if (p.CameraId) {
-                            const viewCameraBtn = document.createElement('button');
-                            viewCameraBtn.textContent = 'Xem camera';
-                            viewCameraBtn.style.marginRight = '5px';
-                            viewCameraBtn.onclick = () => {
-                                console.log('Calling onViewCamera with:', cameraId, nodeId);
-                                window.onViewCamera(cameraId, nodeId);
-                            };
-                            buttonsDiv.appendChild(viewCameraBtn);
-                        }
-
-                        const manageDeviceBtn = document.createElement('button');
-                        manageDeviceBtn.textContent = 'Xem chi tiết';
-                        manageDeviceBtn.onclick = () => {
-                            console.log('Calling onManageDevice with:', nodeId);
-                            window.onManageDevice(nodeId);
-                        };
-
-                        buttonsDiv.appendChild(manageDeviceBtn);
-                        popupContent.appendChild(buttonsDiv);
-
-                        new mapboxgl.Popup()
+                        const popup = new mapboxgl.Popup({ maxWidth: '380px' })
                             .setLngLat(coords)
                             .setDOMContent(popupContent)
                             .addTo(map);
+
+                        // Load sensors data
+                        try {
+                            const sensorsRes = await fetch(`${backendBaseUrl}/api/stations/${stationId}/nodes/${nodeId}/sensors`);
+                            if (sensorsRes.ok) {
+                                const sensors = await sensorsRes.json();
+                                const loadingEl = document.getElementById(`sensors-loading-${nodeId}`);
+                                const listEl = document.getElementById(`sensors-list-${nodeId}`);
+                                
+                                if (loadingEl) loadingEl.style.display = 'none';
+                                
+                                if (listEl && sensors.length > 0) {
+                                    listEl.innerHTML = sensors.map(s => {
+                                        const isWarning = s.currentValue >= s.warningThreshold;
+                                        const isCritical = s.currentValue >= s.criticalThreshold;
+                                        const sensorColor = isCritical ? '#EF4444' : (isWarning ? '#F59E0B' : '#10B981');
+                                        const sensorIcon = getSensorIcon(s.type);
+                                        
+                                        return `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; margin-bottom: 4px; background: #f9fafb; border-radius: 4px; font-size: 11px;">
+                                                <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <span>${sensorIcon}</span>
+                                                    <span style="color: #374151;">${s.name}</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                    <span style="font-weight: 600; color: ${sensorColor};">${s.currentValue?.toFixed(1) || 'N/A'}</span>
+                                                    <span style="color: #9ca3af;">${s.unit}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                } else if (listEl) {
+                                    listEl.innerHTML = '<div style="color: #9ca3af; font-size: 12px; text-align: center;">Không có sensor</div>';
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Failed to load sensors:', err);
+                            const loadingEl = document.getElementById(`sensors-loading-${nodeId}`);
+                            if (loadingEl) loadingEl.textContent = '(lỗi tải)';
+                        }
                     });
 
-                    map.on('click', 'station-circle', (e) => {
+                    // Click event cho Hub/Trạm
+                    map.on('click', 'station-circle', async (e) => {
                         const p = e.features[0].properties;
                         const coords = e.features[0].geometry.coordinates;
+                        const nodeId = p.id;
 
-                        new mapboxgl.Popup()
+                        const statusColors = {
+                            'Online': '#10B981',
+                            'Warning': '#F59E0B',
+                            'Critical': '#EF4444',
+                            'Offline': '#6B7280'
+                        };
+                        const statusColor = statusColors[p.status] || '#94A3B8';
+
+                        const popupContent = document.createElement('div');
+                        popupContent.style.minWidth = '300px';
+                        popupContent.innerHTML = `
+                            <div style="border-bottom: 2px solid #3B82F6; padding-bottom: 10px; margin-bottom: 10px;">
+                                <div style="font-size: 16px; font-weight: bold; color: #1e3a8a;">🏢 ${p.name}</div>
+                                <div style="font-size: 12px; color: #6b7280;">${p.code} • Trung tâm điều khiển</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-bottom: 12px;">
+                                <div>
+                                    <span style="color: #6b7280;">Trạng thái:</span>
+                                    <span style="color: ${statusColor}; font-weight: 600;">● ${p.status}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">Pin:</span>
+                                    <span style="font-weight: 500;">${p.batteryLevel}%</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">RSSI:</span>
+                                    <span style="font-weight: 500;">${p.rssi} dBm</span>
+                                </div>
+                                <div>
+                                    <span style="color: #6b7280;">Sensors:</span>
+                                    <span style="font-weight: 500;">${p.sensorCount}</span>
+                                </div>
+                            </div>
+                            <div id="hub-sensors-section-${nodeId}" style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                                <div style="font-size: 13px; font-weight: 600; color: #1e3a8a; margin-bottom: 6px;">
+                                    📊 Cảm biến Hub <span id="hub-sensors-loading-${nodeId}" style="font-weight: normal; color: #9ca3af;">(đang tải...)</span>
+                                </div>
+                                <div id="hub-sensors-list-${nodeId}" style="max-height: 150px; overflow-y: auto;"></div>
+                            </div>
+                            <div style="margin-top: 12px; display: flex; gap: 8px;">
+                                ${p.cameraId ? `<button onclick="window.onViewCamera('${p.cameraId}','${nodeId}')" style="flex: 1; padding: 8px 12px; background: #10B981; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">📹 Camera</button>` : ''}
+                                <button onclick="window.onManageDevice('${nodeId}')" style="flex: 1; padding: 8px 12px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">⚙️ Quản lý Hub</button>
+                            </div>
+                        `;
+
+                        const popup = new mapboxgl.Popup({ maxWidth: '400px' })
                             .setLngLat(coords)
-                            .setHTML(`
-                                <strong>🏢 ${p.Name}</strong><br>
-                                Code: ${p.Code}<br>
-                                Line: ${p.Line}<br>
-                                Trạng thái: ${p.Status}<br>
-                                Pin: ${p.BatteryLevel}%<br>
-                                RSSI: ${p.RSSI} dBm<br>
-                                Số sensor: ${p.SensorCount}
-                            `)
+                            .setDOMContent(popupContent)
                             .addTo(map);
+
+                        // Load sensors cho Hub
+                        try {
+                            const sensorsRes = await fetch(`${backendBaseUrl}/api/stations/${stationId}/nodes/${nodeId}/sensors`);
+                            if (sensorsRes.ok) {
+                                const sensors = await sensorsRes.json();
+                                const loadingEl = document.getElementById(`hub-sensors-loading-${nodeId}`);
+                                const listEl = document.getElementById(`hub-sensors-list-${nodeId}`);
+                                
+                                if (loadingEl) loadingEl.style.display = 'none';
+                                
+                                if (listEl && sensors.length > 0) {
+                                    listEl.innerHTML = sensors.map(s => {
+                                        const isWarning = s.currentValue >= s.warningThreshold;
+                                        const isCritical = s.currentValue >= s.criticalThreshold;
+                                        const sensorColor = isCritical ? '#EF4444' : (isWarning ? '#F59E0B' : '#10B981');
+                                        const sensorIcon = getSensorIcon(s.type);
+                                        
+                                        return `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; margin-bottom: 4px; background: #EFF6FF; border-radius: 4px; font-size: 12px;">
+                                                <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <span>${sensorIcon}</span>
+                                                    <span style="color: #1e3a8a;">${s.name}</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                    <span style="font-weight: 600; color: ${sensorColor};">${s.currentValue?.toFixed(1) || 'N/A'}</span>
+                                                    <span style="color: #6b7280;">${s.unit}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                } else if (listEl) {
+                                    listEl.innerHTML = '<div style="color: #9ca3af; font-size: 12px; text-align: center;">Không có sensor</div>';
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Failed to load hub sensors:', err);
+                        }
                     });
 
                     // Cursor pointer
@@ -358,6 +486,21 @@
             }
         }
 
+        // Helper function để lấy icon cho sensor type
+        function getSensorIcon(type) {
+            const icons = {
+                'Radar': '📡',
+                'Vibration': '〰️',
+                'Temperature': '🌡️',
+                'Humidity': '💧',
+                'SmokeFire': '🔥',
+                'Gas': '💨',
+                'Pressure': '🎯',
+                'WaterLevel': '🌊',
+                'Motion': '🏃'
+            };
+            return icons[type] || '📊';
+        }
         async function loadRoutes() {
             try {
                 const res = await fetch(`${backendBaseUrl}/api/stations/${stationId}/lines-geojson`);

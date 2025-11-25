@@ -21,6 +21,11 @@
             <converters:IndexToPositionConverter x:Key="IndexToPositionConverter"/>
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <converters:RecordingTextConverter x:Key="RecordingTextConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:NullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
+            <converters:DateTimeFormatConverter x:Key="DateTimeFormatConverter"/>
+            <converters:NullableDateTimeFormatConverter x:Key="NullableDateTimeFormatConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

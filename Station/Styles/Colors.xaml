@@ -28,6 +28,8 @@
             <Color x:Key="BackgroundPrimary">#FFFFFF</Color>
             <Color x:Key="BackgroundSecondary">#F8FAFC</Color>
             <Color x:Key="BackgroundAccent">#EFF6FF</Color>
+            <Color x:Key="BackgroundTertiary">#F1F5F9</Color>
+            <Color x:Key="Accent">#3B82F6</Color>
 
             <!-- Border Colors -->
             <Color x:Key="BorderPrimary">#3B82F6</Color>
@@ -110,6 +112,9 @@
             <SolidColorBrush x:Key="MonitoringAccentButtonBrush" Color="{ThemeResource MonitoringAccentButton}"/>
             
             <!-- TextBox Control Resources - Light Theme -->
+            <SolidColorBrush x:Key="BackgroundTertiaryBrush" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="#3B82F6"/>
+            
             <SolidColorBrush x:Key="TextControlBorderBrush" Color="#E2E8F0"/>
             <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#3B82F6"/>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#3B82F6"/>
@@ -263,6 +268,8 @@
             <SolidColorBrush x:Key="MonitoringAccentButtonBrush" Color="{ThemeResource MonitoringAccentButton}"/>
             
             <!-- TextBox Control Resources - Dark Theme -->
+            <SolidColorBrush x:Key="BackgroundTertiaryBrush" Color="#334155"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="#60A5FA"/>
             <SolidColorBrush x:Key="TextControlBorderBrush" Color="#2D3238"/>
             <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#2979FF"/>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#2979FF"/>

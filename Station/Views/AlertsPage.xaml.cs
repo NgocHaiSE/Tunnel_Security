@@ -1,7 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
 using Station.ViewModels;
+using System;
 
 namespace Station.Views
 {
@@ -15,31 +16,93 @@ namespace Station.Views
             ViewModel = new AlertsViewModel();
         }
 
-        private void FilterListView_ItemClick(object sender, ItemClickEventArgs e)
+        private void AlertItem_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            // ?�ng flyout khi click v�o item
-            if (sender is ListView listView)
+            if (sender is FrameworkElement element && element.DataContext is AlertItemViewModel alert)
             {
-                // T�m flyout parent v� ?�ng n�
-                if (DeviceFlyout.IsOpen)
-                {
-                    DeviceFlyout.Hide();
-                }
-                else if (SeverityFlyout.IsOpen)
-                {
-                    SeverityFlyout.Hide();
-                }
-                else if (StatusFlyout.IsOpen)
-                {
-                    StatusFlyout.Hide();
-                }
+                ViewModel.SelectAlertCommand.Execute(alert);
             }
         }
 
-        private void StatusComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ViewDetailButton_Click(object sender, RoutedEventArgs e)
         {
-            // This event handler ensures the ComboBox updates are processed
-            // The actual state update is handled by the ViewModel binding
+            if (sender is Button button && button.Tag is AlertItemViewModel alert)
+            {
+                ViewModel.SelectAlertCommand.Execute(alert);
+            }
+        }
+
+        private void AcknowledgeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null)
+            {
+                ViewModel.AcknowledgeAlertCommand.Execute(ViewModel.SelectedAlert);
+            }
+        }
+
+        private void ProcessButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null)
+            {
+                ViewModel.StartProcessingCommand.Execute(ViewModel.SelectedAlert);
+            }
+        }
+
+        private void ResolveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null)
+            {
+                ViewModel.ResolveAlertCommand.Execute(ViewModel.SelectedAlert);
+            }
+        }
+
+        private void CloseAlertButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null)
+            {
+                ViewModel.CloseAlertCommand.Execute(ViewModel.SelectedAlert);
+            }
+        }
+
+        private void AddNoteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null && !string.IsNullOrWhiteSpace(NoteTextBox.Text))
+            {
+                ViewModel.AddNoteCommand.Execute(NoteTextBox.Text);
+                NoteTextBox.Text = string.Empty;
+            }
+        }
+
+        private async void ViewCameraButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert?.CameraId != null)
+            {
+                // TODO: Open camera dialog with the alert's camera
+                var dialog = new ContentDialog
+                {
+                    Title = $"Camera - {ViewModel.SelectedAlert.NodeName}",
+                    Content = $"Đang mở camera {ViewModel.SelectedAlert.CameraId}...",
+                    CloseButtonText = "Đóng",
+                    XamlRoot = this.XamlRoot
+                };
+                await dialog.ShowAsync();
+            }
+        }
+
+        private async void ViewOnMapButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedAlert != null)
+            {
+                // TODO: Navigate to map and focus on alert location
+                var dialog = new ContentDialog
+                {
+                    Title = "Xem trên bản đồ",
+                    Content = $"Định vị: {ViewModel.SelectedAlert.NodeName}\nTọa độ: {ViewModel.SelectedAlert.Lat}, {ViewModel.SelectedAlert.Lng}",
+                    CloseButtonText = "Đóng",
+                    XamlRoot = this.XamlRoot
+                };
+                await dialog.ShowAsync();
+            }
         }
     }
 }
