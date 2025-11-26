@@ -24,7 +24,7 @@ namespace Station.Views
         // Config cho map – bạn chỉnh lại cho đúng
         private const string BackendBaseUrl = "http://localhost:5280";
         private const string StationId = "ST01";
-        private const string MapboxToken = "pk.eyJ1IjoiZGV2bm5oYWkiLCJhIjoiY21pOTQwbHlsMGRjZjJpc2E2N2ZvZnMwYyJ9.pwZUdwKuQkFC_X1pWSTcVg";
+        private const string MapboxToken = "pk.eyJ1IjoiZGV2bm5oYWkiLCJhIjoiY21pZXN4MjRyMDU5MTNlczlqeDN3b2N2dSJ9.Ajy_BogFz2pclu6jFl7vVg";
         private bool _securityMapInitialized = false;
 
         public ObservableCollection<SystemLogItem> SystemLogs { get; } = new();
