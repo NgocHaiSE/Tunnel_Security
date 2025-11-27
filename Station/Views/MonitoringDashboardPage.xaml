@@ -118,7 +118,7 @@
                 <ColumnDefinition Width="280"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Right Panel - Relay Stations -->
+            <!-- Right Panel - Trend Analysis & Relay Stations -->
             <Border Grid.Column="2"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
@@ -126,281 +126,355 @@
                     Margin="8,0,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="8"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="200"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Header -->
-                    <TextBlock Grid.Row="0"
-                               Text="Trạm trung chuyển"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
-                               Margin="0,0,0,12"/>
-
-                    <!-- Relay Stations List -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <StackPanel Spacing="12" x:Name="RelayStationsPanel">
-
-                            <!-- Relay A -->
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    CornerRadius="8"
-                                    Padding="12"
-                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
-                                    BorderThickness="1"
-                                    PointerEntered="RelayCard_PointerEntered"
-                                    PointerExited="RelayCard_PointerExited"
-                                    PointerPressed="RelayCard_PointerPressed"
-                                    Tag="RELAY_A">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <!-- Station Name & Status -->
-                                    <Grid Grid.Row="0" Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="📡" FontSize="18"/>
-                                            <TextBlock Text="Khu vực A"
-                                                       FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <Border Grid.Column="1"
-                                                Background="#22C55E20"
-                                                CornerRadius="10"
-                                                Padding="6,2">
-                                            <TextBlock Text="Online"
-                                                       FontSize="10"
-                                                       Foreground="#22C55E"/>
-                                        </Border>
-                                    </Grid>
-
-                                    <!-- Sensor Count -->
-                                    <TextBlock Grid.Row="1"
-                                               Text="6 cảm biến kết nối"
-                                               FontSize="12"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-
-                                    <!-- Last Update -->
-                                    <TextBlock Grid.Row="2"
-                                               Text="Cập nhật: 2 phút trước"
-                                               FontSize="10"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                </Grid>
-                            </Border>
-
-                            <!-- Relay B -->
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    CornerRadius="8"
-                                    Padding="12"
-                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
-                                    BorderThickness="1"
-                                    PointerEntered="RelayCard_PointerEntered"
-                                    PointerExited="RelayCard_PointerExited"
-                                    PointerPressed="RelayCard_PointerPressed"
-                                    Tag="RELAY_B">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <Grid Grid.Row="0" Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="📡" FontSize="18"/>
-                                            <TextBlock Text="Khu vực B"
-                                                       FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <Border Grid.Column="1"
-                                                Background="#22C55E20"
-                                                CornerRadius="10"
-                                                Padding="6,2">
-                                            <TextBlock Text="Online"
-                                                       FontSize="10"
-                                                       Foreground="#22C55E"/>
-                                        </Border>
-                                    </Grid>
-
-                                    <TextBlock Grid.Row="1"
-                                               Text="6 cảm biến kết nối"
-                                               FontSize="12"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-
-                                    <TextBlock Grid.Row="2"
-                                               Text="Cập nhật: 1 phút trước"
-                                               FontSize="10"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                </Grid>
-                            </Border>
-
-                            <!-- Relay C -->
-                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    CornerRadius="8"
-                                    Padding="12"
-                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
-                                    BorderThickness="1"
-                                    PointerEntered="RelayCard_PointerEntered"
-                                    PointerExited="RelayCard_PointerExited"
-                                    PointerPressed="RelayCard_PointerPressed"
-                                    Tag="RELAY_C">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <Grid Grid.Row="0" Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="📡" FontSize="18"/>
-                                            <TextBlock Text="Khu vực C"
-                                                       FontSize="14"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <Border Grid.Column="1"
-                                                Background="#22C55E20"
-                                                CornerRadius="10"
-                                                Padding="6,2">
-                                            <TextBlock Text="Online"
-                                                       FontSize="10"
-                                                       Foreground="#22C55E"/>
-                                        </Border>
-                                    </Grid>
-
-                                    <TextBlock Grid.Row="1"
-                                               Text="6 cảm biến kết nối"
-                                               FontSize="12"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-
-                                    <TextBlock Grid.Row="2"
-                                               Text="Cập nhật: 3 phút trước"
-                                               FontSize="10"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                </Grid>
-                            </Border>
-
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Divider -->
-                    <Border Grid.Row="2"
-                            Height="1"
-                            Background="{StaticResource MonitoringBorderBrush}"
-                            Margin="0,12"/>
-
-                    <!-- System Logs -->
-                    <Grid Grid.Row="3">
+                    <!-- Trend Analysis Panel -->
+                    <Grid Grid.Row="0">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Log Header -->
-                        <Grid Grid.Row="0" Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <!-- Header -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE9D9;" FontSize="16" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                <TextBlock Text="Phân tích xu hướng"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            </StackPanel>
 
-                            <TextBlock Grid.Column="0"
-                                       Text="📋 Nhật ký hệ thống"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-
-                            <Button Grid.Column="1"
-                                    Content="🔄"
-                                    FontSize="12"
-                                    Padding="6,2"
+                            <Button x:Name="TrendPanelMenuButton"
+                                    Click="DataPanelMenuButton_Click"
                                     Background="Transparent"
                                     BorderThickness="0"
-                                    Click="RefreshLogs_Click"
-                                    ToolTipService.ToolTip="Làm mới"/>
+                                    Padding="8"
+                                    HorizontalAlignment="Right"
+                                    ToolTipService.ToolTip="Mở cửa sổ phân tích">
+                                <FontIcon Glyph="&#xE700;"
+                                          FontSize="16"
+                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </Button>
                         </Grid>
 
-                        <!-- Log List -->
-                        <ScrollViewer Grid.Row="1"
-                                      VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl x:Name="SystemLogsItems">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
-                                                CornerRadius="4"
-                                                Padding="8"
-                                                Margin="0,0,0,6">
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
+                        <!-- Time Filter Buttons -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12" HorizontalAlignment="Center">
+                            <Button Content="24H"
+                                    x:Name="Filter24HButton"
+                                    Click="TimeFilter_Click"
+                                    Tag="24H"
+                                    Background="{StaticResource MonitoringAccentButtonBrush}"
+                                    Foreground="White"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderThickness="0"/>
+                            <Button Content="7 Ngày"
+                                    x:Name="Filter7DButton"
+                                    Click="TimeFilter_Click"
+                                    Tag="7D"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                    BorderThickness="1"/>
+                            <Button Content="30 Ngày"
+                                    x:Name="Filter30DButton"
+                                    Click="TimeFilter_Click"
+                                    Tag="30D"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                    BorderThickness="1"/>
+                        </StackPanel>
 
-                                                <Grid Grid.Row="0" Margin="0,0,0,4">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                        <!-- Trend Chart -->
+                        <Border Grid.Row="2"
+                                Background="{StaticResource MonitoringBackgroundBrush}"
+                                CornerRadius="8"
+                                Padding="12">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                                    <TextBlock Grid.Column="0"
-                                                               Text="{Binding Icon}"
-                                                               FontSize="14"
-                                                               Margin="0,0,6,0"/>
+                                <!-- Chart Area -->
+                                <Grid Grid.Row="0">
+                                    <!-- Y-Axis Labels -->
+                                    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="30">
+                                        <TextBlock Text="60" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,0,0,0"/>
+                                        <TextBlock Text="45" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,30,0,0"/>
+                                        <TextBlock Text="30" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,30,0,0"/>
+                                        <TextBlock Text="15" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,30,0,0"/>
+                                        <TextBlock Text="0" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" Margin="0,30,0,0"/>
+                                    </StackPanel>
 
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding Message}"
-                                                               FontSize="11"
-                                                               TextWrapping="Wrap"
-                                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                    <!-- Canvas for Chart -->
+                                    <Canvas Margin="35,8,8,20" x:Name="TrendChartCanvas">
+                                        <!-- Grid Lines -->
+                                        <Line X1="0" Y1="0" X2="500" Y2="0" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
+                                        <Line X1="0" Y1="45" X2="500" Y2="45" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
+                                        <Line X1="0" Y1="90" X2="500" Y2="90" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
+                                        <Line X1="0" Y1="135" X2="500" Y2="135" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
+                                        <Line X1="0" Y1="180" X2="500" Y2="180" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
 
-                                                    <TextBlock Grid.Column="2"
-                                                               Text="{Binding Time}"
-                                                               FontSize="9"
-                                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                               VerticalAlignment="Top"
-                                                               Margin="6,0,0,0"/>
-                                                </Grid>
+                                        <!-- Warning Threshold Line -->
+                                        <Line X1="0" Y1="60" X2="500" Y2="60" Stroke="#EAB308" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
+                                        <TextBlock Text="Ngưỡng cảnh báo" Canvas.Left="410" Canvas.Top="52" FontSize="8" Foreground="#EAB308" Opacity="0.8"/>
 
-                                                <TextBlock Grid.Row="1"
-                                                           Text="{Binding Source}"
-                                                           FontSize="9"
-                                                           Foreground="{Binding LevelBrush}"
-                                                           FontWeight="SemiBold"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                                        <!-- Critical Threshold Line -->
+                                        <Line X1="0" Y1="30" X2="500" Y2="30" Stroke="#EF4444" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
+                                        <TextBlock Text="Ngưỡng nghiêm trọng" Canvas.Left="390" Canvas.Top="22" FontSize="8" Foreground="#EF4444" Opacity="0.8"/>
+
+                                        <!-- Total Alerts Line (Blue) -->
+                                        <Polyline Points="0,120 25,110 50,100 75,105 100,95 125,85 150,80 175,90 200,85 225,75 250,70 275,80 300,75" 
+                                                  Stroke="{StaticResource MonitoringAccentButtonBrush}" 
+                                                  StrokeThickness="2.5" 
+                                                  StrokeLineJoin="Round"/>                                        <!-- Critical Alerts Area (Red with gradient) -->
+                                        <Polygon Points="0,180 25,165 50,155 75,160 100,150 125,145 150,140 175,150 200,145 225,135 250,130 275,140 300,135 300,180"
+                                                 Fill="#40EF4444"
+                                                 Stroke="#EF4444"
+                                                 StrokeThickness="2"
+                                                 StrokeLineJoin="Round"/>
+
+                                        <!-- Warning Alerts Line (Orange) -->
+                                        <Polyline Points="0,145 25,140 50,135 75,138 100,130 125,125 150,120 175,128 200,125 225,118 250,115 275,122 300,118" 
+                                                  Stroke="#F97316" 
+                                                  StrokeThickness="2" 
+                                                  StrokeLineJoin="Round"/>                                        <!-- Data Points with tooltips (last 3 points) -->
+                                        <Ellipse Width="6" Height="6" Fill="{StaticResource MonitoringAccentButtonBrush}" Canvas.Left="297" Canvas.Top="72" ToolTipService.ToolTip="Tổng: 15 cảnh báo"/>
+                                        <Ellipse Width="6" Height="6" Fill="#EF4444" Canvas.Left="297" Canvas.Top="132" ToolTipService.ToolTip="Nghiêm trọng: 5"/>
+                                        <Ellipse Width="6" Height="6" Fill="#F97316" Canvas.Left="297" Canvas.Top="115" ToolTipService.ToolTip="Cảnh báo: 10"/>
+
+                                        <!-- Anomaly Markers -->
+                                        <Ellipse Width="10" Height="10" Fill="Transparent" Stroke="#FBBF24" StrokeThickness="2" Canvas.Left="148" Canvas.Top="78" ToolTipService.ToolTip="Sự kiện bất thường"/>
+                                        <Ellipse Width="10" Height="10" Fill="Transparent" Stroke="#FBBF24" StrokeThickness="2" Canvas.Left="248" Canvas.Top="113" ToolTipService.ToolTip="Sự kiện bất thường"/>
+                                    </Canvas>
+                                </Grid>
+
+                                <!-- Legend -->
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Rectangle Width="16" Height="3" Fill="{StaticResource MonitoringAccentButtonBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Tổng số" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Rectangle Width="16" Height="3" Fill="#EF4444" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Nghiêm trọng" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Rectangle Width="16" Height="3" Fill="#F97316" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Cảnh báo" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Spacer -->
+                    <Border Grid.Row="1"/>
+
+                    <!-- Relay Stations Section -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Grid Grid.Row="0" Margin="0,12,0,12">
+                            <Border Height="1" Background="{StaticResource MonitoringBorderBrush}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                                    Padding="12,0"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="Trạm trung chuyển"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Relay Stations List -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="300">
+                            <StackPanel Spacing="12" x:Name="RelayStationsPanel">
+
+                                <!-- Relay A -->
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="8"
+                                        Padding="12"
+                                        BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                        BorderThickness="1"
+                                        PointerEntered="RelayCard_PointerEntered"
+                                        PointerExited="RelayCard_PointerExited"
+                                        PointerPressed="RelayCard_PointerPressed"
+                                        Tag="RELAY_A">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Station Name & Status -->
+                                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="📡" FontSize="18"/>
+                                                <TextBlock Text="Khu vực A"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Background="#22C55E20"
+                                                    CornerRadius="10"
+                                                    Padding="6,2">
+                                                <TextBlock Text="Online"
+                                                           FontSize="10"
+                                                           Foreground="#22C55E"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Sensor Count -->
+                                        <TextBlock Grid.Row="1"
+                                                   Text="6 cảm biến kết nối"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                                   Margin="0,0,0,4"/>
+
+                                        <!-- Last Update -->
+                                        <TextBlock Grid.Row="2"
+                                                   Text="Cập nhật: 2 phút trước"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Relay B -->
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="8"
+                                        Padding="12"
+                                        BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                        BorderThickness="1"
+                                        PointerEntered="RelayCard_PointerEntered"
+                                        PointerExited="RelayCard_PointerExited"
+                                        PointerPressed="RelayCard_PointerPressed"
+                                        Tag="RELAY_B">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="📡" FontSize="18"/>
+                                                <TextBlock Text="Khu vực B"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Background="#22C55E20"
+                                                    CornerRadius="10"
+                                                    Padding="6,2">
+                                                <TextBlock Text="Online"
+                                                           FontSize="10"
+                                                           Foreground="#22C55E"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Text="6 cảm biến kết nối"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                                   Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2"
+                                                   Text="Cập nhật: 1 phút trước"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Relay C -->
+                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="8"
+                                        Padding="12"
+                                        BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                        BorderThickness="1"
+                                        PointerEntered="RelayCard_PointerEntered"
+                                        PointerExited="RelayCard_PointerExited"
+                                        PointerPressed="RelayCard_PointerPressed"
+                                        Tag="RELAY_C">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="📡" FontSize="18"/>
+                                                <TextBlock Text="Khu vực C"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Background="#22C55E20"
+                                                    CornerRadius="10"
+                                                    Padding="6,2">
+                                                <TextBlock Text="Online"
+                                                           FontSize="10"
+                                                           Foreground="#22C55E"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Text="6 cảm biến kết nối"
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                                   Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2"
+                                                   Text="Cập nhật: 3 phút trước"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                    </Grid>
+                                </Border>
+
+                            </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Grid>
@@ -450,42 +524,17 @@
                         Padding="16"
                         Margin="0,0,8,8">
                     <StackPanel Spacing="12">
-                        <!-- Header with title -->
-                        <TextBlock Text="Cảnh báo"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-
-                        <!-- Filter buttons row -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4" Margin="0,-8,0,0">
-                            <Button x:Name="AlertFilterDay"
-                                    Content="Ngày"
-                                    Click="AlertFilterDay_Click"
-                                    FontSize="11"
-                                    Padding="10,4"
-                                    CornerRadius="4"
-                                    Background="{StaticResource MonitoringNodeNormalBrush}"
-                                    Foreground="{StaticResource MonitoringTextPrimaryBrush}"
-                                    BorderThickness="0"/>
-                            <Button x:Name="AlertFilterWeek"
-                                    Content="Tuần"
-                                    Click="AlertFilterWeek_Click"
-                                    FontSize="11"
-                                    Padding="10,4"
-                                    CornerRadius="4"
-                                    Background="Transparent"
-                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                    BorderThickness="0"/>
-                            <Button x:Name="AlertFilterMonth"
-                                    Content="Tháng"
-                                    Click="AlertFilterMonth_Click"
-                                    FontSize="11"
-                                    Padding="10,4"
-                                    CornerRadius="4"
-                                    Background="Transparent"
-                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                    BorderThickness="0"/>
-                        </StackPanel>
+                        <Grid>
+                            <TextBlock Text="Phân bố cảnh báo"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                                <TextBlock Text="Day" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                                <TextBlock Text="Week" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                <TextBlock Text="Month" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
 
                         <!-- LiveCharts Pie Chart (Donut) -->
                         <lvc:PieChart Height="180"
@@ -545,7 +594,7 @@
                         <!-- Header with hamburger menu -->
                         <Grid Grid.Row="0" Margin="0,0,0,12">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Sự cố"
+                                <TextBlock Text="Cảnh báo mới nhất"
                                            FontSize="14"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
@@ -1145,7 +1194,7 @@
                     <!-- Header with hamburger menu -->
                     <Grid Grid.Row="0" Margin="0,0,0,12">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Trạng thái"
+                            <TextBlock Text="Trạng thái hệ thống"
                                        FontSize="14"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>

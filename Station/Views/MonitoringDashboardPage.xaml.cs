@@ -88,8 +88,8 @@ namespace Station.Views
 
         private void InitializeSystemLogs()
         {
-            // Bind to ItemsControl
-            SystemLogsItems.ItemsSource = SystemLogs;
+            // Note: SystemLogsItems removed from XAML, keeping logs in memory
+            // SystemLogsItems.ItemsSource = SystemLogs;
 
             // Add mock data
             AddSystemLog("✅", "Hệ thống khởi động thành công", "SYSTEM", "INFO", DateTime.Now.AddMinutes(-5));
@@ -151,6 +151,53 @@ namespace Station.Views
         {
             SystemLogs.Clear();
             InitializeSystemLogs();
+        }
+
+        private void TimeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                // Get resources safely
+                var transparentBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
+                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush) 
+                    ? (SolidColorBrush)secBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 139, 148, 158));
+                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush) 
+                    ? (SolidColorBrush)brdBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 54, 61));
+                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush) 
+                    ? (SolidColorBrush)accBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
+
+                // Reset all filter buttons
+                Filter24HButton.Background = transparentBrush;
+                Filter24HButton.Foreground = secondaryBrush;
+                Filter24HButton.BorderBrush = borderBrush;
+                Filter24HButton.BorderThickness = new Thickness(1);
+
+                Filter7DButton.Background = transparentBrush;
+                Filter7DButton.Foreground = secondaryBrush;
+                Filter7DButton.BorderBrush = borderBrush;
+                Filter7DButton.BorderThickness = new Thickness(1);
+
+                Filter30DButton.Background = transparentBrush;
+                Filter30DButton.Foreground = secondaryBrush;
+                Filter30DButton.BorderBrush = borderBrush;
+                Filter30DButton.BorderThickness = new Thickness(1);
+
+                // Set clicked button as active
+                button.Background = accentBrush;
+                button.Foreground = whiteBrush;
+                button.BorderThickness = new Thickness(0);
+
+                // Get filter type
+                string filterTag = button.Tag?.ToString() ?? "24H";
+                Debug.WriteLine($"Time filter changed to: {filterTag}");
+
+                // TODO: Update chart data based on time filter
+                // You can call a method to fetch and display data for the selected time range
+            }
         }
 
         private async void InitializeSecurityMap()
@@ -496,6 +543,11 @@ namespace Station.Views
             OpenModuleWindow("Cảnh báo", typeof(AlertsPage));
         }
 
+        private void CameraMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Camera giám sát", typeof(LiveVideoPage));
+        }
+
         private void DevicePanelMenuButton_Click(object sender, RoutedEventArgs e)
         {
             OpenModuleWindow("Thiết bị", typeof(DevicesPage));
@@ -566,6 +618,10 @@ namespace Station.Views
                     else if (pageType == typeof(AlertsPage))
                     {
                         mainWindow.OpenPageInNewWindow<AlertsPage>(title);
+                    }
+                    else if (pageType == typeof(LiveVideoPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<LiveVideoPage>(title);
                     }
                     else if (pageType == typeof(DevicesPage))
                     {
@@ -755,164 +811,8 @@ namespace Station.Views
 
         #endregion
 
-        #region Alert Filter Handlers
-
-        private void AlertFilterDay_Click(object sender, RoutedEventArgs e)
-        {
-            SetAlertFilter(AlertFilterPeriod.Day);
-        }
-
-        private void AlertFilterWeek_Click(object sender, RoutedEventArgs e)
-        {
-            SetAlertFilter(AlertFilterPeriod.Week);
-        }
-
-        private void AlertFilterMonth_Click(object sender, RoutedEventArgs e)
-        {
-            SetAlertFilter(AlertFilterPeriod.Month);
-        }
-
-        private void SetAlertFilter(AlertFilterPeriod period)
-        {
-            _currentAlertFilter = period;
-
-            // Reset all button styles
-            var normalBrush = (SolidColorBrush)Application.Current.Resources["MonitoringNodeNormalBrush"];
-            var primaryBrush = (SolidColorBrush)Application.Current.Resources["MonitoringTextPrimaryBrush"];
-            var secondaryBrush = (SolidColorBrush)Application.Current.Resources["MonitoringTextSecondaryBrush"];
-            var transparentBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-
-            AlertFilterDay.Background = transparentBrush;
-            AlertFilterDay.Foreground = secondaryBrush;
-            AlertFilterWeek.Background = transparentBrush;
-            AlertFilterWeek.Foreground = secondaryBrush;
-            AlertFilterMonth.Background = transparentBrush;
-            AlertFilterMonth.Foreground = secondaryBrush;
-
-            // Set active button style
-            switch (period)
-            {
-                case AlertFilterPeriod.Day:
-                    AlertFilterDay.Background = normalBrush;
-                    AlertFilterDay.Foreground = primaryBrush;
-                    break;
-                case AlertFilterPeriod.Week:
-                    AlertFilterWeek.Background = normalBrush;
-                    AlertFilterWeek.Foreground = primaryBrush;
-                    break;
-                case AlertFilterPeriod.Month:
-                    AlertFilterMonth.Background = normalBrush;
-                    AlertFilterMonth.Foreground = primaryBrush;
-                    break;
-            }
-
-            // Update chart data with mock data based on period
-            UpdateAlertChartData(period);
-        }
-
-        private void UpdateAlertChartData(AlertFilterPeriod period)
-        {
-            var random = new Random();
-
-            // Mock data multipliers based on period
-            int multiplier = period switch
-            {
-                AlertFilterPeriod.Day => 1,
-                AlertFilterPeriod.Week => 5,
-                AlertFilterPeriod.Month => 20,
-                _ => 1
-            };
-
-            // Generate mock data
-            var lowAlerts = (random.Next(2, 5) * multiplier);
-            var mediumAlerts = (random.Next(3, 6) * multiplier);
-            var highAlerts = (random.Next(2, 4) * multiplier);
-            var criticalAlerts = (random.Next(1, 3) * multiplier);
-
-            // Update ViewModel properties
-            ViewModel.IntruAlerts = lowAlerts;
-            ViewModel.MotionAlerts = mediumAlerts;
-            ViewModel.FireAlerts = highAlerts;
-            ViewModel.SmokeAlerts = criticalAlerts;
-
-            // Update total alerts
-            ViewModel.TodayAlerts = lowAlerts + mediumAlerts + highAlerts + criticalAlerts;
-            ViewModel.CriticalAlerts = criticalAlerts;
-            ViewModel.WarningAlerts = highAlerts + mediumAlerts;
-
-            // Recreate chart series
-            var seriesList = new System.Collections.Generic.List<ISeries>();
-
-            if (lowAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Thấp",
-                    Values = new int[] { lowAlerts },
-                    Fill = new SolidColorPaint(new SKColor(34, 197, 94)), // #22C55E - Green
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
-
-            if (mediumAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Trung bình",
-                    Values = new int[] { mediumAlerts },
-                    Fill = new SolidColorPaint(new SKColor(234, 179, 8)), // #EAB308 - Yellow
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
-
-            if (highAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Cao",
-                    Values = new int[] { highAlerts },
-                    Fill = new SolidColorPaint(new SKColor(249, 115, 22)), // #F97316 - Orange
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
-
-            if (criticalAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Nghiêm trọng",
-                    Values = new int[] { criticalAlerts },
-                    Fill = new SolidColorPaint(new SKColor(239, 68, 68)), // #EF4444 - Red
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
-
-            // Update chart
-            ViewModel.AlertDistributionSeries = seriesList.ToArray();
-
-            Debug.WriteLine($"Alert filter changed to {period}: Low={lowAlerts}, Med={mediumAlerts}, High={highAlerts}, Critical={criticalAlerts}");
-        }
-
+        #region Alert Filter Handlers - Removed (UI redesigned)
+        // Old alert filter methods removed as UI was redesigned
         #endregion
 
         public class SystemLogItem
