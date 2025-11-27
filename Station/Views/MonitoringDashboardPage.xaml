@@ -450,17 +450,42 @@
                         Padding="16"
                         Margin="0,0,8,8">
                     <StackPanel Spacing="12">
-                        <Grid>
-                            <TextBlock Text="Phân bố cảnh báo"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                <TextBlock Text="Day" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                <TextBlock Text="Week" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                <TextBlock Text="Month" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <!-- Header with title -->
+                        <TextBlock Text="Cảnh báo"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+
+                        <!-- Filter buttons row -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4" Margin="0,-8,0,0">
+                            <Button x:Name="AlertFilterDay"
+                                    Content="Ngày"
+                                    Click="AlertFilterDay_Click"
+                                    FontSize="11"
+                                    Padding="10,4"
+                                    CornerRadius="4"
+                                    Background="{StaticResource MonitoringNodeNormalBrush}"
+                                    Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                                    BorderThickness="0"/>
+                            <Button x:Name="AlertFilterWeek"
+                                    Content="Tuần"
+                                    Click="AlertFilterWeek_Click"
+                                    FontSize="11"
+                                    Padding="10,4"
+                                    CornerRadius="4"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    BorderThickness="0"/>
+                            <Button x:Name="AlertFilterMonth"
+                                    Content="Tháng"
+                                    Click="AlertFilterMonth_Click"
+                                    FontSize="11"
+                                    Padding="10,4"
+                                    CornerRadius="4"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    BorderThickness="0"/>
+                        </StackPanel>
 
                         <!-- LiveCharts Pie Chart (Donut) -->
                         <lvc:PieChart Height="180"
@@ -520,7 +545,7 @@
                         <!-- Header with hamburger menu -->
                         <Grid Grid.Row="0" Margin="0,0,0,12">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Cảnh báo mới nhất"
+                                <TextBlock Text="Sự cố"
                                            FontSize="14"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
@@ -953,8 +978,8 @@
                     <!-- Header -->
                     <Grid Grid.Row="0" Margin="0,0,0,12">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE714;" 
-                                      FontSize="14" 
+                            <FontIcon Glyph="&#xE714;"
+                                      FontSize="14"
                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                             <TextBlock Text="Camera giám sát"
                                        FontSize="14"
@@ -992,12 +1017,12 @@
                                     BorderBrush="#EF4444"
                                     BorderThickness="2"
                                     CornerRadius="6">
-                                <Grid VerticalAlignment="Top" 
-                                      Background="#DCEF4444" 
+                                <Grid VerticalAlignment="Top"
+                                      Background="#DCEF4444"
                                       Padding="8,4">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE7BA;" 
-                                                  FontSize="12" 
+                                        <FontIcon Glyph="&#xE7BA;"
+                                                  FontSize="12"
                                                   Foreground="White"/>
                                         <TextBlock x:Name="AlertMessageText"
                                                    Text="⚠️ PHÁT HIỆN BẤT THƯỜNG"
@@ -1009,9 +1034,9 @@
                             </Border>
 
                             <!-- Camera Info Overlay -->
-                            <Grid VerticalAlignment="Top" 
-                                  HorizontalAlignment="Stretch" 
-                                  Background="#B0000000" 
+                            <Grid VerticalAlignment="Top"
+                                  HorizontalAlignment="Stretch"
+                                  Background="#B0000000"
                                   Padding="8,6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -1020,8 +1045,8 @@
 
                                 <TextBlock x:Name="CurrentCameraName"
                                            Grid.Column="0"
-                                           Text="CAM 01" 
-                                           FontSize="12" 
+                                           Text="CAM 01"
+                                           FontSize="12"
                                            FontWeight="SemiBold"
                                            Foreground="White"/>
 
@@ -1031,8 +1056,8 @@
                                         CornerRadius="8"
                                         Padding="6,2">
                                     <TextBlock x:Name="CurrentCameraStatus"
-                                               Text="Online" 
-                                               FontSize="9" 
+                                               Text="Online"
+                                               FontSize="9"
                                                Foreground="White"
                                                FontWeight="SemiBold"/>
                                 </Border>
@@ -1041,7 +1066,7 @@
                             <!-- Time & Recording -->
                             <Grid VerticalAlignment="Bottom">
                                 <Border HorizontalAlignment="Left"
-                                        Background="#B0000000" 
+                                        Background="#B0000000"
                                         Padding="6,3"
                                         Margin="8,8">
                                     <TextBlock x:Name="CurrentCameraTime"
@@ -1051,7 +1076,7 @@
                                 </Border>
 
                                 <Border HorizontalAlignment="Right"
-                                        Background="#B0000000" 
+                                        Background="#B0000000"
                                         Padding="6,3"
                                         Margin="8,8"
                                         x:Name="RecordingIndicator">
@@ -1069,14 +1094,14 @@
                             <Grid x:Name="NoSignalOverlay"
                                   Background="#80000000"
                                   Visibility="Collapsed">
-                                <StackPanel HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center" 
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
                                             Spacing="8">
-                                    <FontIcon Glyph="&#xE711;" 
-                                              FontSize="32" 
+                                    <FontIcon Glyph="&#xE711;"
+                                              FontSize="32"
                                               Foreground="#94A3B8"/>
-                                    <TextBlock Text="Không có tín hiệu" 
-                                               FontSize="11" 
+                                    <TextBlock Text="Không có tín hiệu"
+                                               FontSize="11"
                                                Foreground="White"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -1087,8 +1112,8 @@
                     <!-- Camera Info & Controls -->
                     <Grid Grid.Row="2" Margin="0,8,0,0">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE895;" 
-                                      FontSize="10" 
+                            <FontIcon Glyph="&#xE895;"
+                                      FontSize="10"
                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                             <TextBlock x:Name="CameraRotationInfo"
                                        Text="Tự động: 10s"

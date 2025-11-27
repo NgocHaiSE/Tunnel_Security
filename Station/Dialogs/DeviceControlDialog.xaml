@@ -6,82 +6,40 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Quản lý thiết bị"
+    Title=""
     CloseButtonText="Đóng"
     DefaultButton="Close"
     RequestedTheme="Dark"
-    Background="{StaticResource MonitoringPanelBackgroundBrush}"
-    BorderBrush="{StaticResource MonitoringBorderBrush}"
-    CornerRadius="8"
+    Background="#0D1117"
+    BorderBrush="#30363D"
+    CornerRadius="12"
     Padding="0">
 
     <ContentDialog.Resources>
-        <!-- Tab Item Style -->
-        <Style x:Key="TabItemStyle" TargetType="TabViewItem">
-            <Setter Property="Foreground" Value="{StaticResource MonitoringTextSecondaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <!-- Sensor Card Style -->
-        <Style x:Key="SensorCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource MonitoringBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource MonitoringBorderBrush}"/>
+        <!-- Sensor Card Hover Style -->
+        <Style x:Key="SensorCardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="BorderBrush" Value="#30363D"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="16"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-        </Style>
-
-        <!-- Control Card Style -->
-        <Style x:Key="ControlCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource MonitoringBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource MonitoringBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
-        </Style>
-
-        <!-- Action Button Style -->
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="120"/>
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <!-- Primary Action Button -->
-        <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource MonitoringNodeNormalBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource MonitoringTextPrimaryBrush}"/>
-        </Style>
-
-        <!-- Toggle Button Style -->
-        <Style x:Key="ToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="MinWidth" Value="120"/>
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="{StaticResource MonitoringNodeNormalBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource MonitoringTextPrimaryBrush}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,12"/>
         </Style>
     </ContentDialog.Resources>
 
-    <!-- Main Grid -->
-    <Grid MinWidth="650" MinHeight="500" MaxWidth="750" Padding="0">
+    <Grid Width="580" MinHeight="500" MaxHeight="680">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header Section -->
-        <Border Grid.Row="0"
-                Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                BorderBrush="{StaticResource MonitoringBorderBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="24,20">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- NODE HEADER - Thể hiện đây là 1 Node/Hub -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0" 
+                Background="Transparent"
+                Padding="24,20,24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -89,324 +47,284 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Device Icon & Name -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                    <Border Width="48" Height="48"
-                            Background="{StaticResource MonitoringNodeNormalBrush}"
-                            CornerRadius="24">
-                        <FontIcon Glyph="&#xE957;" FontSize="24"
-                                  Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                    </Border>
-                    <StackPanel VerticalAlignment="Center" Spacing="4">
+                <!-- Node Icon với hiệu ứng glow -->
+                <Grid Grid.Column="0" Margin="0,0,16,0">
+                    <Ellipse Width="56" Height="56" Fill="#1F6B3A"/>
+                    <Ellipse Width="56" Height="56" Opacity="0.3">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#10B981" Offset="0"/>
+                                <GradientStop Color="Transparent" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+                    <FontIcon Glyph="&#xE77B;" FontSize="26" Foreground="#10B981"/>
+                </Grid>
+
+                <!-- Node Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock x:Name="DeviceNameText"
-                                   Text="Tên thiết bị"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                        <TextBlock x:Name="DeviceIdText"
-                                   Text="ID: --"
-                                   FontSize="12"
-                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                   Text="Node XT-1"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                        <Border x:Name="StatusBadge"
+                                Background="#1F6B3A"
+                                CornerRadius="10"
+                                Padding="10,4"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="● Online"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="#10B981"/>
+                        </Border>
                     </StackPanel>
+                    <TextBlock x:Name="DeviceIdText"
+                               Text="ID: XT-1 • Vị trí: Km 1+200"
+                               FontSize="12"
+                               Foreground="#8B949E"/>
                 </StackPanel>
 
-                <!-- Status Badge -->
-                <Border Grid.Column="2"
-                        x:Name="StatusBadge"
-                        Background="#10B981"
-                        CornerRadius="12"
-                        Padding="12,6"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="● Online"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Foreground="White"/>
-                </Border>
+                <!-- Quick Actions -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="ViewCameraButton"
+                            Click="ViewCameraButton_Click"
+                            ToolTipService.ToolTip="Xem Camera"
+                            Width="40" Height="40"
+                            CornerRadius="20"
+                            Background="#21262D"
+                            BorderBrush="#30363D">
+                        <FontIcon Glyph="&#xE714;" FontSize="16" Foreground="#8B949E"/>
+                    </Button>
+                    <Button x:Name="SettingsButton"
+                            Click="EditDeviceButton_Click"
+                            ToolTipService.ToolTip="Cài đặt"
+                            Width="40" Height="40"
+                            CornerRadius="20"
+                            Background="#21262D"
+                            BorderBrush="#30363D">
+                        <FontIcon Glyph="&#xE713;" FontSize="16" Foreground="#8B949E"/>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <!-- TabView Content -->
-        <TabView Grid.Row="1"
-                 x:Name="MainTabView"
-                 Margin="24,16,24,24"
-                 TabWidthMode="Equal"
-                 IsAddTabButtonVisible="False"
-                 CanDragTabs="False"
-                 CanReorderTabs="False">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- NODE STATUS BAR - Thông tin tổng quan Node -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="1" 
+                Background="#161B22" 
+                BorderBrush="#30363D"
+                BorderThickness="0,1,0,1"
+                Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Tab 1: Tổng quan -->
-            <TabView.TabItems>
-                <TabViewItem Header="📊 Tổng quan" Style="{StaticResource TabItemStyle}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Spacing="12" Padding="0,8">
-                            <!-- Device Info Card -->
-                            <Border Style="{StaticResource ControlCardStyle}">
+                <!-- Battery -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE83F;" FontSize="14" Foreground="#10B981"/>
+                    <StackPanel>
+                        <TextBlock x:Name="BatteryText" Text="85%" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Pin" FontSize="10" Foreground="#8B949E"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Signal -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE871;" FontSize="14" Foreground="#3B82F6"/>
+                    <StackPanel>
+                        <TextBlock x:Name="RSSIText" Text="-45 dBm" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Tín hiệu" FontSize="10" Foreground="#8B949E"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Last Update -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE823;" FontSize="14" Foreground="#F59E0B"/>
+                    <StackPanel>
+                        <TextBlock x:Name="LastOnlineText" Text="2 phút" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Cập nhật" FontSize="10" Foreground="#8B949E"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Sensor Count -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE9D9;" FontSize="14" Foreground="#8B5CF6"/>
+                    <StackPanel>
+                        <TextBlock x:Name="SensorCountText" Text="5" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Cảm biến" FontSize="10" Foreground="#8B949E"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- SENSORS SECTION - Danh sách cảm biến thuộc Node -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2" Padding="24,16,24,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Section Header với đường kẻ cây phân cấp -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,12">
+                <Border Width="3" Height="20" Background="#30363D" CornerRadius="2"/>
+                <TextBlock x:Name="SensorHeaderText"
+                           Text="Cảm biến được gắn trong Node"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="#8B949E"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Sensors Grid - 2 cột -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="SensorsItemsControl">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="10"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource SensorCardBorderStyle}"
+                                    PointerPressed="SensorCard_PointerPressed"
+                                    Tag="{Binding}"
+                                    PointerEntered="SensorCard_PointerEntered"
+                                    PointerExited="SensorCard_PointerExited">
                                 <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Row="0"
-                                               Text="Thông tin thiết bị"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
-                                               Margin="0,0,0,12"/>
-
-                                    <Grid Grid.Row="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <!-- Battery -->
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,0,12">
-                                            <TextBlock Text="Pin" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                            <TextBlock x:Name="BatteryText" Text="--%" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- RSSI -->
-                                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="0,0,0,12">
-                                            <TextBlock Text="Tín hiệu" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                            <TextBlock x:Name="RSSIText" Text="-- dBm" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- Last Online -->
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,0,0,12">
-                                            <TextBlock Text="Trực tuyến lần cuối" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                            <TextBlock x:Name="LastOnlineText" Text="--" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-
-                                        <!-- Sensor Count -->
-                                        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="0,0,0,12">
-                                            <TextBlock Text="Số cảm biến" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                            <TextBlock x:Name="SensorCountText" Text="--" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <!-- Quick Actions -->
-                            <Border Style="{StaticResource ControlCardStyle}">
-                                <StackPanel Spacing="12">
-                                    <TextBlock Text="Thao tác nhanh"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="12"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- View Camera Button -->
-                                        <Button Grid.Column="0"
-                                                x:Name="ViewCameraButton"
-                                                Style="{StaticResource PrimaryActionButtonStyle}"
-                                                Click="ViewCameraButton_Click"
-                                                Height="44">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE714;" FontSize="16"/>
-                                                <TextBlock Text="Xem Camera"/>
-                                            </StackPanel>
-                                        </Button>
-
-                                        <!-- Power Toggle Button -->
-                                        <ToggleButton Grid.Column="2"
-                                                      x:Name="PowerToggle"
-                                                      Height="44"
-                                                      CornerRadius="6"
-                                                      Checked="PowerToggle_Checked"
-                                                      Unchecked="PowerToggle_Unchecked"
-                                                      Style="{StaticResource ToggleButtonStyle}">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon x:Name="PowerIcon" Glyph="&#xE7E8;" FontSize="16"/>
-                                                <TextBlock x:Name="PowerText" Text="Bật"/>
-                                            </StackPanel>
-                                        </ToggleButton>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabViewItem>
-
-                <!-- Tab 2: Cảm biến -->
-                <TabViewItem Header="🔬 Cảm biến" Style="{StaticResource TabItemStyle}">
-                    <Grid Padding="0,8">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Sensors Header -->
-                        <Border Grid.Row="0"
-                                Background="{StaticResource MonitoringBackgroundBrush}"
-                                BorderBrush="{StaticResource MonitoringBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="16"
-                                Margin="0,0,0,12">
-                            <Grid>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE9D9;" FontSize="16" Foreground="{StaticResource MonitoringNodeNormalBrush}"/>
-                                    <TextBlock x:Name="SensorHeaderText"
-                                               Text="Đang tải cảm biến..."
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Sensors List -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl x:Name="SensorsItemsControl">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource SensorCardStyle}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- Sensor Icon -->
-                                                <Border Grid.Column="0"
-                                                        Width="40"
-                                                        Height="40"
-                                                        CornerRadius="20"
-                                                        Margin="0,0,12,0"
-                                                        Background="{Binding IconBackground}">
-                                                    <TextBlock Text="{Binding Icon}"
-                                                               FontSize="20"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center"/>
-                                                </Border>
-
-                                                <!-- Sensor Info -->
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                                                    <TextBlock Text="{Binding Name}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                    <TextBlock Text="{Binding Type}"
-                                                               FontSize="12"
-                                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                                </StackPanel>
-
-                                                <!-- Sensor Value -->
-                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="2">
-                                                    <TextBlock Text="{Binding Value}"
-                                                               FontSize="18"
-                                                               FontWeight="Bold"
-                                                               Foreground="{Binding ValueColor}"
-                                                               TextAlignment="Right"/>
-                                                    <TextBlock Text="{Binding Unit}"
-                                                               FontSize="11"
-                                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                               TextAlignment="Right"/>
-                                                </StackPanel>
-                                            </Grid>
+                                    <!-- Connection Line (thể hiện thuộc về Node) -->
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,12,0">
+                                        <!-- Đường kẻ ngang kết nối -->
+                                        <Border Width="12" Height="2" Background="#30363D" VerticalAlignment="Center"/>
+                                        <!-- Sensor Icon -->
+                                        <Border Width="42" Height="42"
+                                                CornerRadius="10"
+                                                Background="{Binding IconBackground}">
+                                            <TextBlock Text="{Binding Icon}"
+                                                       FontSize="20"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
                                         </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </TabViewItem>
+                                    </StackPanel>
 
-                <!-- Tab 3: Điều khiển -->
-                <TabViewItem Header="⚙️ Điều khiển" Style="{StaticResource TabItemStyle}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Spacing="12" Padding="0,8">
-                            <!-- Power Control -->
-                            <Border Style="{StaticResource ControlCardStyle}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,16">
-                                        <TextBlock Text="Nguồn điện"
-                                                   FontSize="15"
+                                    <!-- Sensor Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="14"
                                                    FontWeight="SemiBold"
-                                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                        <TextBlock Text="Bật/tắt thiết bị từ xa"
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                   Foreground="White"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Border Background="#21262D" CornerRadius="4" Padding="6,2">
+                                                <TextBlock Text="{Binding Type}"
+                                                           FontSize="10"
+                                                           Foreground="#8B949E"/>
+                                            </Border>
+                                            <TextBlock Text="• Hoạt động"
+                                                       FontSize="11"
+                                                       Foreground="#10B981"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12">
-                                        <Button x:Name="PowerOnButton"
-                                                Click="PowerOnButton_Click"
-                                                Style="{StaticResource ActionButtonStyle}"
-                                                Background="#10B981">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE7E8;" FontSize="14"/>
-                                                <TextBlock Text="Bật"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button x:Name="PowerOffButton"
-                                                Click="PowerOffButton_Click"
-                                                Style="{StaticResource ActionButtonStyle}"
-                                                Background="#EF4444">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE7E8;" FontSize="14"/>
-                                                <TextBlock Text="Tắt"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Button x:Name="RebootButton"
-                                                Click="RebootButton_Click"
-                                                Style="{StaticResource ActionButtonStyle}"
-                                                Background="#F59E0B">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <FontIcon Glyph="&#xE72C;" FontSize="14"/>
-                                                <TextBlock Text="Khởi động lại"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
+                                    <!-- Sensor Value - Nổi bật -->
+                                    <Border Grid.Column="2" 
+                                            Background="#0D1117"
+                                            CornerRadius="8"
+                                            Padding="14,8"
+                                            VerticalAlignment="Center">
+                                        <StackPanel HorizontalAlignment="Right">
+                                            <TextBlock FontSize="18"
+                                                       FontWeight="Bold"
+                                                       Foreground="{Binding ValueColor}"
+                                                       TextAlignment="Right">
+                                                <Run Text="{Binding Value}"/>
+                                                <Run Text="{Binding Unit}" FontSize="12" Foreground="#8B949E"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
                                 </Grid>
                             </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
 
-                            <!-- Device Settings -->
-                            <Border Style="{StaticResource ControlCardStyle}">
-                                <StackPanel Spacing="12">
-                                    <TextBlock Text="Cài đặt thiết bị"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- FOOTER - Control Actions -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="3" 
+                Background="#161B22"
+                BorderBrush="#30363D"
+                BorderThickness="0,1,0,0"
+                Padding="24,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                                    <Button x:Name="EditDeviceButton"
-                                            Click="EditDeviceButton_Click"
-                                            Style="{StaticResource ActionButtonStyle}"
-                                            HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE70F;" FontSize="14"/>
-                                            <TextBlock Text="Chỉnh sửa cấu hình"/>
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- InfoBar for notifications -->
-                            <InfoBar x:Name="NotificationBar"
-                                     IsOpen="False"
-                                     Severity="Success"/>
+                <!-- Power Controls -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                    <Button x:Name="PowerOnButton"
+                            Click="PowerOnButton_Click"
+                            Height="36"
+                            Padding="16,0"
+                            CornerRadius="8"
+                            Background="#1F6B3A"
+                            BorderThickness="0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE7E8;" FontSize="12" Foreground="#10B981"/>
+                            <TextBlock Text="Bật Node" FontSize="12" Foreground="#10B981" FontWeight="SemiBold"/>
                         </StackPanel>
-                    </ScrollViewer>
-                </TabViewItem>
-            </TabView.TabItems>
-        </TabView>
+                    </Button>
+                    <Button x:Name="PowerOffButton"
+                            Click="PowerOffButton_Click"
+                            Height="36"
+                            Padding="16,0"
+                            CornerRadius="8"
+                            Background="#3D1F1F"
+                            BorderThickness="0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE7E8;" FontSize="12" Foreground="#EF4444"/>
+                            <TextBlock Text="Tắt Node" FontSize="12" Foreground="#EF4444" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="RebootButton"
+                            Click="RebootButton_Click"
+                            Height="36"
+                            Padding="16,0"
+                            CornerRadius="8"
+                            Background="#21262D"
+                            BorderBrush="#30363D">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE72C;" FontSize="12" Foreground="#F59E0B"/>
+                            <TextBlock Text="Khởi động lại" FontSize="12" Foreground="#8B949E"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Notification -->
+                <InfoBar x:Name="NotificationBar"
+                         Grid.Column="1"
+                         IsOpen="False"
+                         Severity="Success"
+                         IsClosable="True"/>
+            </Grid>
+        </Border>
     </Grid>
 </ContentDialog>

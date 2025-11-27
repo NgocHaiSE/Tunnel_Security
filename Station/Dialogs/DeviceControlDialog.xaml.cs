@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Station.ViewModels;
 using System;
@@ -136,13 +137,17 @@ namespace Station.Dialogs
 
                     if (sensors != null && sensors.Count > 0)
                     {
-                        SensorHeaderText.Text = $"Đã tìm thấy {sensors.Count} cảm biến";
+                        SensorHeaderText.Text = $"Cảm biến được gắn trong Node ({sensors.Count})";
+                        SensorCountText.Text = sensors.Count.ToString();
                         
                         var sensorViewModels = sensors.Select(s => new SensorViewModel
                         {
+                            Id = s.Id,
                             Name = GetSensorDisplayName(s.Type, s.Name),
                             Type = GetSensorTypeName(s.Type),
+                            TypeCode = s.Type,
                             Value = s.CurrentValue?.ToString("0.0") ?? "N/A",
+                            NumericValue = s.CurrentValue ?? 0,
                             Unit = s.Unit ?? "",
                             Icon = GetSensorIcon(s.Type, s.Name),
                             IconBackground = GetSensorIconBackground(s.Type),
@@ -189,22 +194,31 @@ namespace Station.Dialogs
 
         private void UpdateStatusBadge(int status)
         {
-            var (color, text) = status switch
+            var (bgColor, fgColor, text) = status switch
             {
-                0 => ("#10B981", "● Online"),
-                1 => ("#F59E0B", "● Warning"),
-                2 => ("#EF4444", "● Critical"),
-                3 => ("#6B7280", "● Offline"),
-                _ => ("#94A3B8", "● Unknown")
+                0 => ("#1F6B3A", "#10B981", "● Online"),
+                1 => ("#3D3A1F", "#F59E0B", "● Warning"),
+                2 => ("#3D1F1F", "#EF4444", "● Critical"),
+                3 => ("#1F2937", "#6B7280", "● Offline"),
+                _ => ("#1F2937", "#94A3B8", "● Unknown")
             };
 
             StatusBadge.Background = new SolidColorBrush(
                 Microsoft.UI.ColorHelper.FromArgb(255,
-                    Convert.ToByte(color.Substring(1, 2), 16),
-                    Convert.ToByte(color.Substring(3, 2), 16),
-                    Convert.ToByte(color.Substring(5, 2), 16)));
+                    Convert.ToByte(bgColor.Substring(1, 2), 16),
+                    Convert.ToByte(bgColor.Substring(3, 2), 16),
+                    Convert.ToByte(bgColor.Substring(5, 2), 16)));
             
-            ((TextBlock)StatusBadge.Child).Text = text;
+            // Find TextBlock child and update
+            if (StatusBadge.Child is TextBlock statusText)
+            {
+                statusText.Text = text;
+                statusText.Foreground = new SolidColorBrush(
+                    Microsoft.UI.ColorHelper.FromArgb(255,
+                        Convert.ToByte(fgColor.Substring(1, 2), 16),
+                        Convert.ToByte(fgColor.Substring(3, 2), 16),
+                        Convert.ToByte(fgColor.Substring(5, 2), 16)));
+            }
         }
 
         private string FormatDateTime(DateTime dt)
@@ -295,32 +309,22 @@ namespace Station.Dialogs
             await playbackDialog.ShowAsync();
         }
 
-        private void PowerToggle_Checked(object sender, RoutedEventArgs e)
-        {
-            ShowNotification("Đã gửi lệnh bật thiết bị", InfoBarSeverity.Success);
-        }
-
-        private void PowerToggle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ShowNotification("Đã gửi lệnh tắt thiết bị", InfoBarSeverity.Warning);
-        }
-
         private void PowerOnButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowNotification("Đã gửi lệnh bật thiết bị", InfoBarSeverity.Success);
+            ShowNotification("Đã gửi lệnh bật Node", InfoBarSeverity.Success);
         }
 
         private void PowerOffButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowNotification("Đã gửi lệnh tắt thiết bị", InfoBarSeverity.Warning);
+            ShowNotification("Đã gửi lệnh tắt Node", InfoBarSeverity.Warning);
         }
 
         private async void RebootButton_Click(object sender, RoutedEventArgs e)
         {
             RebootButton.IsEnabled = false;
-            ShowNotification("Đang khởi động lại thiết bị...", InfoBarSeverity.Informational);
+            ShowNotification("Đang khởi động lại Node...", InfoBarSeverity.Informational);
             await Task.Delay(2000);
-            ShowNotification("Thiết bị đã khởi động lại thành công", InfoBarSeverity.Success);
+            ShowNotification("Node đã khởi động lại thành công", InfoBarSeverity.Success);
             RebootButton.IsEnabled = true;
         }
 
@@ -331,6 +335,52 @@ namespace Station.Dialogs
                 var editDialog = new EditDeviceDialog(_device);
                 editDialog.XamlRoot = this.XamlRoot;
                 await editDialog.ShowAsync();
+            }
+        }
+
+        private async void SensorCard_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border && border.Tag is SensorViewModel sensor)
+            {
+                // Close current dialog first
+                this.Hide();
+                
+                var configDialog = new SensorConfigDialog(
+                    sensorId: sensor.Id,
+                    sensorName: sensor.Name,
+                    sensorType: sensor.TypeCode,
+                    currentValue: sensor.NumericValue,
+                    unit: sensor.Unit,
+                    icon: sensor.Icon,
+                    iconBackground: sensor.IconBackground
+                );
+                configDialog.XamlRoot = this.XamlRoot;
+                var result = await configDialog.ShowAsync();
+                
+                // Reopen this dialog after sensor config is closed
+                if (result == ContentDialogResult.None || result == ContentDialogResult.Secondary)
+                {
+                    await this.ShowAsync();
+                }
+            }
+        }
+
+        private void SensorCard_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                var originalBrush = border.Background;
+                border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Gray) { Opacity = 0.05 };
+            }
+        }
+
+        private void SensorCard_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Transparent);
             }
         }
 
@@ -366,9 +416,12 @@ namespace Station.Dialogs
 
     public class SensorViewModel
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
+        public int TypeCode { get; set; }
         public string Value { get; set; }
+        public double NumericValue { get; set; }
         public string Unit { get; set; }
         public string Icon { get; set; }
         public SolidColorBrush IconBackground { get; set; }

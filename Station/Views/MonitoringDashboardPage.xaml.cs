@@ -12,6 +12,10 @@ using Station.Dialogs;
 using Station.Services;
 using Microsoft.UI.Xaml;
 using Station.ViewModels;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace Station.Views
 {
@@ -53,6 +57,10 @@ namespace Station.Views
             { "CAM 04", false }, // Offline
             { "CAM 05", true }
         };
+
+        // Alert filter variables
+        private enum AlertFilterPeriod { Day, Week, Month }
+        private AlertFilterPeriod _currentAlertFilter = AlertFilterPeriod.Day;
 
         public MonitoringDashboardPage()
         {
@@ -743,6 +751,166 @@ namespace Station.Views
             UpdateCurrentCamera();
 
             Debug.WriteLine("Camera focus cleared, resuming rotation");
+        }
+
+        #endregion
+
+        #region Alert Filter Handlers
+
+        private void AlertFilterDay_Click(object sender, RoutedEventArgs e)
+        {
+            SetAlertFilter(AlertFilterPeriod.Day);
+        }
+
+        private void AlertFilterWeek_Click(object sender, RoutedEventArgs e)
+        {
+            SetAlertFilter(AlertFilterPeriod.Week);
+        }
+
+        private void AlertFilterMonth_Click(object sender, RoutedEventArgs e)
+        {
+            SetAlertFilter(AlertFilterPeriod.Month);
+        }
+
+        private void SetAlertFilter(AlertFilterPeriod period)
+        {
+            _currentAlertFilter = period;
+
+            // Reset all button styles
+            var normalBrush = (SolidColorBrush)Application.Current.Resources["MonitoringNodeNormalBrush"];
+            var primaryBrush = (SolidColorBrush)Application.Current.Resources["MonitoringTextPrimaryBrush"];
+            var secondaryBrush = (SolidColorBrush)Application.Current.Resources["MonitoringTextSecondaryBrush"];
+            var transparentBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+
+            AlertFilterDay.Background = transparentBrush;
+            AlertFilterDay.Foreground = secondaryBrush;
+            AlertFilterWeek.Background = transparentBrush;
+            AlertFilterWeek.Foreground = secondaryBrush;
+            AlertFilterMonth.Background = transparentBrush;
+            AlertFilterMonth.Foreground = secondaryBrush;
+
+            // Set active button style
+            switch (period)
+            {
+                case AlertFilterPeriod.Day:
+                    AlertFilterDay.Background = normalBrush;
+                    AlertFilterDay.Foreground = primaryBrush;
+                    break;
+                case AlertFilterPeriod.Week:
+                    AlertFilterWeek.Background = normalBrush;
+                    AlertFilterWeek.Foreground = primaryBrush;
+                    break;
+                case AlertFilterPeriod.Month:
+                    AlertFilterMonth.Background = normalBrush;
+                    AlertFilterMonth.Foreground = primaryBrush;
+                    break;
+            }
+
+            // Update chart data with mock data based on period
+            UpdateAlertChartData(period);
+        }
+
+        private void UpdateAlertChartData(AlertFilterPeriod period)
+        {
+            var random = new Random();
+
+            // Mock data multipliers based on period
+            int multiplier = period switch
+            {
+                AlertFilterPeriod.Day => 1,
+                AlertFilterPeriod.Week => 5,
+                AlertFilterPeriod.Month => 20,
+                _ => 1
+            };
+
+            // Generate mock data
+            var lowAlerts = (random.Next(2, 5) * multiplier);
+            var mediumAlerts = (random.Next(3, 6) * multiplier);
+            var highAlerts = (random.Next(2, 4) * multiplier);
+            var criticalAlerts = (random.Next(1, 3) * multiplier);
+
+            // Update ViewModel properties
+            ViewModel.IntruAlerts = lowAlerts;
+            ViewModel.MotionAlerts = mediumAlerts;
+            ViewModel.FireAlerts = highAlerts;
+            ViewModel.SmokeAlerts = criticalAlerts;
+
+            // Update total alerts
+            ViewModel.TodayAlerts = lowAlerts + mediumAlerts + highAlerts + criticalAlerts;
+            ViewModel.CriticalAlerts = criticalAlerts;
+            ViewModel.WarningAlerts = highAlerts + mediumAlerts;
+
+            // Recreate chart series
+            var seriesList = new System.Collections.Generic.List<ISeries>();
+
+            if (lowAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Thấp",
+                    Values = new int[] { lowAlerts },
+                    Fill = new SolidColorPaint(new SKColor(34, 197, 94)), // #22C55E - Green
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (mediumAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Trung bình",
+                    Values = new int[] { mediumAlerts },
+                    Fill = new SolidColorPaint(new SKColor(234, 179, 8)), // #EAB308 - Yellow
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (highAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Cao",
+                    Values = new int[] { highAlerts },
+                    Fill = new SolidColorPaint(new SKColor(249, 115, 22)), // #F97316 - Orange
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            if (criticalAlerts > 0)
+            {
+                seriesList.Add(new PieSeries<int>
+                {
+                    Name = "Nghiêm trọng",
+                    Values = new int[] { criticalAlerts },
+                    Fill = new SolidColorPaint(new SKColor(239, 68, 68)), // #EF4444 - Red
+                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    DataLabelsSize = 16,
+                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                    HoverPushout = 15,
+                    MaxRadialColumnWidth = double.MaxValue
+                });
+            }
+
+            // Update chart
+            ViewModel.AlertDistributionSeries = seriesList.ToArray();
+
+            Debug.WriteLine($"Alert filter changed to {period}: Low={lowAlerts}, Med={mediumAlerts}, High={highAlerts}, Critical={criticalAlerts}");
         }
 
         #endregion
