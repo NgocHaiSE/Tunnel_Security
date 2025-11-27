@@ -524,17 +524,47 @@
                         Padding="16"
                         Margin="0,0,8,8">
                     <StackPanel Spacing="12">
-                        <Grid>
-                            <TextBlock Text="Phân bố cảnh báo"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                <TextBlock Text="Day" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                <TextBlock Text="Week" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                <TextBlock Text="Month" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <!-- Header -->
+                        <TextBlock Text="Phân bố cảnh báo"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                        
+                        <!-- Time Filter Buttons -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Button Content="Day"
+                                    x:Name="AlertDayButton"
+                                    Click="AlertTimeFilter_Click"
+                                    Tag="Day"
+                                    Background="{StaticResource MonitoringAccentButtonBrush}"
+                                    Foreground="White"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderThickness="0"/>
+                            <Button Content="Week"
+                                    x:Name="AlertWeekButton"
+                                    Click="AlertTimeFilter_Click"
+                                    Tag="Week"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                    BorderThickness="1"/>
+                            <Button Content="Month"
+                                    x:Name="AlertMonthButton"
+                                    Click="AlertTimeFilter_Click"
+                                    Tag="Month"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                    FontSize="11"
+                                    Padding="12,4"
+                                    CornerRadius="4"
+                                    BorderBrush="{StaticResource MonitoringBorderBrush}"
+                                    BorderThickness="1"/>
+                        </StackPanel>
 
                         <!-- LiveCharts Pie Chart (Donut) -->
                         <lvc:PieChart Height="180"

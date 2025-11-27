@@ -200,6 +200,52 @@ namespace Station.Views
             }
         }
 
+        private void AlertTimeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                // Get resources safely
+                var transparentBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
+                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush) 
+                    ? (SolidColorBrush)secBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 139, 148, 158));
+                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush) 
+                    ? (SolidColorBrush)brdBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 54, 61));
+                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush) 
+                    ? (SolidColorBrush)accBrush 
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
+
+                // Reset all filter buttons
+                AlertDayButton.Background = transparentBrush;
+                AlertDayButton.Foreground = secondaryBrush;
+                AlertDayButton.BorderBrush = borderBrush;
+                AlertDayButton.BorderThickness = new Thickness(1);
+
+                AlertWeekButton.Background = transparentBrush;
+                AlertWeekButton.Foreground = secondaryBrush;
+                AlertWeekButton.BorderBrush = borderBrush;
+                AlertWeekButton.BorderThickness = new Thickness(1);
+
+                AlertMonthButton.Background = transparentBrush;
+                AlertMonthButton.Foreground = secondaryBrush;
+                AlertMonthButton.BorderBrush = borderBrush;
+                AlertMonthButton.BorderThickness = new Thickness(1);
+
+                // Set clicked button as active
+                button.Background = accentBrush;
+                button.Foreground = whiteBrush;
+                button.BorderThickness = new Thickness(0);
+
+                // Get filter type
+                string filterTag = button.Tag?.ToString() ?? "Day";
+                Debug.WriteLine($"Alert time filter changed to: {filterTag}");
+
+                // TODO: Update alert distribution chart based on time filter
+            }
+        }
+
         private async void InitializeSecurityMap()
         {
             try
