@@ -12,6 +12,7 @@ using Station.Dialogs;
 using Station.Services;
 using Microsoft.UI.Xaml;
 using Station.ViewModels;
+using CommunityToolkit.WinUI.Controls.SettingsControlsRns;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;

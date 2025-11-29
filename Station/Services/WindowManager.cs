@@ -77,8 +77,6 @@ namespace Station.Services
                 return new Windows.Graphics.SizeInt32(1400, 900);
             else if (pageType == typeof(LiveVideoPage))
                 return new Windows.Graphics.SizeInt32(1600, 900);
-            else if (pageType == typeof(MapPage))
-                return new Windows.Graphics.SizeInt32(1400, 800);
             else if (pageType == typeof(AlertsPage))
                 return new Windows.Graphics.SizeInt32(1200, 800);
             else if (pageType == typeof(DataPage))

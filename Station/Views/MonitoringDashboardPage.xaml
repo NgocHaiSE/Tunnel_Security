@@ -7,6 +7,7 @@
     xmlns:viewmodels="using:Station.ViewModels"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls2="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     Background="{StaticResource BackgroundSecondaryBrush}">
 
@@ -19,6 +20,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -113,17 +115,19 @@
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="250" MinWidth="200"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="300"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="280" MinWidth="250"/>
             </Grid.ColumnDefinitions>
 
             <!-- Right Panel - Trend Analysis & Relay Stations -->
-            <Border Grid.Column="2"
+            <Border Grid.Column="4"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
                     Padding="16"
-                    Margin="8,0,0,0">
+                    Margin="0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -238,10 +242,11 @@
                                         <TextBlock Text="Ngưỡng nghiêm trọng" Canvas.Left="390" Canvas.Top="22" FontSize="8" Foreground="#EF4444" Opacity="0.8"/>
 
                                         <!-- Total Alerts Line (Blue) -->
-                                        <Polyline Points="0,120 25,110 50,100 75,105 100,95 125,85 150,80 175,90 200,85 225,75 250,70 275,80 300,75" 
-                                                  Stroke="{StaticResource MonitoringAccentButtonBrush}" 
-                                                  StrokeThickness="2.5" 
-                                                  StrokeLineJoin="Round"/>                                        <!-- Critical Alerts Area (Red with gradient) -->
+                                        <Polyline Points="0,120 25,110 50,100 75,105 100,95 125,85 150,80 175,90 200,85 225,75 250,70 275,80 300,75"
+                                                  Stroke="{StaticResource MonitoringAccentButtonBrush}"
+                                                  StrokeThickness="2.5"
+                                                  StrokeLineJoin="Round"/>
+                                        <!-- Critical Alerts Area (Red with gradient) -->
                                         <Polygon Points="0,180 25,165 50,155 75,160 100,150 125,145 150,140 175,150 200,145 225,135 250,130 275,140 300,135 300,180"
                                                  Fill="#40EF4444"
                                                  Stroke="#EF4444"
@@ -249,10 +254,11 @@
                                                  StrokeLineJoin="Round"/>
 
                                         <!-- Warning Alerts Line (Orange) -->
-                                        <Polyline Points="0,145 25,140 50,135 75,138 100,130 125,125 150,120 175,128 200,125 225,118 250,115 275,122 300,118" 
-                                                  Stroke="#F97316" 
-                                                  StrokeThickness="2" 
-                                                  StrokeLineJoin="Round"/>                                        <!-- Data Points with tooltips (last 3 points) -->
+                                        <Polyline Points="0,145 25,140 50,135 75,138 100,130 125,125 150,120 175,128 200,125 225,118 250,115 275,122 300,118"
+                                                  Stroke="#F97316"
+                                                  StrokeThickness="2"
+                                                  StrokeLineJoin="Round"/>
+                                        <!-- Data Points with tooltips (last 3 points) -->
                                         <Ellipse Width="6" Height="6" Fill="{StaticResource MonitoringAccentButtonBrush}" Canvas.Left="297" Canvas.Top="72" ToolTipService.ToolTip="Tổng: 15 cảnh báo"/>
                                         <Ellipse Width="6" Height="6" Fill="#EF4444" Canvas.Left="297" Canvas.Top="132" ToolTipService.ToolTip="Nghiêm trọng: 5"/>
                                         <Ellipse Width="6" Height="6" Fill="#F97316" Canvas.Left="297" Canvas.Top="115" ToolTipService.ToolTip="Cảnh báo: 10"/>
@@ -480,12 +486,25 @@
                 </Grid>
             </Border>
 
+            <!-- GridSplitter between Left and Center panels -->
+            <controls2:GridSplitter Grid.Column="1"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Stretch"
+
+                                    Background="Transparent"
+                                    ResizeBehavior="PreviousAndNext">
+                <controls2:GridSplitter.RenderTransform>
+                    <TranslateTransform X="-0" />
+                </controls2:GridSplitter.RenderTransform>
+
+            </controls2:GridSplitter>
+
             <!-- Center Panel - Security Map -->
-            <Border Grid.Column="1"
+            <Border Grid.Column="2"
                     Background="{ThemeResource BackgroundPrimaryBrush}"
                     CornerRadius="8"
                     Padding="16"
-                    Margin="0,0,8,0">
+                    Margin="0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -509,6 +528,17 @@
                     </Border>
                 </Grid>
             </Border>
+            <!-- GridSplitter between Center and Right panels -->
+            <controls2:GridSplitter Grid.Column="3"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Stretch"
+                                    Background="Transparent"
+                                    ResizeBehavior="PreviousAndNext">
+                <controls2:GridSplitter.RenderTransform>
+                    <TranslateTransform X="-0" />
+                </controls2:GridSplitter.RenderTransform>
+            </controls2:GridSplitter>
+
 
             <!-- Left Panel - Alert Overview -->
             <Grid Grid.Column="0">
@@ -522,14 +552,14 @@
                         Background="{StaticResource MonitoringPanelBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16"
-                        Margin="0,0,8,8">
+                        Margin="0,0,0,8">
                     <StackPanel Spacing="12">
                         <!-- Header -->
                         <TextBlock Text="Phân bố cảnh báo"
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                        
+
                         <!-- Time Filter Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <Button Content="Day"
@@ -614,7 +644,7 @@
                         Background="{StaticResource MonitoringPanelBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16"
-                        Margin="0,0,8,0">
+                        Margin="0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -886,8 +916,15 @@
             </Grid>
         </Grid>
 
+        <!-- Horizontal GridSplitter between Main Content and Bottom Section -->
+        <controls2:GridSplitter Grid.Row="2"
+                                HorizontalAlignment="Stretch"
+                                ResizeBehavior="PreviousAndNext"
+                                Background="Transparent">
+        </controls2:GridSplitter>
+
         <!-- Bottom Section - Sensor Trends, Real-time Alerts, System Data -->
-        <Grid Grid.Row="2" Margin="0,16,0,0">
+        <Grid Grid.Row="3" Margin="0,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -900,7 +937,7 @@
                     CornerRadius="8"
                     Padding="16"
                     Margin="0,0,8,0"
-                    Height="220">
+                    MinHeight="220">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -1046,7 +1083,7 @@
                     CornerRadius="8"
                     Padding="16"
                     Margin="0,0,8,0"
-                    Height="220">
+                    MinHeight="220">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -1214,7 +1251,7 @@
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
                     Padding="16"
-                    Height="220">
+                    MinHeight="220">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
