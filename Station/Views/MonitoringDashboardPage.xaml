@@ -122,21 +122,20 @@
                 <ColumnDefinition Width="280" MinWidth="250"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Right Panel - Trend Analysis & Relay Stations -->
-            <Border Grid.Column="4"
-                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="16"
-                    Margin="0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="280"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="*" MinHeight="220"/>
-                    </Grid.RowDefinitions>
+            <!-- Right Panel - Trend Analysis & Error Statistics -->
+            <Grid Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="200"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" MinHeight="180"/>
+                </Grid.RowDefinitions>
 
-                    <!--Top Error Nodes Section (Resizable)-->
-                    <Grid Grid.Row="0">
+                <!-- Trend Analysis Section -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -165,7 +164,7 @@
                         </Grid>
 
                         <!--Error Nodes Bar Chart-->
-                        <Border Grid.Row="2"
+                        <Border Grid.Row="1"
                                 Background="{StaticResource MonitoringBackgroundBrush}"
                                 CornerRadius="8"
                                 Padding="12"
@@ -267,12 +266,24 @@
                             </Grid>
                         </Border>
                     </Grid>
+                </Border>
 
-                    <!--Spacer-->
-                    <Border Grid.Row="1"/>
+                <!-- GridSplitter for Resizable Panels -->
+                <controls2:GridSplitter Grid.Row="1"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Height="8"
+                                        Background="Transparent"
+                                        ResizeBehavior="PreviousAndNext">
+                </controls2:GridSplitter>
 
-                    <!--Top Error Nodes Section-->
-                    <Grid Grid.Row="2">
+                <!-- Error Statistics Section -->
+                <Border Grid.Row="2"
+                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,4,0,0">
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -463,10 +474,10 @@
                             </Border>
                         </ScrollViewer>
                     </Grid>
-                </Grid>
-            </Border>
+                </Border>
+            </Grid>
 
-            <!-- Trend Analysis Panel (Resizable) -->
+            <!-- Bottom Row - Relay Stations -->
             <Border Grid.Row="2"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
@@ -600,8 +611,9 @@
             <!-- Left Panel - Alert Overview -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="280"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*" MinHeight="150"/>
                 </Grid.RowDefinitions>
 
                 <!--Alert Overview-->
@@ -609,7 +621,7 @@
                         Background="{StaticResource MonitoringPanelBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16"
-                        Margin="0,0,0,8">
+                        Margin="0">
                     <StackPanel Spacing="12">
                         <!--Header-->
                         <TextBlock Text="Phân bố cảnh báo"
@@ -696,8 +708,17 @@
                     </StackPanel>
                 </Border>
 
+                <!-- GridSplitter for Left Panel -->
+                <controls2:GridSplitter Grid.Row="1"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Height="12"
+                                        Background="Transparent"
+                                        ResizeBehavior="PreviousAndNext">
+                </controls2:GridSplitter>
+
                 <!--Cảnh báo mới nhất-->
-                <Border Grid.Row="1"
+                <Border Grid.Row="2"
                         Background="{StaticResource MonitoringPanelBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16"
@@ -1443,18 +1464,30 @@
                                        Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
                         </StackPanel>
 
-                        <Button x:Name="CameraPauseButton"
-                                Click="CameraPauseButton_Click"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Padding="6"
-                                HorizontalAlignment="Right"
-                                ToolTipService.ToolTip="Tạm dừng">
-                            <FontIcon x:Name="CameraPauseIcon"
-                                      Glyph="&#xE769;"
-                                      FontSize="12"
-                                      Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                            <Button x:Name="CameraPauseButton"
+                                    Click="CameraPauseButton_Click"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="6"
+                                    ToolTipService.ToolTip="Tạm dừng">
+                                <FontIcon x:Name="CameraPauseIcon"
+                                          Glyph="&#xE769;"
+                                          FontSize="12"
+                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </Button>
+
+                            <Button x:Name="CameraPanelMenuButton"
+                                    Click="CameraPanelMenuButton_Click"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="6"
+                                    ToolTipService.ToolTip="Mở cửa sổ camera">
+                                <FontIcon Glyph="&#xE700;"
+                                          FontSize="12"
+                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                     <!-- Camera Display -->

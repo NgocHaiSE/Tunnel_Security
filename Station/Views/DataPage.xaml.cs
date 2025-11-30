@@ -19,26 +19,28 @@ namespace Station.Views
     {
         private List<LineData> _lines = new();
         private string _selectedLineId = "all";
-        private string _selectedNodeType = "all";
         private string _selectedStatus = "all";
         private int _timeRangeHours = 6;
+        private string _searchText = "";
+        private HashSet<string> _selectedTypes = new() { "radar", "camera", "temperature", "humidity", "light", "water", "vibration" };
+        private int _columnsPerRow = 2;
 
         public DataPage()
         {
             this.InitializeComponent();
             InitializeMockData();
-            BuildLineTree();
             this.Loaded += DataPage_Loaded;
         }
 
         private void DataPage_Loaded(object sender, RoutedEventArgs e)
         {
+            UpdateSensorCounts();
+            UpdateStatusCounts();
             LoadChartsForAllNodes();
         }
 
         private void InitializeMockData()
         {
-            // Mock data: 3 tuyến, mỗi tuyến có 6 nút
             _lines = new List<LineData>
             {
                 new LineData
@@ -89,151 +91,69 @@ namespace Station.Views
             };
         }
 
-        private void BuildLineTree()
+        private void UpdateSensorCounts()
         {
-            LineTreePanel.Children.Clear();
-
-            foreach (var line in _lines)
-            {
-                var expander = new Expander
-                {
-                    Header = CreateLineHeader(line),
-                    IsExpanded = true,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    Margin = new Thickness(0, 0, 0, 8)
-                };
-
-                var nodesList = new StackPanel { Spacing = 4, Margin = new Thickness(16, 8, 0, 0) };
-
-                foreach (var node in line.Nodes)
-                {
-                    var nodeButton = new Button
-                    {
-                        Content = CreateNodeContent(node),
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        HorizontalContentAlignment = HorizontalAlignment.Left,
-                        Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
-                        BorderThickness = new Thickness(0),
-                        Padding = new Thickness(8, 6, 8, 6),
-                        Tag = node
-                    };
-
-                    nodeButton.Click += NodeButton_Click;
-                    nodesList.Children.Add(nodeButton);
-                }
-
-                expander.Content = nodesList;
-                LineTreePanel.Children.Add(expander);
-            }
+            var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
+            RadarCount.Text = allNodes.Count(n => n.Type == "radar").ToString();
+            CameraCount.Text = allNodes.Count(n => n.Type == "camera").ToString();
+            TempCount.Text = allNodes.Count(n => n.Type == "temperature").ToString();
+            HumidityCount.Text = allNodes.Count(n => n.Type == "humidity").ToString();
+            LightCount.Text = allNodes.Count(n => n.Type == "light").ToString();
+            WaterCount.Text = allNodes.Count(n => n.Type == "water").ToString();
+            VibrationCount.Text = allNodes.Count(n => n.Type == "vibration").ToString();
         }
 
-        private UIElement CreateLineHeader(LineData line)
+        private void UpdateStatusCounts()
         {
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
+            var normalCount = allNodes.Count(n => n.Status == "normal");
+            var warningCount = allNodes.Count(n => n.Status == "warning");
+            var criticalCount = allNodes.Count(n => n.Status == "critical");
 
-            var nameText = new TextBlock
-            {
-                Text = $"📍 {line.Name}",
-                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                FontSize = 14
-            };
-            Grid.SetColumn(nameText, 0);
-
-            var countBadge = new Border
-            {
-                Background = new SolidColorBrush(Color.FromArgb(255, 59, 130, 246)),
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(8, 2, 8, 2),
-                Child = new TextBlock
-                {
-                    Text = $"{line.Nodes.Count} nút",
-                    FontSize = 10,
-                    //Foreground = new SolidColorBrush(Colors.White)
-                }
-            };
-            Grid.SetColumn(countBadge, 1);
-
-            grid.Children.Add(nameText);
-            grid.Children.Add(countBadge);
-
-            return grid;
-        }
-
-        private UIElement CreateNodeContent(NodeData node)
-        {
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            var icon = new TextBlock
-            {
-                Text = node.Icon,
-                FontSize = 16,
-                Margin = new Thickness(0, 0, 8, 0)
-            };
-            Grid.SetColumn(icon, 0);
-
-            var name = new TextBlock
-            {
-                Text = node.Name,
-                FontSize = 12,
-                TextTrimming = TextTrimming.CharacterEllipsis
-            };
-            Grid.SetColumn(name, 1);
-
-            var statusDot = new Ellipse
-            {
-                Width = 8,
-                Height = 8,
-                Fill = GetStatusBrush(node.Status)
-            };
-            Grid.SetColumn(statusDot, 2);
-
-            grid.Children.Add(icon);
-            grid.Children.Add(name);
-            grid.Children.Add(statusDot);
-
-            return grid;
-        }
-
-        private SolidColorBrush GetStatusBrush(string status)
-        {
-            return status switch
-            {
-                "normal" => new SolidColorBrush(Color.FromArgb(255, 34, 197, 94)),
-                "warning" => new SolidColorBrush(Color.FromArgb(255, 245, 158, 11)),
-                "critical" => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
-                _ => new SolidColorBrush(Color.FromArgb(255, 156, 163, 175))
-            };
-        }
-
-        private void NodeButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.Tag is NodeData node)
-            {
-                LoadChartForNode(node);
-            }
+            NormalCountText.Text = $"{normalCount} bình thường";
+            WarningCountText.Text = $"{warningCount} cảnh báo";
+            CriticalCountText.Text = $"{criticalCount} nghiêm trọng";
         }
 
         private void LoadChartsForAllNodes()
         {
-            if (ChartsPanel == null)
+            if (ChartsPanel == null) return;
+
+            ChartsPanel.Children.Clear();
+            var filteredNodes = GetFilteredNodes();
+
+            if (filteredNodes.Count == 0)
             {
-                Debug.WriteLine("ChartsPanel is null, skipping chart load");
+                EmptyState.Visibility = Visibility.Visible;
+                ChartCountText.Text = "0 biểu đồ";
                 return;
             }
 
-            ChartsPanel.Children.Clear();
+            EmptyState.Visibility = Visibility.Collapsed;
+            ChartCountText.Text = $"{filteredNodes.Count} biểu đồ";
 
-            var filteredNodes = GetFilteredNodes();
+            // Create rows based on layout setting
+            var currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+            int itemsInRow = 0;
 
             foreach (var node in filteredNodes)
             {
                 var chartCard = CreateChartCard(node);
-                ChartsPanel.Children.Add(chartCard);
+                currentRow.Children.Add(chartCard);
+                itemsInRow++;
+
+                if (itemsInRow >= _columnsPerRow)
+                {
+                    ChartsPanel.Children.Add(currentRow);
+                    currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+                    itemsInRow = 0;
+                }
+            }
+
+            // Add remaining items
+            if (currentRow.Children.Count > 0)
+            {
+                ChartsPanel.Children.Add(currentRow);
             }
         }
 
@@ -241,20 +161,29 @@ namespace Station.Views
         {
             var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
 
+            // Filter by line
             if (_selectedLineId != "all")
             {
                 var line = _lines.FirstOrDefault(l => l.Id == _selectedLineId);
                 allNodes = line?.Nodes ?? new List<NodeData>();
             }
 
-            if (_selectedNodeType != "all")
-            {
-                allNodes = allNodes.Where(n => n.Type == _selectedNodeType).ToList();
-            }
+            // Filter by selected types (checkboxes)
+            allNodes = allNodes.Where(n => _selectedTypes.Contains(n.Type)).ToList();
 
+            // Filter by status
             if (_selectedStatus != "all")
             {
                 allNodes = allNodes.Where(n => n.Status == _selectedStatus).ToList();
+            }
+
+            // Filter by search text
+            if (!string.IsNullOrEmpty(_searchText))
+            {
+                allNodes = allNodes.Where(n => 
+                    n.Name.ToLower().Contains(_searchText.ToLower()) ||
+                    n.Id.ToLower().Contains(_searchText.ToLower())
+                ).ToList();
             }
 
             return allNodes;
@@ -264,16 +193,18 @@ namespace Station.Views
         {
             var card = new Border
             {
-                Background = (Brush)Application.Current.Resources["MonitoringPanelBackgroundBrush"],
+                Background = (Brush)Application.Current.Resources["BackgroundSecondaryBrush"],
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(16),
-                Margin = new Thickness(0, 0, 0, 16)
+                MinWidth = _columnsPerRow == 1 ? 0 : (_columnsPerRow == 2 ? 450 : 300),
+                HorizontalAlignment = _columnsPerRow == 1 ? HorizontalAlignment.Stretch : HorizontalAlignment.Left
             };
 
             var grid = new Grid();
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(300) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(250) });
 
+            // Header
             var header = new Grid { Margin = new Thickness(0, 0, 0, 12) };
             header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -282,15 +213,15 @@ namespace Station.Views
             var title = new TextBlock
             {
                 Text = $"{node.Icon} {node.Name}",
-                FontSize = 16,
+                FontSize = 14,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
             };
             var subtitle = new TextBlock
             {
-                Text = $"Giá trị hiện tại: {node.Value} {GetUnit(node.Type)}",
-                FontSize = 12,
-                Foreground = (Brush)Application.Current.Resources["MonitoringTextSecondaryBrush"],
-                Margin = new Thickness(0, 4, 0, 0)
+                Text = $"Giá trị: {node.Value} {GetUnit(node.Type)}",
+                FontSize = 11,
+                Foreground = (Brush)Application.Current.Resources["TextSecondaryBrush"],
+                Margin = new Thickness(0, 2, 0, 0)
             };
             titleStack.Children.Add(title);
             titleStack.Children.Add(subtitle);
@@ -299,13 +230,14 @@ namespace Station.Views
             var statusBadge = new Border
             {
                 Background = GetStatusBrush(node.Status),
-                CornerRadius = new CornerRadius(12),
-                Padding = new Thickness(12, 4, 12, 4),
+                CornerRadius = new CornerRadius(10),
+                Padding = new Thickness(10, 4, 10, 4),
+                VerticalAlignment = VerticalAlignment.Top,
                 Child = new TextBlock
                 {
                     Text = GetStatusText(node.Status),
-                    FontSize = 11,
-                    //Foreground = new SolidColorBrush(Colors.White)
+                    FontSize = 10,
+                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.White)
                 }
             };
             Grid.SetColumn(statusBadge, 1);
@@ -314,6 +246,7 @@ namespace Station.Views
             header.Children.Add(statusBadge);
             Grid.SetRow(header, 0);
 
+            // Chart
             var chart = CreateChart(node);
             Grid.SetRow(chart, 1);
 
@@ -336,6 +269,10 @@ namespace Station.Views
                 values[i] = Math.Max(0, baseValue + variance);
             }
 
+            var showDataPoints = ChkShowDataPoints?.IsChecked ?? true;
+            var smoothLine = ChkSmoothLine?.IsChecked ?? true ? 0.5 : 0;
+            var showGrid = ChkShowGrid?.IsChecked ?? true;
+
             var series = new ISeries[]
             {
                 new LineSeries<double>
@@ -346,40 +283,34 @@ namespace Station.Views
                         GetChartColor(node.Type, 10),
                         new SKPoint(0, 0),
                         new SKPoint(0, 1)),
-                    Stroke = new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 3 },
-                    GeometrySize = 8,
-                    GeometryStroke = new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 2 },
-                    GeometryFill = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    LineSmoothness = 0.5
+                    Stroke = new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 2 },
+                    GeometrySize = showDataPoints ? 6 : 0,
+                    GeometryStroke = showDataPoints ? new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 2 } : null,
+                    GeometryFill = showDataPoints ? new SolidColorPaint(new SKColor(255, 255, 255)) : null,
+                    LineSmoothness = smoothLine
                 }
             };
 
-            var xAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            var xAxis = new Axis
             {
-                new Axis
-                {
-                    Labels = new[] { "00h", "04h", "08h", "12h", "16h", "20h", "24h" },
-                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
-                    SeparatorsPaint = new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 },
-                    TextSize = 11
-                }
+                Labels = new[] { "00h", "04h", "08h", "12h", "16h", "20h", "24h" },
+                LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                TextSize = 10
             };
 
-            var yAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            var yAxis = new Axis
             {
-                new Axis
-                {
-                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
-                    SeparatorsPaint = new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 },
-                    TextSize = 11
-                }
+                LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                TextSize = 10
             };
 
             return new CartesianChart
             {
                 Series = series,
-                XAxes = xAxis,
-                YAxes = yAxis
+                XAxes = new[] { xAxis },
+                YAxes = new[] { yAxis }
             };
         }
 
@@ -390,11 +321,22 @@ namespace Station.Views
                 "radar" => new SKColor(16, 185, 129, alpha),
                 "camera" => new SKColor(59, 130, 246, alpha),
                 "temperature" => new SKColor(239, 68, 68, alpha),
-                "humidity" => new SKColor(59, 130, 246, alpha),
+                "humidity" => new SKColor(6, 182, 212, alpha),
                 "light" => new SKColor(251, 191, 36, alpha),
                 "water" => new SKColor(14, 165, 233, alpha),
                 "vibration" => new SKColor(245, 158, 11, alpha),
                 _ => new SKColor(156, 163, 175, alpha)
+            };
+        }
+
+        private SolidColorBrush GetStatusBrush(string status)
+        {
+            return status switch
+            {
+                "normal" => new SolidColorBrush(Color.FromArgb(255, 34, 197, 94)),
+                "warning" => new SolidColorBrush(Color.FromArgb(255, 245, 158, 11)),
+                "critical" => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+                _ => new SolidColorBrush(Color.FromArgb(255, 156, 163, 175))
             };
         }
 
@@ -424,42 +366,17 @@ namespace Station.Views
             };
         }
 
-        private void LoadChartForNode(NodeData node)
-        {
-            ChartsPanel.Children.Clear();
-            var chartCard = CreateChartCard(node);
-            ChartsPanel.Children.Add(chartCard);
-        }
-
+        // Event Handlers
         private void LineFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (LineFilterComboBox.SelectedIndex == 0)
-                _selectedLineId = "all";
-            else if (LineFilterComboBox.SelectedIndex == 1)
-                _selectedLineId = "LINE_A";
-            else if (LineFilterComboBox.SelectedIndex == 2)
-                _selectedLineId = "LINE_B";
-            else if (LineFilterComboBox.SelectedIndex == 3)
-                _selectedLineId = "LINE_C";
-
-            LoadChartsForAllNodes();
-        }
-
-        private void NodeTypeFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _selectedNodeType = NodeTypeFilterComboBox.SelectedIndex switch
+            _selectedLineId = LineFilterComboBox.SelectedIndex switch
             {
                 0 => "all",
-                1 => "radar",
-                2 => "camera",
-                3 => "temperature",
-                4 => "humidity",
-                5 => "light",
-                6 => "water",
-                7 => "vibration",
+                1 => "LINE_A",
+                2 => "LINE_B",
+                3 => "LINE_C",
                 _ => "all"
             };
-
             LoadChartsForAllNodes();
         }
 
@@ -471,10 +388,8 @@ namespace Station.Views
                 1 => "normal",
                 2 => "warning",
                 3 => "critical",
-                4 => "offline",
                 _ => "all"
             };
-
             LoadChartsForAllNodes();
         }
 
@@ -489,6 +404,63 @@ namespace Station.Views
                 4 => 720,
                 _ => 6
             };
+            LoadChartsForAllNodes();
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _searchText = SearchTextBox.Text;
+            LoadChartsForAllNodes();
+        }
+
+        private void ChartType_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is string type)
+            {
+                if (checkBox.IsChecked == true)
+                    _selectedTypes.Add(type);
+                else
+                    _selectedTypes.Remove(type);
+
+                LoadChartsForAllNodes();
+            }
+        }
+
+        private void SelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            ChkRadar.IsChecked = true;
+            ChkCamera.IsChecked = true;
+            ChkTemperature.IsChecked = true;
+            ChkHumidity.IsChecked = true;
+            ChkLight.IsChecked = true;
+            ChkWater.IsChecked = true;
+            ChkVibration.IsChecked = true;
+        }
+
+        private void ClearAll_Click(object sender, RoutedEventArgs e)
+        {
+            ChkRadar.IsChecked = false;
+            ChkCamera.IsChecked = false;
+            ChkTemperature.IsChecked = false;
+            ChkHumidity.IsChecked = false;
+            ChkLight.IsChecked = false;
+            ChkWater.IsChecked = false;
+            ChkVibration.IsChecked = false;
+        }
+
+        private void DisplayOption_Changed(object sender, RoutedEventArgs e)
+        {
+            LoadChartsForAllNodes();
+        }
+
+        private void LayoutOption_Changed(object sender, RoutedEventArgs e)
+        {
+            if (LayoutSingle?.IsChecked == true)
+                _columnsPerRow = 1;
+            else if (LayoutDouble?.IsChecked == true)
+                _columnsPerRow = 2;
+            else if (LayoutTriple?.IsChecked == true)
+                _columnsPerRow = 3;
 
             LoadChartsForAllNodes();
         }

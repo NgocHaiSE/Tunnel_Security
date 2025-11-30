@@ -595,6 +595,11 @@ namespace Station.Views
             OpenModuleWindow("Camera giám sát", typeof(LiveVideoPage));
         }
 
+        private void CameraPanelMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModuleWindow("Camera giám sát", typeof(LiveVideoPage));
+        }
+
         private void DevicePanelMenuButton_Click(object sender, RoutedEventArgs e)
         {
             OpenModuleWindow("Thiết bị", typeof(DevicesPage));
