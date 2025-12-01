@@ -65,5 +65,107 @@ namespace Station.Views
                 border.BorderThickness = new Thickness(1);
             }
         }
+
+        /// <summary>
+        /// Handles node expand/collapse button click
+        /// </summary>
+        private void NodeExpandButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                // Find the parent Border (Node Card)
+                var parent = button.Parent;
+                while (parent != null && parent is not Border)
+                {
+                    parent = VisualTreeHelper.GetParent(parent) as DependencyObject;
+                }
+
+                if (parent is Border nodeBorder)
+                {
+                    // Find the SensorsPanel and ExpandIcon
+                    var sensorsPanel = FindChildByName<StackPanel>(nodeBorder, "SensorsPanel");
+                    var expandIcon = FindChildByName<FontIcon>(button, "ExpandIcon");
+
+                    if (sensorsPanel != null && expandIcon != null)
+                    {
+                        // Toggle visibility
+                        if (sensorsPanel.Visibility == Visibility.Collapsed)
+                        {
+                            sensorsPanel.Visibility = Visibility.Visible;
+                            expandIcon.Glyph = "\uE70E"; // ChevronUp
+                        }
+                        else
+                        {
+                            sensorsPanel.Visibility = Visibility.Collapsed;
+                            expandIcon.Glyph = "\uE70D"; // ChevronDown
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Highlights sensor card on mouse enter
+        /// </summary>
+        private void SensorCard_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.BorderBrush = (SolidColorBrush)Application.Current.Resources["PrimaryMediumBrush"];
+                border.BorderThickness = new Thickness(2);
+                border.Background = (SolidColorBrush)Application.Current.Resources["BackgroundAccentBrush"];
+            }
+        }
+
+        /// <summary>
+        /// Restores sensor card on mouse leave
+        /// </summary>
+        private void SensorCard_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.BorderBrush = (SolidColorBrush)Application.Current.Resources["BorderLightBrush"];
+                border.BorderThickness = new Thickness(1);
+                border.Background = (SolidColorBrush)Application.Current.Resources["BackgroundSecondaryBrush"];
+            }
+        }
+
+        /// <summary>
+        /// Opens sensor detail dialog when sensor card is tapped
+        /// </summary>
+        private void SensorCard_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is ViewModels.SensorItemViewModel sensor)
+            {
+                sensor.OpenSensorDetailCommand?.Execute(null);
+            }
+        }
+
+        /// <summary>
+        /// Helper method to find a child element by name
+        /// </summary>
+        private T FindChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            if (parent == null) return null;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T typedChild && typedChild.Name == name)
+                {
+                    return typedChild;
+                }
+
+                var result = FindChildByName<T>(child, name);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
     }
 }

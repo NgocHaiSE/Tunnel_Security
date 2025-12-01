@@ -24,13 +24,13 @@ namespace Station.ViewModels
             }
         }
 
-        private string? _selectedType = "Tất cả loại";
-        public string? SelectedType
+        private string? _selectedLine = "Tất cả tuyến";
+        public string? SelectedLine
         {
-            get => _selectedType;
+            get => _selectedLine;
             set
             {
-                SetProperty(ref _selectedType, value);
+                SetProperty(ref _selectedLine, value);
                 ApplyFilters();
             }
         }
@@ -49,8 +49,9 @@ namespace Station.ViewModels
         // Device collections
         public ObservableCollection<DeviceItemViewModel> AllDevices { get; } = new();
         public ObservableCollection<DeviceItemViewModel> FilteredDevices { get; } = new();
+        public ObservableCollection<NodeItemViewModel> FilteredNodes { get; } = new();
         public ObservableCollection<string> StatusFilters { get; } = new();
-        public ObservableCollection<string> TypeFilters { get; } = new();
+        public ObservableCollection<string> LineFilters { get; } = new();
 
         // Statistics
         private int _totalDevices;
@@ -97,11 +98,11 @@ namespace Station.ViewModels
             StatusFilters.Add("Lỗi");
             StatusFilters.Add("Tắt");
 
-            // Mock type filters
-            TypeFilters.Add("Tất cả loại");
-            TypeFilters.Add("Camera");
-            TypeFilters.Add("Sensor");
-            TypeFilters.Add("Radar");
+            // Mock line filters
+            LineFilters.Add("Tất cả tuyến");
+            LineFilters.Add("Tuyến A1");
+            LineFilters.Add("Tuyến A2");
+            LineFilters.Add("Tuyến A3");
 
             // Mock devices
             var mockDevices = new[]
@@ -230,6 +231,7 @@ Type = "Sensor",
         private void ApplyFilters()
         {
             FilteredDevices.Clear();
+            FilteredNodes.Clear();
 
             var filtered = AllDevices.AsEnumerable();
 
@@ -249,10 +251,10 @@ Type = "Sensor",
                 });
             }
 
-            // Filter by type
-            if (!string.IsNullOrEmpty(SelectedType) && SelectedType != "Tất cả loại")
+            // Filter by line
+            if (!string.IsNullOrEmpty(SelectedLine) && SelectedLine != "Tất cả tuyến")
             {
-                filtered = filtered.Where(d => d.Type == SelectedType);
+                filtered = filtered.Where(d => d.Location.StartsWith(SelectedLine.Replace("Tuyến ", "")));
             }
 
             // Filter by search text
@@ -271,7 +273,150 @@ Type = "Sensor",
                 FilteredDevices.Add(device);
             }
 
+            // Group by nodes (location-based grouping)
+            var nodeGroups = filtered.GroupBy(d => {
+                var parts = d.Location.Split('/');
+                return parts.Length >= 3 ? $"{parts[0].Trim()}/{parts[1].Trim()}/{parts[2].Trim()}" : d.Location;
+            });
+
+            foreach (var group in nodeGroups)
+            {
+                var nodeDevices = group.ToList();
+                var firstDevice = nodeDevices.First();
+                var parts = firstDevice.Location.Split('/');
+                
+                var node = new NodeItemViewModel
+                {
+                    NodeName = parts.Length >= 3 ? parts[2].Trim() : "Unknown Node",
+                    LineName = parts.Length >= 1 ? parts[0].Trim() : "Unknown Line",
+                    Location = string.Join(" / ", parts.Take(2).Select(p => p.Trim())),
+                    Status = nodeDevices.Any(d => d.Status == DeviceStatus.Fault) ? DeviceStatus.Fault :
+                             nodeDevices.Any(d => d.Status == DeviceStatus.Offline) ? DeviceStatus.Offline :
+                             DeviceStatus.Online
+                };
+
+                // Add all 6 sensor types to each node
+                var random = new Random();
+                var nodeLocation = string.Join("/", parts.Select(p => p.Trim()));
+                
+                // 1. Radar phát hiện người
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"RAD-{parts[2].Trim()}-001",
+                    SensorName = "Radar phát hiện người",
+                    SensorType = "Radar Detection",
+                    CurrentValue = random.Next(0, 2) == 0 ? "Không phát hiện" : "Phát hiện",
+                    Unit = "",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE701" // Radar
+                });
+
+                // 2. Camera hồng ngoại
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"CAM-{parts[2].Trim()}-001",
+                    SensorName = "Camera hồng ngoại",
+                    SensorType = "Infrared Camera",
+                    CurrentValue = "Online",
+                    Unit = "",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE714" // Camera
+                });
+
+                // 3. Cảm biến hồng ngoại phát hiện người
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"PIR-{parts[2].Trim()}-001",
+                    SensorName = "Cảm biến hồng ngoại",
+                    SensorType = "PIR Motion Sensor",
+                    CurrentValue = random.Next(0, 2) == 0 ? "Không chuyển động" : "Có chuyển động",
+                    Unit = "",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE7C1" // Motion
+                });
+
+                // 4. Cảm biến nhiệt độ, độ ẩm
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"THM-{parts[2].Trim()}-001",
+                    SensorName = "Cảm biến nhiệt độ & độ ẩm",
+                    SensorType = "Temperature & Humidity Sensor",
+                    CurrentValue = $"{20 + random.Next(15)}.{random.Next(10)}°C / {40 + random.Next(40)}%",
+                    Unit = "",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE9CA" // Temperature
+                });
+
+                // 5. Cảm biến ánh sáng
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"LUX-{parts[2].Trim()}-001",
+                    SensorName = "Cảm biến ánh sáng",
+                    SensorType = "Light Sensor",
+                    CurrentValue = $"{100 + random.Next(400)}",
+                    Unit = "lux",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE706" // Light
+                });
+
+                // 6. Cảm biến đo mực nước
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"WTR-{parts[2].Trim()}-001",
+                    SensorName = "Cảm biến mực nước",
+                    SensorType = "Water Level Sensor",
+                    CurrentValue = $"{random.Next(50, 150)}.{random.Next(10)}",
+                    Unit = "cm",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uE9F2" // Water
+                });
+
+                // 7. Cảm biến gia tốc (rung động)
+                node.Sensors.Add(new SensorItemViewModel
+                {
+                    SensorId = $"ACC-{parts[2].Trim()}-001",
+                    SensorName = "Cảm biến gia tốc",
+                    SensorType = "Accelerometer Sensor",
+                    CurrentValue = $"{random.Next(1, 10)}.{random.Next(10)}",
+                    Unit = "m/s²",
+                    LastUpdateText = "Vừa xong",
+                    SensorStatus = DeviceStatus.Online,
+                    TypeIcon = "\uEDA4" // Vibration
+                });
+
+                FilteredNodes.Add(node);
+            }
+
             UpdateStatistics();
+        }
+
+        private string GetMockSensorValue(string type)
+        {
+            var random = new Random();
+            return type switch
+            {
+                "Camera" => "Online",
+                "Sensor" => $"{20 + random.Next(15)}.{random.Next(10)}",
+                "Radar" => $"{random.Next(100)}",
+                _ => "N/A"
+            };
+        }
+
+        private string GetSensorUnit(string type)
+        {
+            return type switch
+            {
+                "Camera" => "",
+                "Sensor" => "°C",
+                "Radar" => "%",
+                _ => ""
+            };
         }
 
         private void UpdateStatistics()
@@ -507,6 +652,125 @@ Type = "Sensor",
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error opening playback dialog: {ex.Message}");
+            }
+        }
+    }
+
+    public partial class NodeItemViewModel : ObservableObject
+    {
+        [ObservableProperty]
+        private string _nodeName = string.Empty;
+
+        [ObservableProperty]
+        private string _lineName = string.Empty;
+
+        [ObservableProperty]
+        private string _location = string.Empty;
+
+        [ObservableProperty]
+        private DeviceStatus _status;
+
+        [ObservableProperty]
+        private bool _isExpanded = false;
+
+        public ObservableCollection<SensorItemViewModel> Sensors { get; } = new();
+
+        public string StatusText
+        {
+            get => Status switch
+            {
+                DeviceStatus.Online => "Hoạt động",
+                DeviceStatus.Offline => "Ngoại tuyến",
+                DeviceStatus.Fault => "Lỗi",
+                DeviceStatus.Disabled => "Tắt",
+                _ => "Không xác định"
+            };
+        }
+
+        public SolidColorBrush StatusColor
+        {
+            get => Status switch
+            {
+                DeviceStatus.Online => new SolidColorBrush(Color.FromArgb(255, 34, 197, 94)),
+                DeviceStatus.Offline => new SolidColorBrush(Color.FromArgb(255, 148, 163, 184)),
+                DeviceStatus.Fault => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+                DeviceStatus.Disabled => new SolidColorBrush(Color.FromArgb(255, 100, 116, 139)),
+                _ => new SolidColorBrush(Color.FromArgb(255, 148, 163, 184))
+            };
+        }
+
+        public SolidColorBrush StatusBackgroundColor
+        {
+            get => Status switch
+            {
+                DeviceStatus.Online => new SolidColorBrush(Color.FromArgb(40, 34, 197, 94)),
+                DeviceStatus.Offline => new SolidColorBrush(Color.FromArgb(40, 148, 163, 184)),
+                DeviceStatus.Fault => new SolidColorBrush(Color.FromArgb(40, 239, 68, 68)),
+                DeviceStatus.Disabled => new SolidColorBrush(Color.FromArgb(40, 100, 116, 139)),
+                _ => new SolidColorBrush(Color.FromArgb(40, 148, 163, 184))
+            };
+        }
+
+        public string SensorCountText => $"{Sensors.Count} cảm biến";
+    }
+
+    public partial class SensorItemViewModel : ObservableObject
+    {
+        [ObservableProperty]
+        private string _sensorId = string.Empty;
+
+        [ObservableProperty]
+        private string _sensorName = string.Empty;
+
+        [ObservableProperty]
+        private string _sensorType = string.Empty;
+
+        [ObservableProperty]
+        private string _currentValue = string.Empty;
+
+        [ObservableProperty]
+        private string _unit = string.Empty;
+
+        [ObservableProperty]
+        private string _lastUpdateText = string.Empty;
+
+        [ObservableProperty]
+        private DeviceStatus _sensorStatus;
+
+        [ObservableProperty]
+        private string _typeIcon = string.Empty;
+
+        public SolidColorBrush SensorStatusColor
+        {
+            get => SensorStatus switch
+            {
+                DeviceStatus.Online => new SolidColorBrush(Color.FromArgb(255, 34, 197, 94)),
+                DeviceStatus.Offline => new SolidColorBrush(Color.FromArgb(255, 148, 163, 184)),
+                DeviceStatus.Fault => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+                DeviceStatus.Disabled => new SolidColorBrush(Color.FromArgb(255, 100, 116, 139)),
+                _ => new SolidColorBrush(Color.FromArgb(255, 148, 163, 184))
+            };
+        }
+
+        [RelayCommand]
+        private async void OpenSensorDetail()
+        {
+            try
+            {
+                // Create and show the Sensor Detail Dialog
+                var dialog = new Station.Dialogs.SensorDetailDialog(this);
+
+                // Set XamlRoot from App's main window
+                if (Microsoft.UI.Xaml.Application.Current is App app && app.m_window is MainWindow mainWindow)
+                {
+                    dialog.XamlRoot = mainWindow.Content.XamlRoot;
+                }
+
+                await dialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error opening sensor detail dialog: {ex.Message}");
             }
         }
     }
