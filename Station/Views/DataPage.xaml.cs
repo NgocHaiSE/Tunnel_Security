@@ -12,6 +12,7 @@ using LiveChartsCore.SkiaSharpView.WinUI;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using Windows.UI;
+using Station.Controls;
 
 namespace Station.Views
 {
@@ -247,7 +248,17 @@ namespace Station.Views
             Grid.SetRow(header, 0);
 
             // Chart
-            var chart = CreateChart(node);
+            FrameworkElement chart;
+            if (node.Type == "radar")
+            {
+                // Use WebView2 radar chart for radar sensors
+                chart = CreateRadarChart(node);
+            }
+            else
+            {
+                // Use line chart for other sensors
+                chart = CreateChart(node);
+            }
             Grid.SetRow(chart, 1);
 
             grid.Children.Add(header);
@@ -255,6 +266,36 @@ namespace Station.Views
             card.Child = grid;
 
             return card;
+        }
+
+        private RadarChartControl CreateRadarChart(NodeData node)
+        {
+            var random = new Random();
+            var detections = new List<RadarDetection>();
+
+            // Generate random detections based on node value
+            var detectionCount = (int)(node.Value ?? 0);
+            for (int i = 0; i < detectionCount; i++)
+            {
+                // Generate detections in active zone (60° - 120°)
+                detections.Add(new RadarDetection
+                {
+                    angle = 60 + random.Next(61), // Random angle between 60° and 120°
+                    distance = 10 + random.Next(35), // Random distance between 10cm and 45cm
+                    intensity = 50 + random.Next(50), // Random intensity
+                    objectType = "Person"
+                });
+            }
+
+            var radarChart = new RadarChartControl();
+            
+            // Update detections after control is loaded
+            radarChart.Loaded += async (s, e) =>
+            {
+                await radarChart.UpdateDetectionsAsync(detections);
+            };
+
+            return radarChart;
         }
 
         private CartesianChart CreateChart(NodeData node)

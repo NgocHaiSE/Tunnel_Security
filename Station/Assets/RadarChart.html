@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        #radarContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="radarContainer">
+        <canvas id="radarCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('radarCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let config = {
+            maxDistance: 50,
+            startAngle: 170,
+            endAngle: 10,
+            deadZoneAngle: 10,
+            detections: []
+        };
+
+        let sweepAngle = 90;
+        let sweepDirection = 1;
+        let animationSpeed = 0.1;
+        let pulseTime = 0;
+        let detectionFadeDelay = 2000; // Thời gian (ms) điểm hiển thị sau khi quét qua
+        let detectionTimestamps = new Map(); // Lưu thời điểm quét qua mỗi điểm
+        let scanRangeStart = 30; // Góc bắt đầu vùng quét
+        let scanRangeEnd = 150; // Góc kết thúc vùng quét
+
+        function resizeCanvas() {
+            const container = document.getElementById('radarContainer');
+            const containerWidth = container.clientWidth || 500;
+            const containerHeight = container.clientHeight || 300;
+            
+            canvas.width = containerWidth;
+            canvas.height = containerHeight;
+        }
+
+        function drawRadar() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            if (width <= 0 || height <= 0) return;
+            
+            const centerX = width / 2;
+            const centerY = height - 10;
+            const radius = Math.min(width / 2 - 20, height - 15);
+
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, Math.PI, 0, false);
+            ctx.lineTo(centerX, centerY);
+            ctx.closePath();
+            ctx.fill();
+
+            drawDeadZone(centerX, centerY, radius, 180, scanRangeEnd, '#8b0000');
+            drawDeadZone(centerX, centerY, radius, scanRangeStart, 0, '#8b0000');
+
+            const activeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            activeGradient.addColorStop(0, 'rgba(34, 197, 94, 0.15)');
+            activeGradient.addColorStop(1, 'rgba(34, 197, 94, 0.03)');
+            
+            ctx.fillStyle = activeGradient;
+            drawSector(centerX, centerY, radius, scanRangeEnd, scanRangeStart);
+
+            drawDistanceRings(centerX, centerY, radius);
+            drawAngleLines(centerX, centerY, radius);
+            drawSweepLine(centerX, centerY, radius, sweepAngle);
+            drawSweepTrail(centerX, centerY, radius, sweepAngle);
+            drawDetections(centerX, centerY, radius);
+            drawLabels(centerX, centerY, radius);
+
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawDeadZone(centerX, centerY, radius, startAngle, endAngle, color) {
+            ctx.fillStyle = `${color}40`;
+            drawSector(centerX, centerY, radius, startAngle, endAngle);
+
+            ctx.strokeStyle = `${color}80`;
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < 20; i++) {
+                const angle = startAngle - (startAngle - endAngle) * (i / 20);
+                const rad = degToRad(180 - angle);
+                const x = centerX + radius * Math.cos(rad);
+                const y = centerY - radius * Math.sin(rad);
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            drawRadialLine(centerX, centerY, radius, startAngle);
+            drawRadialLine(centerX, centerY, radius, endAngle);
+        }
+
+        function drawSector(centerX, centerY, radius, startAngle, endAngle) {
+            const startRad = degToRad(180 - startAngle);
+            const endRad = degToRad(180 - endAngle);
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startRad, endRad, false);
+            ctx.lineTo(centerX, centerY);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawDistanceRings(centerX, centerY, radius) {
+            const distances = [10, 20, 30, 40];
+            
+            for (const distance of distances) {
+                const r = (distance / config.maxDistance) * radius;
+                
+                ctx.strokeStyle = 'rgba(34, 197, 94, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, Math.PI, 0, false);
+                ctx.stroke();
+
+                ctx.fillStyle = '#22c55e';
+                ctx.font = '10px Segoe UI';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${distance}cm`, centerX + r + 5, centerY - 3);
+            }
+        }
+
+        function drawAngleLines(centerX, centerY, radius) {
+            const angles = [scanRangeStart, 90, scanRangeEnd];
+            
+            ctx.strokeStyle = 'rgba(34, 197, 94, 0.3)';
+            ctx.lineWidth = 1;
+
+            for (const angle of angles) {
+                drawRadialLine(centerX, centerY, radius, angle);
+
+                const rad = degToRad(180 - angle);
+                const labelRadius = radius + 20;
+                const x = centerX + labelRadius * Math.cos(rad);
+                const y = centerY - labelRadius * Math.sin(rad);
+
+                ctx.fillStyle = '#22c55e';
+                ctx.font = 'bold 11px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${angle}°`, x, y + 4);
+            }
+        }
+
+        function drawRadialLine(centerX, centerY, radius, angle) {
+            const rad = degToRad(180 - angle);
+            const x = centerX + radius * Math.cos(rad);
+            const y = centerY - radius * Math.sin(rad);
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function drawSweepLine(centerX, centerY, radius, angle) {
+            if (angle < scanRangeStart || angle > scanRangeEnd) return;
+
+            const rad = degToRad(180 - angle);
+            const x = centerX + radius * Math.cos(rad);
+            const y = centerY - radius * Math.sin(rad);
+
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#22c55e';
+            
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawSweepTrail(centerX, centerY, radius, angle) {
+            if (angle < scanRangeStart || angle > scanRangeEnd) return;
+
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(34, 197, 94, 0.15)');
+            gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+            ctx.fillStyle = gradient;
+
+            const startAngle = Math.min(angle, scanRangeEnd);
+            const trailLength = 20;
+            const endAngle = Math.max(Math.min(angle - trailLength, scanRangeEnd), scanRangeStart);
+
+            if (startAngle > endAngle) {
+                drawSector(centerX, centerY, radius, startAngle, endAngle);
+            }
+        }
+
+        function drawDetections(centerX, centerY, radius) {
+            const currentTime = Date.now();
+            
+            for (const detection of config.detections) {
+                if (detection.angle < scanRangeStart || detection.angle > scanRangeEnd) continue;
+                if (detection.distance > config.maxDistance) continue;
+
+                const angle = detection.angle;
+                const distance = detection.distance;
+                const detectionKey = `${angle}_${distance}`;
+                
+                // Kiểm tra nếu đường quét vừa đi qua điểm này
+                const angleDiff = Math.abs(sweepAngle - angle);
+                if (angleDiff < 2) { // Đường quét gần điểm
+                    detectionTimestamps.set(detectionKey, currentTime);
+                }
+                
+                // Kiểm tra xem điểm có nên hiển thị không
+                const lastSweepTime = detectionTimestamps.get(detectionKey);
+                if (!lastSweepTime) continue; // Chưa được quét qua
+                
+                const timeSinceSweep = currentTime - lastSweepTime;
+                if (timeSinceSweep > detectionFadeDelay) {
+                    continue; // Đã quá thời gian hiển thị
+                }
+                
+                // Tính độ mờ dần khi sắp hết thời gian
+                const fadeStartTime = detectionFadeDelay * 0.7; // 70% thời gian bắt đầu mờ dần
+                let fadeAlpha = 1;
+                if (timeSinceSweep > fadeStartTime) {
+                    fadeAlpha = 1 - (timeSinceSweep - fadeStartTime) / (detectionFadeDelay - fadeStartTime);
+                }
+
+                const rad = degToRad(180 - angle);
+                const r = (distance / config.maxDistance) * radius;
+                const x = centerX + r * Math.cos(rad);
+                const y = centerY - r * Math.sin(rad);
+
+                // Vẽ các vòng sóng tỏa ra chậm dần
+                const maxWaves = 3;
+                const waveSpeed = 0.3; // Chậm hơn
+                const maxWaveRadius = 50;
+                
+                for (let i = 0; i < maxWaves; i++) {
+                    const waveOffset = (pulseTime * waveSpeed + i * 20) % maxWaveRadius;
+                    const waveAlpha = (1 - (waveOffset / maxWaveRadius)) * fadeAlpha;
+                    
+                    if (waveAlpha > 0) {
+                        ctx.strokeStyle = `rgba(239, 68, 68, ${waveAlpha * 0.5})`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, waveOffset, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+
+                // Vẽ điểm chính với hiệu ứng nhấp nháy nhẹ
+                const pulseScale = 1 + Math.sin(pulseTime * 0.05) * 0.2;
+                
+                ctx.shadowBlur = (15 + Math.sin(pulseTime * 0.08) * 8) * fadeAlpha;
+                ctx.shadowColor = '#ef4444';
+                ctx.fillStyle = `rgba(239, 68, 68, ${fadeAlpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 6 * pulseScale, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Vẽ điểm trung tâm sáng
+                ctx.shadowBlur = 10 * fadeAlpha;
+                ctx.fillStyle = `rgba(255, 255, 255, ${fadeAlpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function drawLabels(centerX, centerY, radius) {
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '10px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Khoảng cách', centerX, centerY + 20);
+        }
+
+        function degToRad(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function updateSweepAngle() {
+            sweepAngle += animationSpeed * sweepDirection;
+
+            if (sweepAngle >= scanRangeEnd) {
+                sweepAngle = scanRangeEnd;
+                sweepDirection = -1;
+            } else if (sweepAngle <= scanRangeStart) {
+                sweepAngle = scanRangeStart;
+                sweepDirection = 1;
+            }
+            
+            pulseTime += 1;
+        }
+
+        function animate() {
+            updateSweepAngle();
+            drawRadar();
+            requestAnimationFrame(animate);
+        }
+
+        window.updateRadarData = function(data) {
+            if (data.detections) {
+                config.detections = data.detections;
+            }
+            if (data.maxDistance) {
+                config.maxDistance = data.maxDistance;
+            }
+        };
+
+        window.setAnimationSpeed = function(speed) {
+            animationSpeed = speed;
+        };
+        
+        window.setDetectionFadeDelay = function(delay) {
+            detectionFadeDelay = delay;
+        };
+        
+        window.setScanRange = function(startAngle, endAngle) {
+            scanRangeStart = startAngle;
+            scanRangeEnd = endAngle;
+            sweepAngle = (startAngle + endAngle) / 2; // Reset về giữa vùng quét
+        };
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+        
+        setTimeout(() => {
+            resizeCanvas();
+            animate();
+        }, 100);
+    </script>
+</body>
+</html>
