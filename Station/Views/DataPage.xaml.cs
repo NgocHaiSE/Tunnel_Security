@@ -23,6 +23,7 @@ namespace Station.Views
         private string _selectedStatus = "all";
         private int _timeRangeHours = 6;
         private string _searchText = "";
+        private HashSet<string> _selectedNodeIds = new();
         private HashSet<string> _selectedTypes = new() { "radar", "camera", "temperature", "humidity", "light", "water", "vibration" };
         private int _columnsPerRow = 2;
 
@@ -35,8 +36,7 @@ namespace Station.Views
 
         private void DataPage_Loaded(object sender, RoutedEventArgs e)
         {
-            UpdateSensorCounts();
-            UpdateStatusCounts();
+            BuildNodeFilterComboBox();
             LoadChartsForAllNodes();
         }
 
@@ -51,12 +51,36 @@ namespace Station.Views
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData { Id = "S01", Name = "Radar Cổng A1", Type = "radar", Icon = "📡", Status = "normal", Value = 3 },
-                        new NodeData { Id = "S02", Name = "Radar Lối Thoát A2", Type = "radar", Icon = "📡", Status = "warning", Value = 15 },
-                        new NodeData { Id = "S03", Name = "Camera IR A3", Type = "camera", Icon = "📹", Status = "normal", Value = 1 },
-                        new NodeData { Id = "S04", Name = "Nhiệt độ A4", Type = "temperature", Icon = "🌡️", Status = "normal", Value = 28.5 },
-                        new NodeData { Id = "S05", Name = "Độ ẩm A5", Type = "humidity", Icon = "💧", Status = "normal", Value = 65 },
-                        new NodeData { Id = "S06", Name = "Ánh sáng A6", Type = "light", Icon = "💡", Status = "normal", Value = 174 }
+                        new NodeData 
+                        { 
+                            Id = "NODE_A1", 
+                            Name = "Node A1 - Cổng vào", 
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "S01", Name = "Radar", Type = "radar", Status = "normal", Value = 3 },
+                                new SensorData { Id = "S02", Name = "Camera IR", Type = "camera", Status = "normal", Value = 1 },
+                                new SensorData { Id = "S03", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.5 },
+                                new SensorData { Id = "S04", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
+                                new SensorData { Id = "S05", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 174 },
+                                new SensorData { Id = "S06", Name = "Mực nước", Type = "water", Status = "normal", Value = 5 }
+                            }
+                        },
+                        new NodeData 
+                        { 
+                            Id = "NODE_A2", 
+                            Name = "Node A2 - Giữa tuyến", 
+                            Status = "warning",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "S07", Name = "Radar", Type = "radar", Status = "warning", Value = 15 },
+                                new SensorData { Id = "S08", Name = "Camera IR", Type = "camera", Status = "normal", Value = 2 },
+                                new SensorData { Id = "S09", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 32.1 },
+                                new SensorData { Id = "S10", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
+                                new SensorData { Id = "S11", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 165 },
+                                new SensorData { Id = "S12", Name = "Rung động", Type = "vibration", Status = "warning", Value = 0.45 }
+                            }
+                        }
                     }
                 },
                 new LineData
@@ -66,12 +90,36 @@ namespace Station.Views
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData { Id = "S07", Name = "Radar B1", Type = "radar", Icon = "📡", Status = "normal", Value = 2 },
-                        new NodeData { Id = "S08", Name = "Camera IR B2", Type = "camera", Icon = "📹", Status = "normal", Value = 0 },
-                        new NodeData { Id = "S09", Name = "Nhiệt độ B3", Type = "temperature", Icon = "🌡️", Status = "warning", Value = 35.2 },
-                        new NodeData { Id = "S10", Name = "Độ ẩm B4", Type = "humidity", Icon = "💧", Status = "normal", Value = 70 },
-                        new NodeData { Id = "S11", Name = "Mực nước B5", Type = "water", Icon = "🌊", Status = "critical", Value = 25 },
-                        new NodeData { Id = "S12", Name = "Rung động B6", Type = "vibration", Icon = "📊", Status = "warning", Value = 0.45 }
+                        new NodeData 
+                        { 
+                            Id = "NODE_B1", 
+                            Name = "Node B1 - Điểm đo 1", 
+                            Status = "critical",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "S13", Name = "Radar", Type = "radar", Status = "normal", Value = 2 },
+                                new SensorData { Id = "S14", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
+                                new SensorData { Id = "S15", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 35.2 },
+                                new SensorData { Id = "S16", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 70 },
+                                new SensorData { Id = "S17", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 180 },
+                                new SensorData { Id = "S18", Name = "Mực nước", Type = "water", Status = "critical", Value = 25 }
+                            }
+                        },
+                        new NodeData 
+                        { 
+                            Id = "NODE_B2", 
+                            Name = "Node B2 - Điểm đo 2", 
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "S19", Name = "Radar", Type = "radar", Status = "normal", Value = 1 },
+                                new SensorData { Id = "S20", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
+                                new SensorData { Id = "S21", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.5 },
+                                new SensorData { Id = "S22", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 66 },
+                                new SensorData { Id = "S23", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 170 },
+                                new SensorData { Id = "S24", Name = "Rung động", Type = "vibration", Status = "normal", Value = 0.12 }
+                            }
+                        }
                     }
                 },
                 new LineData
@@ -81,85 +129,164 @@ namespace Station.Views
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData { Id = "S13", Name = "Radar C1", Type = "radar", Icon = "📡", Status = "normal", Value = 1 },
-                        new NodeData { Id = "S14", Name = "Camera IR C2", Type = "camera", Icon = "📹", Status = "normal", Value = 0 },
-                        new NodeData { Id = "S15", Name = "Nhiệt độ C3", Type = "temperature", Icon = "🌡️", Status = "normal", Value = 27.8 },
-                        new NodeData { Id = "S16", Name = "Độ ẩm C4", Type = "humidity", Icon = "💧", Status = "normal", Value = 68 },
-                        new NodeData { Id = "S17", Name = "Ánh sáng C5", Type = "light", Icon = "💡", Status = "normal", Value = 165 },
-                        new NodeData { Id = "S18", Name = "Mực nước C6", Type = "water", Icon = "🌊", Status = "normal", Value = 8 }
+                        new NodeData 
+                        { 
+                            Id = "NODE_C1", 
+                            Name = "Node C1 - Khu vực 1", 
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "S25", Name = "Radar", Type = "radar", Status = "normal", Value = 1 },
+                                new SensorData { Id = "S26", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
+                                new SensorData { Id = "S27", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.8 },
+                                new SensorData { Id = "S28", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
+                                new SensorData { Id = "S29", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 165 },
+                                new SensorData { Id = "S30", Name = "Mực nước", Type = "water", Status = "normal", Value = 8 }
+                            }
+                        }
                     }
                 }
             };
         }
 
-        private void UpdateSensorCounts()
+        //private void UpdateSensorCounts()
+        //{
+        //    var allSensors = _lines.SelectMany(l => l.Nodes).SelectMany(n => n.Sensors).ToList();
+        //    RadarCount.Text = allSensors.Count(s => s.Type == "radar").ToString();
+        //    CameraCount.Text = allSensors.Count(s => s.Type == "camera").ToString();
+        //    TempCount.Text = allSensors.Count(s => s.Type == "temperature").ToString();
+        //    HumidityCount.Text = allSensors.Count(s => s.Type == "humidity").ToString();
+        //    LightCount.Text = allSensors.Count(s => s.Type == "light").ToString();
+        //    WaterCount.Text = allSensors.Count(s => s.Type == "water").ToString();
+        //    VibrationCount.Text = allSensors.Count(s => s.Type == "vibration").ToString();
+        //}
+
+
+        private void BuildNodeFilterComboBox()
         {
-            var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
-            RadarCount.Text = allNodes.Count(n => n.Type == "radar").ToString();
-            CameraCount.Text = allNodes.Count(n => n.Type == "camera").ToString();
-            TempCount.Text = allNodes.Count(n => n.Type == "temperature").ToString();
-            HumidityCount.Text = allNodes.Count(n => n.Type == "humidity").ToString();
-            LightCount.Text = allNodes.Count(n => n.Type == "light").ToString();
-            WaterCount.Text = allNodes.Count(n => n.Type == "water").ToString();
-            VibrationCount.Text = allNodes.Count(n => n.Type == "vibration").ToString();
+            if (NodeFilterComboBox == null) return;
+
+            NodeFilterComboBox.Items.Clear();
+
+            // Add "All Nodes" option
+            var allItem = new ComboBoxItem
+            {
+                Content = "Tất cả nodes",
+                Tag = "all"
+            };
+            NodeFilterComboBox.Items.Add(allItem);
+
+            // Get lines based on selected line filter
+            var linesToShow = _selectedLineId == "all" 
+                ? _lines 
+                : _lines.Where(l => l.Id == _selectedLineId).ToList();
+
+            // Add nodes from filtered lines
+            foreach (var line in linesToShow)
+            {
+                foreach (var node in line.Nodes)
+                {
+                    var nodeItem = new ComboBoxItem
+                    {
+                        Content = _selectedLineId == "all" 
+                            ? $"{line.Name} - {node.Name}" 
+                            : node.Name, // If specific line selected, no need to show line name
+                        Tag = node.Id
+                    };
+                    NodeFilterComboBox.Items.Add(nodeItem);
+                }
+            }
+
+            NodeFilterComboBox.SelectedIndex = 0;
+            _selectedNodeIds.Clear(); // Reset node selection when rebuilding
         }
 
-        private void UpdateStatusCounts()
+        private void NodeFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
-            var normalCount = allNodes.Count(n => n.Status == "normal");
-            var warningCount = allNodes.Count(n => n.Status == "warning");
-            var criticalCount = allNodes.Count(n => n.Status == "critical");
+            if (NodeFilterComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            {
+                _selectedNodeIds.Clear();
+                
+                if (tag != "all")
+                {
+                    _selectedNodeIds.Add(tag);
+                }
 
-            NormalCountText.Text = $"{normalCount} bình thường";
-            WarningCountText.Text = $"{warningCount} cảnh báo";
-            CriticalCountText.Text = $"{criticalCount} nghiêm trọng";
+                LoadChartsForAllNodes();
+            }
         }
 
         private void LoadChartsForAllNodes()
         {
-            if (ChartsPanel == null) return;
+            if (ChartsPanel == null || CameraPanel == null) return;
 
             ChartsPanel.Children.Clear();
-            var filteredNodes = GetFilteredNodes();
+            CameraPanel.Children.Clear();
+            
+            var filteredSensors = GetFilteredSensors();
+            
+            // Separate cameras from other sensors
+            var cameraSensors = filteredSensors.Where(s => s.Type == "camera").ToList();
+            var chartSensors = filteredSensors.Where(s => s.Type != "camera").ToList();
 
-            if (filteredNodes.Count == 0)
+            // Handle Charts Panel
+            if (chartSensors.Count == 0)
             {
                 EmptyState.Visibility = Visibility.Visible;
                 ChartCountText.Text = "0 biểu đồ";
-                return;
             }
-
-            EmptyState.Visibility = Visibility.Collapsed;
-            ChartCountText.Text = $"{filteredNodes.Count} biểu đồ";
-
-            // Create rows based on layout setting
-            var currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
-            int itemsInRow = 0;
-
-            foreach (var node in filteredNodes)
+            else
             {
-                var chartCard = CreateChartCard(node);
-                currentRow.Children.Add(chartCard);
-                itemsInRow++;
+                EmptyState.Visibility = Visibility.Collapsed;
+                ChartCountText.Text = $"{chartSensors.Count} biểu đồ";
 
-                if (itemsInRow >= _columnsPerRow)
+                // Create rows based on layout setting
+                var currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+                int itemsInRow = 0;
+
+                foreach (var sensor in chartSensors)
+                {
+                    var chartCard = CreateChartCard(sensor);
+                    currentRow.Children.Add(chartCard);
+                    itemsInRow++;
+
+                    if (itemsInRow >= _columnsPerRow)
+                    {
+                        ChartsPanel.Children.Add(currentRow);
+                        currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+                        itemsInRow = 0;
+                    }
+                }
+
+                // Add remaining items
+                if (currentRow.Children.Count > 0)
                 {
                     ChartsPanel.Children.Add(currentRow);
-                    currentRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
-                    itemsInRow = 0;
                 }
             }
 
-            // Add remaining items
-            if (currentRow.Children.Count > 0)
+            // Handle Camera Panel
+            if (cameraSensors.Count == 0)
             {
-                ChartsPanel.Children.Add(currentRow);
+                CameraEmptyState.Visibility = Visibility.Visible;
+                CameraCountText.Text = "0 camera";
+            }
+            else
+            {
+                CameraEmptyState.Visibility = Visibility.Collapsed;
+                CameraCountText.Text = $"{cameraSensors.Count} camera";
+
+                foreach (var sensor in cameraSensors)
+                {
+                    var cameraCard = CreateCameraCard(sensor);
+                    CameraPanel.Children.Add(cameraCard);
+                }
             }
         }
 
-        private List<NodeData> GetFilteredNodes()
+        private List<SensorData> GetFilteredSensors()
         {
+            // Get all nodes
             var allNodes = _lines.SelectMany(l => l.Nodes).ToList();
 
             // Filter by line
@@ -169,28 +296,37 @@ namespace Station.Views
                 allNodes = line?.Nodes ?? new List<NodeData>();
             }
 
-            // Filter by selected types (checkboxes)
-            allNodes = allNodes.Where(n => _selectedTypes.Contains(n.Type)).ToList();
+            // Filter by selected nodes
+            if (_selectedNodeIds.Count > 0)
+            {
+                allNodes = allNodes.Where(n => _selectedNodeIds.Contains(n.Id)).ToList();
+            }
+
+            // Get all sensors from filtered nodes
+            var allSensors = allNodes.SelectMany(n => n.Sensors).ToList();
+
+            // Filter by sensor type (checkboxes in sidebar)
+            allSensors = allSensors.Where(s => _selectedTypes.Contains(s.Type)).ToList();
 
             // Filter by status
             if (_selectedStatus != "all")
             {
-                allNodes = allNodes.Where(n => n.Status == _selectedStatus).ToList();
+                allSensors = allSensors.Where(s => s.Status == _selectedStatus).ToList();
             }
 
             // Filter by search text
             if (!string.IsNullOrEmpty(_searchText))
             {
-                allNodes = allNodes.Where(n => 
-                    n.Name.ToLower().Contains(_searchText.ToLower()) ||
-                    n.Id.ToLower().Contains(_searchText.ToLower())
+                allSensors = allSensors.Where(s => 
+                    s.Name.ToLower().Contains(_searchText.ToLower()) ||
+                    s.Id.ToLower().Contains(_searchText.ToLower())
                 ).ToList();
             }
 
-            return allNodes;
+            return allSensors;
         }
 
-        private Border CreateChartCard(NodeData node)
+        private Border CreateChartCard(SensorData sensor)
         {
             var card = new Border
             {
@@ -213,13 +349,13 @@ namespace Station.Views
             var titleStack = new StackPanel();
             var title = new TextBlock
             {
-                Text = $"{node.Icon} {node.Name}",
+                Text = sensor.Name,
                 FontSize = 14,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
             };
             var subtitle = new TextBlock
             {
-                Text = $"Giá trị: {node.Value} {GetUnit(node.Type)}",
+                Text = $"Giá trị: {sensor.Value} {GetUnit(sensor.Type)}",
                 FontSize = 11,
                 Foreground = (Brush)Application.Current.Resources["TextSecondaryBrush"],
                 Margin = new Thickness(0, 2, 0, 0)
@@ -228,36 +364,21 @@ namespace Station.Views
             titleStack.Children.Add(subtitle);
             Grid.SetColumn(titleStack, 0);
 
-            var statusBadge = new Border
-            {
-                Background = GetStatusBrush(node.Status),
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(10, 4, 10, 4),
-                VerticalAlignment = VerticalAlignment.Top,
-                Child = new TextBlock
-                {
-                    Text = GetStatusText(node.Status),
-                    FontSize = 10,
-                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.White)
-                }
-            };
-            Grid.SetColumn(statusBadge, 1);
 
             header.Children.Add(titleStack);
-            header.Children.Add(statusBadge);
             Grid.SetRow(header, 0);
 
-            // Chart
+            // Chart or Radar View (no camera here)
             FrameworkElement chart;
-            if (node.Type == "radar")
+            if (sensor.Type == "radar")
             {
                 // Use WebView2 radar chart for radar sensors
-                chart = CreateRadarChart(node);
+                chart = CreateRadarChart(sensor);
             }
             else
             {
                 // Use line chart for other sensors
-                chart = CreateChart(node);
+                chart = CreateChart(sensor);
             }
             Grid.SetRow(chart, 1);
 
@@ -268,13 +389,13 @@ namespace Station.Views
             return card;
         }
 
-        private RadarChartControl CreateRadarChart(NodeData node)
+        private RadarChartControl CreateRadarChart(SensorData sensor)
         {
             var random = new Random();
             var detections = new List<RadarDetection>();
 
-            // Generate random detections based on node value
-            var detectionCount = (int)(node.Value ?? 0);
+            // Generate random detections based on sensor value
+            var detectionCount = (int)(sensor.Value ?? 0);
             for (int i = 0; i < detectionCount; i++)
             {
                 // Generate detections in active zone (60° - 120°)
@@ -298,61 +419,407 @@ namespace Station.Views
             return radarChart;
         }
 
-        private CartesianChart CreateChart(NodeData node)
+        private Grid CreateCameraView(NodeData node)
         {
-            var random = new Random();
-            var baseValue = node.Value ?? 0;
-            var values = new double[24];
-
-            for (int i = 0; i < 24; i++)
+            var grid = new Grid
             {
-                var variance = (random.NextDouble() - 0.5) * baseValue * 0.2;
-                values[i] = Math.Max(0, baseValue + variance);
-            }
+                Background = new SolidColorBrush(Color.FromArgb(255, 20, 20, 30)),
+                CornerRadius = new CornerRadius(8)
+            };
 
-            var showDataPoints = ChkShowDataPoints?.IsChecked ?? true;
-            var smoothLine = ChkSmoothLine?.IsChecked ?? true ? 0.5 : 0;
-            var showGrid = ChkShowGrid?.IsChecked ?? true;
-
-            var series = new ISeries[]
+            // Camera feed placeholder with border
+            var videoContainer = new Border
             {
-                new LineSeries<double>
+                Background = new SolidColorBrush(Color.FromArgb(255, 30, 30, 40)),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(8),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(255, 60, 60, 80)),
+                BorderThickness = new Thickness(1)
+            };
+
+            // Video feed with live indicator
+            var videoGrid = new Grid();
+
+            // Placeholder video feed (you can replace this with actual video stream)
+            var placeholder = new Border
+            {
+                Background = new LinearGradientBrush
                 {
-                    Values = values,
-                    Fill = new LinearGradientPaint(
-                        GetChartColor(node.Type, 60),
-                        GetChartColor(node.Type, 10),
-                        new SKPoint(0, 0),
-                        new SKPoint(0, 1)),
-                    Stroke = new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 2 },
-                    GeometrySize = showDataPoints ? 6 : 0,
-                    GeometryStroke = showDataPoints ? new SolidColorPaint(GetChartColor(node.Type)) { StrokeThickness = 2 } : null,
-                    GeometryFill = showDataPoints ? new SolidColorPaint(new SKColor(255, 255, 255)) : null,
-                    LineSmoothness = smoothLine
+                    StartPoint = new Windows.Foundation.Point(0, 0),
+                    EndPoint = new Windows.Foundation.Point(1, 1),
+                    GradientStops = new GradientStopCollection
+                    {
+                        new GradientStop { Color = Color.FromArgb(255, 45, 55, 72), Offset = 0 },
+                        new GradientStop { Color = Color.FromArgb(255, 30, 40, 55), Offset = 1 }
+                    }
                 }
             };
 
-            var xAxis = new Axis
+            // Camera icon in center
+            var cameraIcon = new StackPanel
             {
-                Labels = new[] { "00h", "04h", "08h", "12h", "16h", "20h", "24h" },
-                LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
-                SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
-                TextSize = 10
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Spacing = 8
             };
 
-            var yAxis = new Axis
+            var icon = new FontIcon
             {
-                LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
-                SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
-                TextSize = 10
+                Glyph = "\uE714", // Camera icon
+                FontSize = 48,
+                Foreground = new SolidColorBrush(Color.FromArgb(100, 255, 255, 255))
             };
 
-            return new CartesianChart
+            var statusText = new TextBlock
             {
-                Series = series,
-                XAxes = new[] { xAxis },
-                YAxes = new[] { yAxis }
+                Text = "Camera Feed",
+                FontSize = 12,
+                Foreground = new SolidColorBrush(Color.FromArgb(150, 255, 255, 255)),
+                HorizontalAlignment = HorizontalAlignment.Center
             };
+
+            cameraIcon.Children.Add(icon);
+            cameraIcon.Children.Add(statusText);
+
+            // Live indicator
+            var liveIndicator = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(10, 4, 10, 4),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(12, 12, 0, 0)
+            };
+
+            var liveStack = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 6
+            };
+
+            var recordDot = new Ellipse
+            {
+                Width = 8,
+                Height = 8,
+                Fill = new SolidColorBrush(Microsoft.UI.Colors.White),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            liveStack.Children.Add(recordDot);
+            liveIndicator.Child = liveStack;
+
+            // Camera info overlay
+            var infoPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 12, 12),
+                Spacing = 4
+            };
+
+            var timeText = new TextBlock
+            {
+                Text = DateTime.Now.ToString("HH:mm:ss"),
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            var fpsText = new TextBlock
+            {
+                Text = "30 FPS • 1080p",
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            infoPanel.Children.Add(timeText);
+            infoPanel.Children.Add(fpsText);
+
+            videoGrid.Children.Add(placeholder);
+            videoGrid.Children.Add(cameraIcon);
+            videoGrid.Children.Add(liveIndicator);
+            videoGrid.Children.Add(infoPanel);
+
+            videoContainer.Child = videoGrid;
+            grid.Children.Add(videoContainer);
+
+            return grid;
+        }
+
+        private Border CreateCameraCard(SensorData sensor)
+        {
+            var card = new Border
+            {
+                Background = (Brush)Application.Current.Resources["BackgroundSecondaryBrush"],
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(12),
+                MinHeight = 220
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            // Header
+            var header = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var titleStack = new StackPanel();
+            var title = new TextBlock
+            {
+                Text = sensor.Name,
+                FontSize = 12,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+            };
+            titleStack.Children.Add(title);
+            Grid.SetColumn(titleStack, 0);
+
+
+            header.Children.Add(titleStack);
+            //header.Children.Add(statusBadge);
+            Grid.SetRow(header, 0);
+
+            // Camera View (compact version for sidebar)
+            var cameraView = CreateCompactCameraView(sensor);
+            Grid.SetRow(cameraView, 1);
+
+            grid.Children.Add(header);
+            grid.Children.Add(cameraView);
+            card.Child = grid;
+
+            return card;
+        }
+
+        private Grid CreateCompactCameraView(SensorData sensor)
+        {
+            var grid = new Grid
+            {
+                Background = new SolidColorBrush(Color.FromArgb(255, 20, 20, 30)),
+                CornerRadius = new CornerRadius(6)
+            };
+
+            // Camera feed placeholder
+            var videoContainer = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(255, 30, 30, 40)),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(4),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(255, 60, 60, 80)),
+                BorderThickness = new Thickness(1)
+            };
+
+            var videoGrid = new Grid();
+
+            // Placeholder
+            var placeholder = new Border
+            {
+                Background = new LinearGradientBrush
+                {
+                    StartPoint = new Windows.Foundation.Point(0, 0),
+                    EndPoint = new Windows.Foundation.Point(1, 1),
+                    GradientStops = new GradientStopCollection
+                    {
+                        new GradientStop { Color = Color.FromArgb(255, 45, 55, 72), Offset = 0 },
+                        new GradientStop { Color = Color.FromArgb(255, 30, 40, 55), Offset = 1 }
+                    }
+                }
+            };
+
+            // Camera icon
+            var cameraIcon = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Spacing = 6
+            };
+
+            var icon = new FontIcon
+            {
+                Glyph = "\uE714",
+                FontSize = 32,
+                Foreground = new SolidColorBrush(Color.FromArgb(100, 255, 255, 255))
+            };
+
+            var statusText = new TextBlock
+            {
+                Text = "Camera Feed",
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromArgb(150, 255, 255, 255)),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            cameraIcon.Children.Add(icon);
+            cameraIcon.Children.Add(statusText);
+
+
+            var liveStack = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 4
+            };
+
+            var recordDot = new Ellipse
+            {
+                Width = 6,
+                Height = 6,
+                Fill = new SolidColorBrush(Microsoft.UI.Colors.White),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+
+            liveStack.Children.Add(recordDot);
+
+            // Info overlay
+            var infoPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 8, 8),
+                Spacing = 2
+            };
+
+            var timeText = new TextBlock
+            {
+                Text = DateTime.Now.ToString("HH:mm:ss"),
+                FontSize = 9,
+                Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            var fpsText = new TextBlock
+            {
+                Text = "30 FPS",
+                FontSize = 8,
+                Foreground = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            infoPanel.Children.Add(timeText);
+            infoPanel.Children.Add(fpsText);
+
+            videoGrid.Children.Add(placeholder);
+            videoGrid.Children.Add(cameraIcon);
+            videoGrid.Children.Add(infoPanel);
+
+            videoContainer.Child = videoGrid;
+            grid.Children.Add(videoContainer);
+
+            return grid;
+        }
+
+        private CartesianChart CreateChart(SensorData sensor)
+        {
+            var random = new Random();
+            var baseValue = sensor.Value ?? 0;
+            var showGrid = ChkShowGrid?.IsChecked ?? true;
+
+            // Biểu đồ rung động dùng bar chart với nhiều điểm dữ liệu
+            if (sensor.Type == "vibration")
+            {
+                var dataPoints = 120; // Nhiều điểm dữ liệu để tạo hiệu ứng dày đặc
+                var values = new double[dataPoints];
+
+                for (int i = 0; i < dataPoints; i++)
+                {
+                    // Tạo dao động ngẫu nhiên xung quanh giá trị trung bình
+                    var variance = (random.NextDouble() - 0.5) * 2;
+                    values[i] = baseValue + variance * baseValue * 2;
+                }
+
+                var series = new ISeries[]
+                {
+                    new ColumnSeries<double>
+                    {
+                        Values = values,
+                        Fill = new SolidColorPaint(GetChartColor(sensor.Type, 180)),
+                        Stroke = null,
+                        MaxBarWidth = 3,
+                        IgnoresBarPosition = true
+                    }
+                };
+
+                var xAxis = new Axis
+                {
+                    Labels = Enumerable.Range(0, 7).Select(i => $"{i * 10}s").ToArray(),
+                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                    SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                    TextSize = 10,
+                    MinLimit = 0
+                };
+
+                var yAxis = new Axis
+                {
+                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                    SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                    TextSize = 10,
+                    MinLimit = -baseValue * 3,
+                    MaxLimit = baseValue * 3
+                };
+
+                return new CartesianChart
+                {
+                    Series = series,
+                    XAxes = new[] { xAxis },
+                    YAxes = new[] { yAxis }
+                };
+            }
+            else
+            {
+                // Các loại biểu đồ khác giữ nguyên dạng line chart
+                var values = new double[24];
+
+                for (int i = 0; i < 24; i++)
+                {
+                    var variance = (random.NextDouble() - 0.5) * baseValue * 0.2;
+                    values[i] = Math.Max(0, baseValue + variance);
+                }
+
+                var showDataPoints = ChkShowDataPoints?.IsChecked ?? true;
+                var smoothLine = ChkSmoothLine?.IsChecked ?? true ? 0.5 : 0;
+
+                var series = new ISeries[]
+                {
+                    new LineSeries<double>
+                    {
+                        Values = values,
+                        Fill = new LinearGradientPaint(
+                            GetChartColor(sensor.Type, 60),
+                            GetChartColor(sensor.Type, 10),
+                            new SKPoint(0, 0),
+                            new SKPoint(0, 1)),
+                        Stroke = new SolidColorPaint(GetChartColor(sensor.Type)) { StrokeThickness = 2 },
+                        GeometrySize = showDataPoints ? 6 : 0,
+                        GeometryStroke = showDataPoints ? new SolidColorPaint(GetChartColor(sensor.Type)) { StrokeThickness = 2 } : null,
+                        GeometryFill = showDataPoints ? new SolidColorPaint(new SKColor(255, 255, 255)) : null,
+                        LineSmoothness = smoothLine
+                    }
+                };
+
+                var xAxis = new Axis
+                {
+                    Labels = new[] { "00h", "04h", "08h", "12h", "16h", "20h", "24h" },
+                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                    SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                    TextSize = 10
+                };
+
+                var yAxis = new Axis
+                {
+                    LabelsPaint = new SolidColorPaint(new SKColor(148, 163, 184)),
+                    SeparatorsPaint = showGrid ? new SolidColorPaint(new SKColor(226, 232, 240)) { StrokeThickness = 1 } : null,
+                    TextSize = 10
+                };
+
+                return new CartesianChart
+                {
+                    Series = series,
+                    XAxes = new[] { xAxis },
+                    YAxes = new[] { yAxis }
+                };
+            }
         }
 
         private SKColor GetChartColor(string type, byte alpha = 255)
@@ -396,16 +863,6 @@ namespace Station.Views
             };
         }
 
-        private string GetStatusText(string status)
-        {
-            return status switch
-            {
-                "normal" => "Bình thường",
-                "warning" => "Cảnh báo",
-                "critical" => "Nghiêm trọng",
-                _ => "Không xác định"
-            };
-        }
 
         // Event Handlers
         private void LineFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -418,35 +875,13 @@ namespace Station.Views
                 3 => "LINE_C",
                 _ => "all"
             };
+            
+            // Rebuild node dropdown based on selected line
+            BuildNodeFilterComboBox();
             LoadChartsForAllNodes();
         }
 
-        private void StatusFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _selectedStatus = StatusFilterComboBox.SelectedIndex switch
-            {
-                0 => "all",
-                1 => "normal",
-                2 => "warning",
-                3 => "critical",
-                _ => "all"
-            };
-            LoadChartsForAllNodes();
-        }
 
-        private void TimeRange_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _timeRangeHours = TimeRangeComboBox.SelectedIndex switch
-            {
-                0 => 1,
-                1 => 6,
-                2 => 24,
-                3 => 168,
-                4 => 720,
-                _ => 6
-            };
-            LoadChartsForAllNodes();
-        }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -525,6 +960,14 @@ namespace Station.Views
         }
 
         public class NodeData
+        {
+            public string Id { get; set; } = string.Empty;
+            public string Name { get; set; } = string.Empty;
+            public string Status { get; set; } = string.Empty;
+            public List<SensorData> Sensors { get; set; } = new();
+        }
+
+        public class SensorData
         {
             public string Id { get; set; } = string.Empty;
             public string Name { get; set; } = string.Empty;

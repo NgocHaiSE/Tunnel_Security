@@ -31,17 +31,10 @@
                 <!-- Title Row -->
                 <Grid Grid.Row="0" Margin="0,0,0,16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="📊 Giám sát Dữ liệu Real-time"
+                        <TextBlock Text="Giám sát Dữ liệu"
                                    FontSize="22" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
 
-                        <!-- Real-time Indicator -->
-                        <Border Background="#DCFCE7" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <Ellipse Width="8" Height="8" Fill="#22C55E"/>
-                                <TextBlock Text="Đang cập nhật" FontSize="11" Foreground="#166534" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </Border>
                     </StackPanel>
 
                     <!-- Action Buttons -->
@@ -88,60 +81,39 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <!-- Status Filter -->
+                        <!-- Node Filter -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0">
-                            <TextBlock Text="Trạng thái:" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                            <TextBlock Text="Node:" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
                                        VerticalAlignment="Center"/>
-                            <ComboBox x:Name="StatusFilterComboBox" MinWidth="140"
+                            <ComboBox x:Name="NodeFilterComboBox" MinWidth="200"
                                       Style="{StaticResource ComboBoxStyle}"
-                                      SelectionChanged="StatusFilter_SelectionChanged">
-                                <ComboBoxItem Content="Tất cả" IsSelected="True"/>
-                                <ComboBoxItem Content="✅ Bình thường"/>
-                                <ComboBoxItem Content="⚠️ Cảnh báo"/>
-                                <ComboBoxItem Content="🔴 Nghiêm trọng"/>
-                            </ComboBox>
+                                      SelectionChanged="NodeFilter_SelectionChanged"/>
                         </StackPanel>
+
 
                         <!-- Time Range Filter -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0">
-                            <TextBlock Text="Thời gian:" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
-                                       VerticalAlignment="Center"/>
-                            <ComboBox x:Name="TimeRangeComboBox" MinWidth="130"
-                                      Style="{StaticResource ComboBoxStyle}"
-                                      SelectionChanged="TimeRange_SelectionChanged">
-                                <ComboBoxItem Content="1 giờ qua"/>
-                                <ComboBoxItem Content="6 giờ qua" IsSelected="True"/>
-                                <ComboBoxItem Content="24 giờ qua"/>
-                                <ComboBoxItem Content="7 ngày qua"/>
-                                <ComboBoxItem Content="30 ngày qua"/>
-                            </ComboBox>
-                        </StackPanel>
+                        <!--<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0">
+                        <TextBlock Text="Thời gian:" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"/>
+                        <ComboBox x:Name="TimeRangeComboBox" MinWidth="130"
+                        Style="{StaticResource ComboBoxStyle}"
+                        SelectionChanged="TimeRange_SelectionChanged">
+                        <ComboBoxItem Content="1 giờ qua"/>
+                        <ComboBoxItem Content="6 giờ qua" IsSelected="True"/>
+                        <ComboBoxItem Content="24 giờ qua"/>
+                        <ComboBoxItem Content="7 ngày qua"/>
+                        <ComboBoxItem Content="30 ngày qua"/>
+                        </ComboBox>
+                        </StackPanel>-->
 
                         <!-- Search -->
-                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
-                            <TextBox x:Name="SearchTextBox" PlaceholderText="Tìm kiếm nút cảm biến..."
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
+                            <TextBox x:Name="SearchTextBox" PlaceholderText="Tìm kiếm cảm biến..."
                                      MinWidth="200" Style="{StaticResource SearchTextBoxStyle}"
                                      TextChanged="SearchTextBox_TextChanged"/>
                         </StackPanel>
 
                         <!-- Summary Stats -->
-                        <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="16">
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <Ellipse Width="8" Height="8" Fill="#22C55E" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="NormalCountText" Text="12 bình thường" FontSize="12"
-                                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <Ellipse Width="8" Height="8" Fill="#F59E0B" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="WarningCountText" Text="3 cảnh báo" FontSize="12"
-                                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <Ellipse Width="8" Height="8" Fill="#EF4444" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="CriticalCountText" Text="1 nghiêm trọng" FontSize="12"
-                                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>
@@ -151,6 +123,7 @@
         <Grid Grid.Row="1" Margin="24,16,24,24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="2.5*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -172,7 +145,6 @@
                             BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
                         <Grid>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE9D9;" FontSize="16" Foreground="{StaticResource PrimaryMediumBrush}"/>
                                 <TextBlock Text="Chọn biểu đồ" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}"/>
                             </StackPanel>
@@ -192,29 +164,19 @@
 
                             <!-- Sensor Type Section -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="📡 LOẠI CẢM BIẾN" FontSize="10" FontWeight="SemiBold"
+                                <TextBlock Text="LOẠI CẢM BIẾN" FontSize="10" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextTertiaryBrush}" Margin="4,0,0,0"/>
 
                                 <!-- Radar -->
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkRadar" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="radar"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="📡 Radar" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Phát hiện chuyển động" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#10B981" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="RadarCount" Text="3" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkRadar" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="radar" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Radar" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -222,22 +184,12 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkCamera" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="camera"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="📹 Camera" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Giám sát hình ảnh" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#3B82F6" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="CameraCount" Text="3" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkCamera" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="camera" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Camera" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -245,22 +197,12 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkTemperature" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="temperature"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="🌡️ Nhiệt độ" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Đo nhiệt độ (°C)" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#EF4444" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TempCount" Text="3" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkTemperature" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="temperature" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Nhiệt độ" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -268,22 +210,12 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkHumidity" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="humidity"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="💧 Độ ẩm" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Độ ẩm không khí (%)" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#06B6D4" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="HumidityCount" Text="3" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkHumidity" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="humidity" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Độ ẩm" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -291,22 +223,12 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkLight" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="light"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="💡 Ánh sáng" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Cường độ (lux)" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#FBBF24" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="LightCount" Text="2" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkLight" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="light" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Ánh sáng" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -314,22 +236,12 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkWater" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="water"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="🌊 Mực nước" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Mực nước (cm)" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#0EA5E9" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="WaterCount" Text="2" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkWater" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="water" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Mực nước" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
@@ -337,29 +249,19 @@
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="ChkVibration" Grid.Column="0" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="vibration"/>
-                                        <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="📊 Rung động" FontSize="12" FontWeight="SemiBold"/>
-                                            <TextBlock Text="Rung động (m/s²)" FontSize="10"
-                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Column="2" Background="#F59E0B" CornerRadius="8"
-                                                Padding="6,2" VerticalAlignment="Center">
-                                            <TextBlock x:Name="VibrationCount" Text="1" FontSize="9"
-                                                       Foreground="White" FontWeight="Bold"/>
-                                        </Border>
+                                        <CheckBox Grid.Column="0" x:Name="ChkVibration" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="vibration" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Rung động" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
                             </StackPanel>
 
                             <!-- Display Options Section -->
                             <StackPanel Spacing="8" Margin="0,8,0,0">
-                                <TextBlock Text="⚙️ TÙY CHỌN HIỂN THỊ" FontSize="10" FontWeight="SemiBold"
+                                <TextBlock Text="TÙY CHỌN HIỂN THỊ" FontSize="10" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextTertiaryBrush}" Margin="4,0,0,0"/>
 
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12">
@@ -378,7 +280,7 @@
 
                             <!-- Chart Layout Section -->
                             <StackPanel Spacing="8" Margin="0,8,0,0">
-                                <TextBlock Text="📐 BỐ CỤC" FontSize="10" FontWeight="SemiBold"
+                                <TextBlock Text="BỐ CỤC" FontSize="10" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextTertiaryBrush}" Margin="4,0,0,0"/>
 
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12">
@@ -398,7 +300,7 @@
                 </Grid>
             </Border>
 
-            <!-- Right Panel - Charts Display -->
+            <!-- Center  Panel - Charts Display -->
             <Border Grid.Column="1"
                     Background="{StaticResource BackgroundPrimaryBrush}"
                     BorderBrush="{StaticResource BorderLightBrush}"
@@ -415,7 +317,6 @@
                             BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
                         <Grid>
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <FontIcon Glyph="&#xE9F9;" FontSize="16" Foreground="{StaticResource PrimaryMediumBrush}"/>
                                 <TextBlock Text="Biểu đồ dữ liệu" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}"/>
                                 <Border Background="{StaticResource BackgroundTertiaryBrush}" CornerRadius="10" Padding="8,2">
@@ -437,6 +338,50 @@
                                 Spacing="12" Visibility="Collapsed">
                         <FontIcon Glyph="&#xE9D9;" FontSize="48" Foreground="{StaticResource TextTertiaryBrush}"/>
                         <TextBlock Text="Chọn loại biểu đồ từ bảng điều khiển bên trái"
+                                   FontSize="14" Foreground="{StaticResource TextTertiaryBrush}" TextAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel - Camera Views -->
+            <Border Grid.Column="2"
+                    Background="{StaticResource BackgroundPrimaryBrush}"
+                    BorderBrush="{StaticResource BorderLightBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Margin="16,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Camera Header -->
+                    <Border Grid.Row="0" Padding="16,14"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="Camera" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <Border Background="{StaticResource BackgroundTertiaryBrush}" CornerRadius="10" Padding="8,2">
+                                    <TextBlock x:Name="CameraCountText" Text="0 camera" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Camera Views Area -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12">
+                        <StackPanel x:Name="CameraPanel" Spacing="12"/>
+                    </ScrollViewer>
+
+                    <!-- Camera Empty State -->
+                    <StackPanel x:Name="CameraEmptyState" Grid.Row="1"
+                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Spacing="12" Visibility="Collapsed">
+                        <FontIcon Glyph="&#xE714;" FontSize="48" Foreground="{StaticResource TextTertiaryBrush}"/>
+                        <TextBlock Text="Chọn camera từ bảng điều khiển"
                                    FontSize="14" Foreground="{StaticResource TextTertiaryBrush}" TextAlignment="Center"/>
                     </StackPanel>
                 </Grid>
