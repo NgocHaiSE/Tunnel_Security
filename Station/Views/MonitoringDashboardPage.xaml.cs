@@ -172,20 +172,20 @@ namespace Station.Views
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
 
                 // Reset all filter buttons
-                Filter24HButton.Background = transparentBrush;
-                Filter24HButton.Foreground = secondaryBrush;
-                Filter24HButton.BorderBrush = borderBrush;
-                Filter24HButton.BorderThickness = new Thickness(1);
+                //Filter24HButton.Background = transparentBrush;
+                //Filter24HButton.Foreground = secondaryBrush;
+                //Filter24HButton.BorderBrush = borderBrush;
+                //Filter24HButton.BorderThickness = new Thickness(1);
 
-                Filter7DButton.Background = transparentBrush;
-                Filter7DButton.Foreground = secondaryBrush;
-                Filter7DButton.BorderBrush = borderBrush;
-                Filter7DButton.BorderThickness = new Thickness(1);
+                //Filter7DButton.Background = transparentBrush;
+                //Filter7DButton.Foreground = secondaryBrush;
+                //Filter7DButton.BorderBrush = borderBrush;
+                //Filter7DButton.BorderThickness = new Thickness(1);
 
-                Filter30DButton.Background = transparentBrush;
-                Filter30DButton.Foreground = secondaryBrush;
-                Filter30DButton.BorderBrush = borderBrush;
-                Filter30DButton.BorderThickness = new Thickness(1);
+                //Filter30DButton.Background = transparentBrush;
+                //Filter30DButton.Foreground = secondaryBrush;
+                //Filter30DButton.BorderBrush = borderBrush;
+                //Filter30DButton.BorderThickness = new Thickness(1);
 
                 // Set clicked button as active
                 button.Background = accentBrush;
