@@ -14,8 +14,34 @@ using System.Collections.Generic;
 
 namespace Station.ViewModels
 {
+    public enum AlertSidebarMode
+    {
+        Summary,
+        History,
+        Processing
+    }
+
     public partial class AlertsViewModel : ObservableObject
     {
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsSidebarSummaryVisible))]
+        [NotifyPropertyChangedFor(nameof(IsSidebarHistoryVisible))]
+        [NotifyPropertyChangedFor(nameof(IsSidebarProcessingVisible))]
+        private AlertSidebarMode _sidebarMode = AlertSidebarMode.Summary;
+
+        public bool IsSidebarSummaryVisible => SidebarMode == AlertSidebarMode.Summary;
+        public bool IsSidebarHistoryVisible => SidebarMode == AlertSidebarMode.History;
+        public bool IsSidebarProcessingVisible => SidebarMode == AlertSidebarMode.Processing;
+
+        // Commands to switch modes
+        [RelayCommand]
+        private void ShowSummary() => SidebarMode = AlertSidebarMode.Summary;
+
+        [RelayCommand]
+        private void ShowHistory() => SidebarMode = AlertSidebarMode.History;
+
+        [RelayCommand]
+        private void ShowProcessing() => SidebarMode = AlertSidebarMode.Processing;
         #region Filter Properties
 
         private string _selectedLine = "Tất cả tuyến";
@@ -711,6 +737,12 @@ namespace Station.ViewModels
             // TODO: Call API to refresh alerts
             ApplyFilters();
             CalculateStatistics();
+        }
+
+        [RelayCommand]
+        private void CloseSidebar()
+        {
+            SelectedAlert = null;
         }
 
         [RelayCommand]

@@ -372,35 +372,91 @@ namespace Station.ViewModels
 
         private async void StartRealtimeUpdates()
         {
+            var random = new Random();
+            
             while (true)
             {
-                await System.Threading.Tasks.Task.Delay(1000);
+                await System.Threading.Tasks.Task.Delay(2000); // Update every 2 seconds
 
-                currentTime = DateTime.Now.ToString("HH:mm:ss");
+                CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+                CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
 
-                // Simulate random updates
-                var random = new Random();
-                if (random.Next(100) < 5) // 5% chance per second
+                // Update metrics
+                CpuUsage = 40 + random.Next(20) + random.NextDouble();
+                MemoryUsage = 65 + random.Next(10) + random.NextDouble();
+                AverageTemperature = 26 + random.Next(6) + random.NextDouble();
+                MaxTemperature = 38 + random.Next(8) + random.NextDouble();
+
+                // Update alert counts with random variations
+                if (random.Next(100) < 20) // 20% chance
+                {
+                    IntruAlerts = Math.Max(1, IntruAlerts + random.Next(-1, 2));
+                    MotionAlerts = Math.Max(1, MotionAlerts + random.Next(-1, 2));
+                    FireAlerts = Math.Max(1, FireAlerts + random.Next(-1, 2));
+                    SmokeAlerts = Math.Max(1, SmokeAlerts + random.Next(-1, 2));
+                    
+                    // Refresh pie chart
+                    InitializeCharts();
+                    OnPropertyChanged(nameof(AlertDistributionSeries));
+                }
+
+                // Update mini charts - shift data and add new point
+                UpdateMiniChart(TemperatureSeries, 26 + random.NextDouble() * 6);
+                UpdateMiniChart(HumiditySeries, 60 + random.NextDouble() * 15);
+                UpdateMiniChart(VibrationSeries, 0.1 + random.NextDouble() * 0.5);
+                UpdateMiniChart(WaterLevelSeries, 5 + random.NextDouble() * 15);
+                UpdateMiniChart(LightSeries, 150 + random.NextDouble() * 50);
+
+                // Update node statuses
+                foreach (var node in Nodes)
+                {
+                    if (random.Next(100) < 10) // 10% chance to update
+                    {
+                        node.Temperature = 20 + random.Next(25) + random.NextDouble();
+                        node.LastUpdate = DateTime.Now;
+                    }
+                }
+
+                // Random alerts
+                if (random.Next(100) < 8) // 8% chance per update
                 {
                     var messages = new[]
                     {
-   "Phát hiện chuyển động",
-     "Cảnh báo nhiệt độ",
-       "Tín hiệu yếu",
-       "Kết nối không ổn định"
-      };
-                    var severities = new[] { "warning", "high", "critical" };
+                        "Phát hiện chuyển động",
+                        "Cảnh báo nhiệt độ",
+                        "Tín hiệu yếu",
+                        "Kết nối không ổn định",
+                        "Độ ẩm cao bất thường",
+                        "Rung động vượt ngưỡng",
+                        "Mất kết nối cảm biến",
+                        "Camera mờ hình"
+                    };
+                    var severities = new[] { "warning", "high", "critical", "low" };
 
                     AddRealtimeAlert(
-                $"NODE-{random.Next(1, 13):D3}",
-                  messages[random.Next(messages.Length)],
-                 severities[random.Next(severities.Length)]
-                   );
-                }
+                        $"NODE-{random.Next(1, 13):D3}",
+                        messages[random.Next(messages.Length)],
+                        severities[random.Next(severities.Length)]
+                    );
 
-                // Update metrics
-                cpuUsage = 40 + random.Next(20) + random.NextDouble();
-                memoryUsage = 65 + random.Next(10) + random.NextDouble();
+                    TodayAlerts++;
+                }
+            }
+        }
+
+        private void UpdateMiniChart(ISeries[] series, double newValue)
+        {
+            if (series == null || series.Length == 0) return;
+
+            var lineSeries = series[0] as LineSeries<double>;
+            if (lineSeries?.Values is double[] values)
+            {
+                // Shift all values left and add new value at the end
+                var newValues = new double[values.Length];
+                Array.Copy(values, 1, newValues, 0, values.Length - 1);
+                newValues[values.Length - 1] = newValue;
+                
+                lineSeries.Values = newValues;
             }
         }
     }

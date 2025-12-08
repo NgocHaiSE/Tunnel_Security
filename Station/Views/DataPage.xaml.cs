@@ -26,18 +26,145 @@ namespace Station.Views
         private HashSet<string> _selectedNodeIds = new();
         private HashSet<string> _selectedTypes = new() { "radar", "camera", "temperature", "humidity", "light", "water", "vibration" };
         private int _columnsPerRow = 2;
+        private DispatcherTimer _realtimeTimer;
+        private Random _random = new Random();
+        private Dictionary<string, List<double>> _sensorHistoricalData = new();
+        private Dictionary<string, CartesianChart> _chartInstances = new();
+        private Dictionary<string, TextBlock> _sensorValueTexts = new();
 
         public DataPage()
         {
             this.InitializeComponent();
             InitializeMockData();
             this.Loaded += DataPage_Loaded;
+            this.Unloaded += DataPage_Unloaded;
         }
 
         private void DataPage_Loaded(object sender, RoutedEventArgs e)
         {
             BuildNodeFilterComboBox();
             LoadChartsForAllNodes();
+            StartRealtimeUpdates();
+        }
+
+        private void DataPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            StopRealtimeUpdates();
+        }
+
+        private void StartRealtimeUpdates()
+        {
+            _realtimeTimer = new DispatcherTimer();
+            _realtimeTimer.Interval = TimeSpan.FromSeconds(2);
+            _realtimeTimer.Tick += RealtimeTimer_Tick;
+            _realtimeTimer.Start();
+        }
+
+        private void StopRealtimeUpdates()
+        {
+            if (_realtimeTimer != null)
+            {
+                _realtimeTimer.Stop();
+                _realtimeTimer = null;
+            }
+        }
+
+        private void RealtimeTimer_Tick(object sender, object e)
+        {
+            UpdateSensorValues();
+            UpdateCharts();
+        }
+
+        private void UpdateSensorValues()
+        {
+            foreach (var line in _lines)
+            {
+                foreach (var node in line.Nodes)
+                {
+                    foreach (var sensor in node.Sensors)
+                    {
+                        if (sensor.Value.HasValue)
+                        {
+                            // Update sensor value with random variation
+                            var baseValue = sensor.Value.Value;
+                            var variation = sensor.Type switch
+                            {
+                                "temperature" => (_random.NextDouble() - 0.5) * 2,
+                                "humidity" => (_random.NextDouble() - 0.5) * 4,
+                                "light" => (_random.NextDouble() - 0.5) * 10,
+                                "water" => (_random.NextDouble() - 0.5) * 2,
+                                "vibration" => (_random.NextDouble() - 0.5) * 0.1,
+                                "radar" => _random.Next(-1, 2),
+                                "camera" => _random.Next(-1, 2),
+                                _ => 0
+                            };
+                            
+                            sensor.Value = Math.Max(0, baseValue + variation);
+                            
+                            // Update historical data
+                            if (!_sensorHistoricalData.ContainsKey(sensor.Id))
+                            {
+                                _sensorHistoricalData[sensor.Id] = new List<double>();
+                                for (int i = 0; i < 24; i++)
+                                {
+                                    _sensorHistoricalData[sensor.Id].Add(baseValue);
+                                }
+                            }
+                            
+                            var history = _sensorHistoricalData[sensor.Id];
+                            history.RemoveAt(0);
+                            history.Add(sensor.Value.Value);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateCharts()
+        {
+            foreach (var kvp in _chartInstances)
+            {
+                var sensorId = kvp.Key;
+                var chart = kvp.Value;
+                
+                if (_sensorHistoricalData.ContainsKey(sensorId))
+                {
+                    var sensor = _lines.SelectMany(l => l.Nodes)
+                                       .SelectMany(n => n.Sensors)
+                                       .FirstOrDefault(s => s.Id == sensorId);
+                    
+                    if (sensor != null && chart.Series != null)
+                    {
+                        var seriesArray = chart.Series.ToArray();
+                        if (seriesArray.Length > 0)
+                        {
+                            // Update value text
+                            if (_sensorValueTexts.ContainsKey(sensorId))
+                            {
+                                _sensorValueTexts[sensorId].Text = $"Giá trị: {sensor.Value:F1} {GetUnit(sensor.Type)}";
+                            }
+                            
+                            if (sensor.Type == "vibration" && seriesArray[0] is ColumnSeries<double> columnSeries)
+                            {
+                                // Update vibration chart with more points
+                                var values = new double[120];
+                                var baseValue = sensor.Value ?? 0;
+                                for (int i = 0; i < 120; i++)
+                                {
+                                    var variance = (_random.NextDouble() - 0.5) * 2;
+                                    values[i] = baseValue + variance * baseValue * 2;
+                                }
+                                columnSeries.Values = values;
+                            }
+                            else if (seriesArray[0] is LineSeries<double> lineSeries)
+                            {
+                                // Update line chart
+                                lineSeries.Values = _sensorHistoricalData[sensorId].ToArray();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void InitializeMockData()
@@ -222,6 +349,8 @@ namespace Station.Views
 
             ChartsPanel.Children.Clear();
             CameraPanel.Children.Clear();
+            _chartInstances.Clear();
+            _sensorValueTexts.Clear();
             
             var filteredSensors = GetFilteredSensors();
             
@@ -355,11 +484,15 @@ namespace Station.Views
             };
             var subtitle = new TextBlock
             {
-                Text = $"Giá trị: {sensor.Value} {GetUnit(sensor.Type)}",
+                Text = $"Giá trị: {sensor.Value:F1} {GetUnit(sensor.Type)}",
                 FontSize = 11,
                 Foreground = (Brush)Application.Current.Resources["TextSecondaryBrush"],
                 Margin = new Thickness(0, 2, 0, 0)
             };
+            
+            // Store subtitle reference for realtime updates
+            _sensorValueTexts[sensor.Id] = subtitle;
+            
             titleStack.Children.Add(title);
             titleStack.Children.Add(subtitle);
             Grid.SetColumn(titleStack, 0);
@@ -716,6 +849,17 @@ namespace Station.Views
             var baseValue = sensor.Value ?? 0;
             var showGrid = ChkShowGrid?.IsChecked ?? true;
 
+            // Initialize historical data if not exists
+            if (!_sensorHistoricalData.ContainsKey(sensor.Id))
+            {
+                _sensorHistoricalData[sensor.Id] = new List<double>();
+                for (int i = 0; i < 24; i++)
+                {
+                    var variance = (random.NextDouble() - 0.5) * baseValue * 0.2;
+                    _sensorHistoricalData[sensor.Id].Add(Math.Max(0, baseValue + variance));
+                }
+            }
+
             // Biểu đồ rung động dùng bar chart với nhiều điểm dữ liệu
             if (sensor.Type == "vibration")
             {
@@ -759,23 +903,20 @@ namespace Station.Views
                     MaxLimit = baseValue * 3
                 };
 
-                return new CartesianChart
+                var chart = new CartesianChart
                 {
                     Series = series,
                     XAxes = new[] { xAxis },
                     YAxes = new[] { yAxis }
                 };
+
+                _chartInstances[sensor.Id] = chart;
+                return chart;
             }
             else
             {
                 // Các loại biểu đồ khác giữ nguyên dạng line chart
-                var values = new double[24];
-
-                for (int i = 0; i < 24; i++)
-                {
-                    var variance = (random.NextDouble() - 0.5) * baseValue * 0.2;
-                    values[i] = Math.Max(0, baseValue + variance);
-                }
+                var values = _sensorHistoricalData[sensor.Id].ToArray();
 
                 var showDataPoints = ChkShowDataPoints?.IsChecked ?? true;
                 var smoothLine = ChkSmoothLine?.IsChecked ?? true ? 0.5 : 0;
@@ -813,12 +954,15 @@ namespace Station.Views
                     TextSize = 10
                 };
 
-                return new CartesianChart
+                var chart = new CartesianChart
                 {
                     Series = series,
                     XAxes = new[] { xAxis },
                     YAxes = new[] { yAxis }
                 };
+
+                _chartInstances[sensor.Id] = chart;
+                return chart;
             }
         }
 

@@ -26,6 +26,9 @@
             <converters:NullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
             <converters:DateTimeFormatConverter x:Key="DateTimeFormatConverter"/>
             <converters:NullableDateTimeFormatConverter x:Key="NullableDateTimeFormatConverter"/>
+            <converters:BoolToAccentColorConverter x:Key="BoolToAccentColorConverter"/>
+            <converters:BoolToInverseColorConverter x:Key="BoolToInverseColorConverter"/>
+            <converters:BoolToThicknessConverter x:Key="BoolToThicknessConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

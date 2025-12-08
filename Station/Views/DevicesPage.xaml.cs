@@ -135,9 +135,9 @@ namespace Station.Views
         /// </summary>
         private void SensorCard_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is ViewModels.SensorItemViewModel sensor)
+            if (sender is FrameworkElement element && element.DataContext is SensorItemViewModel sensor)
             {
-                sensor.OpenSensorDetailCommand?.Execute(null);
+                ViewModel.SelectedSensor = sensor;
             }
         }
 
@@ -152,7 +152,7 @@ namespace Station.Views
             for (int i = 0; i < childCount; i++)
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
-                
+
                 if (child is T typedChild && typedChild.Name == name)
                 {
                     return typedChild;

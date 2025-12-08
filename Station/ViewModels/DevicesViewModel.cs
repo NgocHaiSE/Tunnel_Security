@@ -10,8 +10,25 @@ using Windows.UI;
 
 namespace Station.ViewModels
 {
+    public enum DeviceSidebarMode
+    {
+        Summary,
+        Details,
+        Edit
+    }
+
     public partial class DevicesViewModel : ObservableObject
     {
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsSidebarSummaryVisible))]
+        [NotifyPropertyChangedFor(nameof(IsSidebarDetailVisible))]
+        [NotifyPropertyChangedFor(nameof(IsSidebarEditVisible))]
+        private DeviceSidebarMode _sidebarMode = DeviceSidebarMode.Summary;
+
+        public bool IsSidebarSummaryVisible => SidebarMode == DeviceSidebarMode.Summary;
+        public bool IsSidebarDetailVisible => SidebarMode == DeviceSidebarMode.Details;
+        public bool IsSidebarEditVisible => SidebarMode == DeviceSidebarMode.Edit;
+
         // Filter properties
         private string? _selectedStatus = "Tất cả trạng thái";
         public string? SelectedStatus
@@ -21,6 +38,17 @@ namespace Station.ViewModels
             {
                 SetProperty(ref _selectedStatus, value);
                 ApplyFilters();
+            }
+        }
+
+        [ObservableProperty]
+        private SensorItemViewModel? _selectedSensor;
+
+        partial void OnSelectedSensorChanged(SensorItemViewModel? value)
+        {
+            if (value != null)
+            {
+                SidebarMode = DeviceSidebarMode.Summary;
             }
         }
 
@@ -274,7 +302,8 @@ Type = "Sensor",
             }
 
             // Group by nodes (location-based grouping)
-            var nodeGroups = filtered.GroupBy(d => {
+            var nodeGroups = filtered.GroupBy(d =>
+            {
                 var parts = d.Location.Split('/');
                 return parts.Length >= 3 ? $"{parts[0].Trim()}/{parts[1].Trim()}/{parts[2].Trim()}" : d.Location;
             });
@@ -284,7 +313,7 @@ Type = "Sensor",
                 var nodeDevices = group.ToList();
                 var firstDevice = nodeDevices.First();
                 var parts = firstDevice.Location.Split('/');
-                
+
                 var node = new NodeItemViewModel
                 {
                     NodeName = parts.Length >= 3 ? parts[2].Trim() : "Unknown Node",
@@ -298,7 +327,7 @@ Type = "Sensor",
                 // Add all 6 sensor types to each node
                 var random = new Random();
                 var nodeLocation = string.Join("/", parts.Select(p => p.Trim()));
-                
+
                 // 1. Radar phát hiện người
                 node.Sensors.Add(new SensorItemViewModel
                 {
@@ -309,7 +338,10 @@ Type = "Sensor",
                     Unit = "",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE701" // Radar
+                    TypeIcon = "\uE701", // Radar
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 2. Camera hồng ngoại
@@ -322,7 +354,10 @@ Type = "Sensor",
                     Unit = "",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE714" // Camera
+                    TypeIcon = "\uE714", // Camera
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 3. Cảm biến hồng ngoại phát hiện người
@@ -335,7 +370,10 @@ Type = "Sensor",
                     Unit = "",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE7C1" // Motion
+                    TypeIcon = "\uE7C1", // Motion
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 4. Cảm biến nhiệt độ, độ ẩm
@@ -348,7 +386,10 @@ Type = "Sensor",
                     Unit = "",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE9CA" // Temperature
+                    TypeIcon = "\uE9CA", // Temperature
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 5. Cảm biến ánh sáng
@@ -361,7 +402,10 @@ Type = "Sensor",
                     Unit = "lux",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE706" // Light
+                    TypeIcon = "\uE706", // Light
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 6. Cảm biến đo mực nước
@@ -374,7 +418,10 @@ Type = "Sensor",
                     Unit = "cm",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE9F2" // Water
+                    TypeIcon = "\uE9F2", // Water
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 // 7. Cảm biến gia tốc (rung động)
@@ -387,7 +434,10 @@ Type = "Sensor",
                     Unit = "m/s²",
                     LastUpdateText = "Vừa xong",
                     SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uEDA4" // Vibration
+                    TypeIcon = "\uEDA4", // Vibration
+                    LineName = node.LineName,
+                    NodeName = node.NodeName,
+                    Location = node.Location
                 });
 
                 FilteredNodes.Add(node);
@@ -430,6 +480,37 @@ Type = "Sensor",
         private void ClearSearch()
         {
             SearchText = string.Empty;
+        }
+
+        [RelayCommand]
+        private void ShowDetails()
+        {
+            SidebarMode = DeviceSidebarMode.Details;
+        }
+
+        [RelayCommand]
+        private void ShowEdit()
+        {
+            SidebarMode = DeviceSidebarMode.Edit;
+        }
+
+        [RelayCommand]
+        private void ShowSummary()
+        {
+            SidebarMode = DeviceSidebarMode.Summary;
+        }
+
+        [RelayCommand]
+        private void CloseSidebar()
+        {
+            SelectedSensor = null;
+        }
+
+        [RelayCommand]
+        private void AddDevice()
+        {
+            // Placeholder for Add Device logic
+            System.Diagnostics.Debug.WriteLine("Add Device command executed");
         }
     }
 
@@ -739,6 +820,15 @@ Type = "Sensor",
 
         [ObservableProperty]
         private string _typeIcon = string.Empty;
+
+        [ObservableProperty]
+        private string _lineName = string.Empty;
+
+        [ObservableProperty]
+        private string _nodeName = string.Empty;
+
+        [ObservableProperty]
+        private string _location = string.Empty;
 
         public SolidColorBrush SensorStatusColor
         {
