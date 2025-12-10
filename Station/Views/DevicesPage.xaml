@@ -180,7 +180,7 @@
 
                     <!-- Search & Actions -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                        <Button Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.AddDeviceCommand}">
+                        <Button Style="{StaticResource PrimaryButtonStyle}" Click="AddDeviceButton_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE710;" FontSize="12"/>
                                 <TextBlock Text="Thêm thiết bị"/>
@@ -441,20 +441,20 @@
                     <Border Grid.Column="0" Background="Transparent" CornerRadius="8" Padding="4" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <!-- Info Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowSummaryCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowSummaryCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE946;" FontSize="14" 
+                                    <FontIcon Glyph="&#xE946;" FontSize="14"
                                               Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                     <TextBlock Text="Thông tin" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                 </StackPanel>
                             </Button>
-                            
+
                             <!-- Data Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowDetailsCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowDetailsCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
@@ -467,7 +467,7 @@
                             </Button>
 
                             <!-- Config Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowEditCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowEditCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
@@ -482,7 +482,7 @@
                     </Border>
 
                     <!-- Close Button -->
-                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}" 
+                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}"
                             Command="{x:Bind ViewModel.CloseSidebarCommand}" ToolTipService.ToolTip="Đóng">
                         <FontIcon Glyph="&#xE711;" FontSize="12"/>
                     </Button>
@@ -491,230 +491,230 @@
                 <!-- Summary Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                               Visibility="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel Padding="20" Spacing="16">
+                    <StackPanel Padding="20" Spacing="16">
 
-                            <!-- Sensor Header -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}"
-                                           FontSize="16" FontWeight="Bold"
-                                           Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                        <!-- Sensor Header -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}"
+                                       FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
 
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Border Background="{StaticResource BackgroundTertiaryBrush}"
-                                            CornerRadius="4" Padding="8,4">
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorType, Mode=OneWay}"
-                                                   FontSize="11" FontWeight="Bold"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </Border>
-                                    <Border Background="{StaticResource BackgroundTertiaryBrush}" CornerRadius="4" Padding="8,4">
-                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                            <Ellipse Width="8" Height="8" Fill="{x:Bind ViewModel.SelectedSensor.SensorStatusColor, Mode=OneWay}"/>
-                                            <TextBlock Text="Online" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Location Info -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="📍 Vị trí" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                        CornerRadius="8" Padding="12">
-                                    <StackPanel Spacing="6">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Tuyến:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LineName, Mode=OneWay}"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Nút:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.NodeName, Mode=OneWay}"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Vị trí:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.Location, Mode=OneWay}"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Background="{StaticResource BackgroundTertiaryBrush}"
+                                        CornerRadius="4" Padding="8,4">
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorType, Mode=OneWay}"
+                                               FontSize="11" FontWeight="Bold"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Background="{StaticResource BackgroundTertiaryBrush}" CornerRadius="4" Padding="8,4">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <Ellipse Width="8" Height="8" Fill="{x:Bind ViewModel.SelectedSensor.SensorStatusColor, Mode=OneWay}"/>
+                                        <TextBlock Text="Online" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
-
-                            <!-- Sensor Data -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="📊 Dữ liệu thời gian thực" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                        CornerRadius="8" Padding="12">
-                                    <StackPanel Spacing="6">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Giá trị:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock FontSize="14" Foreground="{StaticResource PrimaryDarkBrush}"
-                                                       FontWeight="Bold">
-                                                <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
-                                                <Run Text=" "/>
-                                                <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Cập nhật:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"
-                                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Device Info -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="ℹ️ Thông tin thiết bị" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                        CornerRadius="8" Padding="12">
-                                    <StackPanel Spacing="6">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="ID:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorId, Mode=OneWay}"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Hãng:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="Bosch"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="Firmware:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                            <TextBlock Text="v2.1.0"
-                                                       FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Actions -->
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="🛠️ Thao tác" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Button Grid.Column="0" Margin="0,0,4,0"
-                                            Style="{StaticResource SecondaryButtonStyle}"
-                                            HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE72C;" FontSize="12"/>
-                                            <TextBlock Text="Làm mới" FontSize="13"/>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Button Grid.Column="1" Margin="4,0,0,0"
-                                            Style="{StaticResource SecondaryButtonStyle}"
-                                            HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE711;" FontSize="12"/>
-                                            <TextBlock Text="Xóa" FontSize="13"/>
-                                        </StackPanel>
-                                    </Button>
-                                </Grid>
-                            </StackPanel>
-
                         </StackPanel>
-                    </ScrollViewer>
+
+                        <!-- Location Info -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="📍 Vị trí" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                    CornerRadius="8" Padding="12">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Tuyến:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LineName, Mode=OneWay}"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Nút:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.NodeName, Mode=OneWay}"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Vị trí:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.Location, Mode=OneWay}"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Sensor Data -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="📊 Dữ liệu thời gian thực" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                    CornerRadius="8" Padding="12">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Giá trị:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock FontSize="14" Foreground="{StaticResource PrimaryDarkBrush}"
+                                                   FontWeight="Bold">
+                                            <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
+                                            <Run Text=" "/>
+                                            <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Cập nhật:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"
+                                                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Device Info -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="ℹ️ Thông tin thiết bị" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                    CornerRadius="8" Padding="12">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="ID:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorId, Mode=OneWay}"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Hãng:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="Bosch"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Firmware:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
+                                        <TextBlock Text="v2.1.0"
+                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Actions -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="🛠️ Thao tác" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Margin="0,0,4,0"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE72C;" FontSize="12"/>
+                                        <TextBlock Text="Làm mới" FontSize="13"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Grid.Column="1" Margin="4,0,0,0"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                                        <TextBlock Text="Xóa" FontSize="13"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
 
 
                 <!-- Details View -->
                 <!-- Details Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20"
                               Visibility="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel Spacing="20">
-                            <!-- Current Reading Section -->
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="Giá trị hiện tại" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundAccentBrush}" CornerRadius="8" Padding="24">
-                                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                                        <TextBlock FontSize="48" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" HorizontalAlignment="Center">
-                                            <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
-                                            <Run Text=" "/>
-                                            <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}" FontSize="24"/>
-                                        </TextBlock>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center">
-                                            <Run Text="Cập nhật:"/>
-                                            <Run Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"/>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Statistics Section -->
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="Thống kê 24 giờ qua" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="0,0,4,0">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock Text="TB" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            <TextBlock Text="25.5" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <Border Grid.Column="1" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock Text="Min" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            <TextBlock Text="18.2" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityLowBrush}"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <Border Grid.Column="2" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0,0,0">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock Text="Max" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            <TextBlock Text="32.8" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityCriticalBrush}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-
-                            <!-- Recent Readings Section -->
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="Lịch sử đọc gần đây" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="16">
-                                    <StackPanel Spacing="8">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="09:30:15" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="26.5°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="09:25:10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="26.3°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="09:20:05" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="26.1°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
+                    <StackPanel Spacing="20">
+                        <!-- Current Reading Section -->
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Giá trị hiện tại" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource BackgroundAccentBrush}" CornerRadius="8" Padding="24">
+                                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                    <TextBlock FontSize="48" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" HorizontalAlignment="Center">
+                                        <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
+                                        <Run Text=" "/>
+                                        <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}" FontSize="24"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center">
+                                        <Run Text="Cập nhật:"/>
+                                        <Run Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </ScrollViewer>
+
+                        <!-- Statistics Section -->
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Thống kê 24 giờ qua" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="0,0,4,0">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="TB" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="25.5" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Min" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="18.2" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityLowBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0,0,0">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Max" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="32.8" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityCriticalBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Recent Readings Section -->
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Lịch sử đọc gần đây" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="16">
+                                <StackPanel Spacing="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="09:30:15" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        <TextBlock Grid.Column="1" Text="26.5°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="09:25:10" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        <TextBlock Grid.Column="1" Text="26.3°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="09:20:05" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        <TextBlock Grid.Column="1" Text="26.1°C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
 
 
                 <!-- Edit View -->

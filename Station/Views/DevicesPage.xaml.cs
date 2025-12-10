@@ -1,9 +1,10 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Station.ViewModels;
+using System;
 
 namespace Station.Views
 {
@@ -18,6 +19,41 @@ namespace Station.Views
         {
             this.InitializeComponent();
             ViewModel = new DevicesViewModel();
+        }
+
+        /// <summary>
+        /// Opens Add Node Dialog when "Thêm thiết bị" button is clicked
+        /// </summary>
+        private async void AddDeviceButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Create and show the Add Node Dialog
+                var dialog = new Station.Dialogs.AddNodeDialog(ViewModel);
+                dialog.XamlRoot = this.XamlRoot;
+
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    System.Diagnostics.Debug.WriteLine("Node added successfully!");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error opening add node dialog: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                // Show error dialog to user
+                var errorDialog = new ContentDialog
+                {
+                    Title = "Lỗi",
+                    Content = $"Không thể mở dialog thêm thiết bị:\n\n{ex.Message}",
+                    CloseButtonText = "Đóng",
+                    XamlRoot = this.XamlRoot
+                };
+                await errorDialog.ShowAsync();
+            }
         }
 
         /// <summary>
