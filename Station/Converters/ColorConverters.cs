@@ -91,4 +91,37 @@ namespace Station.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// Converts bool to accent background brush (for tab highlighting)
+    /// True: BackgroundAccentBrush, False: Transparent
+    /// </summary>
+    public class BoolToAccentBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            bool isTrue = value is bool b && b;
+
+            if (isTrue)
+            {
+                // Return accent background for selected state
+                if (Application.Current.Resources.TryGetValue("BackgroundAccentBrush", out object resource))
+                {
+                    return resource;
+                }
+                // Fallback accent color
+                return new SolidColorBrush(Windows.UI.Color.FromArgb(255, 220, 252, 231));
+            }
+            else
+            {
+                // Return transparent for unselected state
+                return new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

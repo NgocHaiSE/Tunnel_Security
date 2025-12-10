@@ -29,6 +29,7 @@
             <converters:BoolToAccentColorConverter x:Key="BoolToAccentColorConverter"/>
             <converters:BoolToInverseColorConverter x:Key="BoolToInverseColorConverter"/>
             <converters:BoolToThicknessConverter x:Key="BoolToThicknessConverter"/>
+            <converters:BoolToAccentBackgroundConverter x:Key="BoolToAccentBackgroundConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

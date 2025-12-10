@@ -52,6 +52,9 @@ namespace Station.ViewModels
             }
         }
 
+        [ObservableProperty]
+        private NodeItemViewModel? _selectedNode;
+
         private string? _selectedLine = "Tất cả tuyến";
         public string? SelectedLine
         {
