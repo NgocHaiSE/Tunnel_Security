@@ -17,6 +17,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using Station.Config;
 
 namespace Station.Views
 {
@@ -26,10 +27,10 @@ namespace Station.Views
 
         private readonly ThemeService _themeService;
 
-        // Config cho map – bạn chỉnh lại cho đúng
-        private const string BackendBaseUrl = "http://localhost:5280";
-        private const string StationId = "ST01";
-        private const string MapboxToken = "pk.eyJ1IjoiZGV2bm5oYWkiLCJhIjoiY21pZXN4MjRyMDU5MTNlczlqeDN3b2N2dSJ9.Ajy_BogFz2pclu6jFl7vVg";
+        // Config sẽ được load từ .env file
+        private string BackendBaseUrl => EnvironmentConfig.BackendBaseUrl;
+        private string StationId => EnvironmentConfig.StationId;
+        private string MapboxToken => EnvironmentConfig.MapboxAccessToken;
         private bool _securityMapInitialized = false;
 
         public ObservableCollection<SystemLogItem> SystemLogs { get; } = new();
@@ -161,14 +162,14 @@ namespace Station.Views
                 // Get resources safely
                 var transparentBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
                 var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
-                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush) 
-                    ? (SolidColorBrush)secBrush 
+                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush)
+                    ? (SolidColorBrush)secBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 139, 148, 158));
-                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush) 
-                    ? (SolidColorBrush)brdBrush 
+                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush)
+                    ? (SolidColorBrush)brdBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 54, 61));
-                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush) 
-                    ? (SolidColorBrush)accBrush 
+                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush)
+                    ? (SolidColorBrush)accBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
 
                 // Reset all filter buttons
@@ -208,14 +209,14 @@ namespace Station.Views
                 // Get resources safely
                 var transparentBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
                 var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
-                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush) 
-                    ? (SolidColorBrush)secBrush 
+                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush)
+                    ? (SolidColorBrush)secBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 139, 148, 158));
-                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush) 
-                    ? (SolidColorBrush)brdBrush 
+                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush)
+                    ? (SolidColorBrush)brdBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 54, 61));
-                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush) 
-                    ? (SolidColorBrush)accBrush 
+                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush)
+                    ? (SolidColorBrush)accBrush
                     : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
 
                 // Reset all filter buttons
@@ -769,7 +770,7 @@ namespace Station.Views
             var isOnline = _cameraStatus[cameraName];
 
             CurrentCameraName.Text = cameraName;
-            
+
             if (_cameraLocations.TryGetValue(cameraName, out var location))
             {
                 // Location info can be displayed if needed
@@ -841,9 +842,9 @@ namespace Station.Views
         {
             _focusedCamera = cameraName;
             _currentCameraIndex = Array.IndexOf(_cameraList, cameraName);
-            
+
             UpdateCurrentCamera();
-            
+
             // Show alert overlay
             AlertMessageText.Text = $"⚠️ {alertMessage.ToUpper()}";
             AlertOverlay.Visibility = Visibility.Visible;
