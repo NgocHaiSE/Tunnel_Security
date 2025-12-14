@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            background: #171E33;
+            color: #E6EEF3;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #mapContainer {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #mapCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Node styles - FIXED HOVER */
+        .node {
+            cursor: pointer;
+            transition: transform 0.15s ease-out;
+            transform-origin: center center;
+        }
+
+        .node:hover {
+            transform: scale(1.12);
+        }
+
+        /* Connecting lines */
+        .connection-line {
+            stroke: #404860;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5, 5;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Area labels */
+        .area-label {
+            font-size: 13px;
+            fill: #C4C8CF;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Node popup */
+        .node-popup {
+            position: absolute;
+            background: #15171A;
+            border: 1px solid #1F2429;
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 260px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            animation: popupFadeIn 0.2s ease;
+        }
+
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #E6EEF3;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1F2429;
+        }
+
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .popup-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #9AA6B2;
+        }
+
+        .popup-value {
+            color: #E6EEF3;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #1F2429;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .popup-btn-primary {
+            background: #2979FF;
+            color: white;
+        }
+
+        .popup-btn-primary:hover {
+            background: #1565C0;
+        }
+
+        .popup-btn-secondary {
+            background: #1F2429;
+            color: #E6EEF3;
+        }
+
+        .popup-btn-secondary:hover {
+            background: #2A2F3A;
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(21, 23, 26, 0.9);
+            border: 1px solid #1F2429;
+            border-radius: 8px;
+            padding: 12px 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-title {
+            font-size: 11px;
+            color: #9AA6B2;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+            font-size: 11px;
+            color: #E6EEF3;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Loading */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #9AA6B2;
+        }
+
+        /* Pulse animation for critical nodes */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .node-critical {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Hub node special styling */
+        .node-hub {
+            filter: drop-shadow(0 0 8px rgba(63, 207, 142, 0.5));
+        }
+    </style>
+</head>
+
+<body>
+    <div id="mapContainer">
+        <svg id="mapCanvas" viewBox="0 0 700 500" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <!-- Gradient for nodes -->
+                <radialGradient id="nodeGradient">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="1" />
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.7" />
+                </radialGradient>
+
+                <!-- Glow filter -->
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                    <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <!-- Connection lines group -->
+            <g id="connections"></g>
+
+            <!-- Area labels -->
+            <g id="areaLabels"></g>
+
+            <!-- Nodes group -->
+            <g id="nodes"></g>
+        </svg>
+
+        <!-- Node detail popup -->
+        <div id="nodePopup" class="node-popup">
+            <div class="popup-header" id="popupTitle">Node A-7</div>
+            <div id="popupContent"></div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-title">Legend</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #3FCF8E;"></div>
+                <span>Secure</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #FFD166;"></div>
+                <span>Warning</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #F0625D;"></div>
+                <span>Critical</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #7B7E85;"></div>
+                <span>Offline</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #7B7E85; border: 2px solid #3FCF8E;"></div>
+                <span>Hub</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+
+        // Initialize map with mock data (synchronized with DevicesViewModel)
+        function initializeMap() {
+            // Mock node data - matches devices from DevicesViewModel
+            nodes = [
+                // CAM-001: Camera 01 - Area A1 / R1 / N1
+                { id: 'CAM-001', name: 'Camera 01', x: 50, y: 400, area: 'A1', region: 'R1', nodeNumber: 'N1', status: 'online', radar: 2.1, vibration: 2.5, smokeFire: 28, temperature: 22.5, cameraId: 'CAM-001', isHub: false },
+
+                // CAM-002: Camera 02 - Area A1 / R2 / N3
+                { id: 'CAM-002', name: 'Camera 02', x: 130, y: 365, area: 'A1', region: 'R2', nodeNumber: 'N3', status: 'online', radar: 2.0, vibration: 2.3, smokeFire: 25, temperature: 21.8, cameraId: 'CAM-002', isHub: false },
+
+                // SEN-001: Sensor 01 - Area A2 / R3 / N5
+                { id: 'SEN-001', name: 'Sensor 01', x: 270, y: 280, area: 'A2', region: 'R3', nodeNumber: 'N5', status: 'online', radar: 2.2, vibration: 2.8, smokeFire: 30, temperature: 23.0, cameraId: null, isHub: false },
+
+                // RAD-001: Radar 01 - Area A2 / R4 / N7
+                { id: 'RAD-001', name: 'Radar 01', x: 430, y: 130, area: 'A2', region: 'R4', nodeNumber: 'N7', status: 'offline', radar: 0, vibration: 0, smokeFire: 0, temperature: 0, cameraId: null, isHub: false },
+
+                // SEN-002: Sensor 02 - Area A1 / R1 / N2
+                { id: 'SEN-002', name: 'Sensor 02', x: 90, y: 420, area: 'A1', region: 'R1', nodeNumber: 'N2', status: 'fault', radar: 2.8, vibration: 3.5, smokeFire: 45, temperature: 28.5, cameraId: null, isHub: false },
+
+                // CAM-003: Camera 03 - Area A3 / R5 / N9
+                { id: 'CAM-003', name: 'Camera 03', x: 560, y: 110, area: 'A3', region: 'R5', nodeNumber: 'N9', status: 'online', radar: 1.9, vibration: 2.4, smokeFire: 22, temperature: 21.5, cameraId: 'CAM-003', isHub: false },
+
+                // CAM-004: Camera 04 - Area A2 / R3 / N6
+                { id: 'CAM-004', name: 'Camera 04', x: 310, y: 260, area: 'A2', region: 'R3', nodeNumber: 'N6', status: 'disabled', radar: 0, vibration: 0, smokeFire: 0, temperature: 0, cameraId: 'CAM-004', isHub: false },
+
+                // SEN-003: Sensor 03 - Area A1 / R2 / N4
+                { id: 'SEN-003', name: 'Sensor 03', x: 180, y: 280, area: 'A1', region: 'R2', nodeNumber: 'N4', status: 'online', radar: 2.0, vibration: 2.6, smokeFire: 26, temperature: 22.0, cameraId: null, isHub: false },
+            ];
+
+
+            // Create connections between adjacent nodes (updated for new device layout)
+            connections = [
+                // Main path connections
+                ['CAM-001', 'SEN-002'],      // Camera 01 to Sensor 02
+                ['SEN-002', 'CAM-002'],      // Sensor 02 to Camera 02
+                ['CAM-002', 'SEN-003'],      // Camera 02 to Sensor 03
+                ['SEN-003', 'SEN-001'],      // Sensor 03 to Sensor 01
+                ['SEN-001', 'CAM-004'],      // Sensor 01 to Camera 04
+                ['CAM-004', 'RAD-001'],      // Camera 04 to Radar 01
+                ['RAD-001', 'CAM-003'],      // Radar 01 to Camera 03
+            ];
+
+            drawMap();
+        }
+
+        // Draw the entire map
+        function drawMap() {
+            drawConnections();
+            drawAreaLabels();
+            drawNodes();
+        }
+
+        // Draw connection lines
+        function drawConnections() {
+            const connectionsGroup = document.getElementById('connections');
+            connectionsGroup.innerHTML = '';
+
+            connections.forEach(([startId, endId]) => {
+                const startNode = nodes.find(n => n.id === startId);
+                const endNode = nodes.find(n => n.id === endId);
+
+                if (startNode && endNode) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('class', 'connection-line');
+                    line.setAttribute('x1', startNode.x);
+                    line.setAttribute('y1', startNode.y);
+                    line.setAttribute('x2', endNode.x);
+                    line.setAttribute('y2', endNode.y);
+                    connectionsGroup.appendChild(line);
+                }
+            });
+        }
+
+        // Draw area labels (updated for new device layout)
+        function drawAreaLabels() {
+            const labelsGroup = document.getElementById('areaLabels');
+            labelsGroup.innerHTML = '';
+
+            const areas = [
+                { name: 'Area A1', x: 50, y: 340 },   // Left area
+                { name: 'Area A2', x: 300, y: 200 }, // Middle area
+                { name: 'Area A3', x: 520, y: 60 }   // Top right area
+            ];
+
+            areas.forEach(area => {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('class', 'area-label');
+                text.setAttribute('x', area.x);
+                text.setAttribute('y', area.y);
+                text.textContent = area.name;
+                labelsGroup.appendChild(text);
+            });
+        }
+
+        // Draw nodes - FIXED: No more mouseenter/mouseleave
+        function drawNodes() {
+            const nodesGroup = document.getElementById('nodes');
+            nodesGroup.innerHTML = '';
+
+            nodes.forEach(node => {
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', `node ${node.status === 'fault' ? 'node-critical' : ''} ${node.isHub ? 'node-hub' : ''}`);
+                group.setAttribute('data-node-id', node.id);
+                group.style.cursor = 'pointer';
+                // Set transform-origin for smooth scaling
+                group.style.transformOrigin = `${node.x}px ${node.y}px`;
+
+                // Node outer circle (for hub)
+                if (node.isHub) {
+                    const outerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    outerCircle.setAttribute('cx', node.x);
+                    outerCircle.setAttribute('cy', node.y);
+                    outerCircle.setAttribute('r', '10');
+                    outerCircle.setAttribute('fill', 'none');
+                    outerCircle.setAttribute('stroke', getStatusColor(node.status));
+                    outerCircle.setAttribute('stroke-width', '2');
+                    group.appendChild(outerCircle);
+                }
+
+                // Node main circle
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x);
+                circle.setAttribute('cy', node.y);
+                circle.setAttribute('r', node.isHub ? '7' : '6');
+                circle.setAttribute('fill', getStatusColor(node.status));
+                circle.setAttribute('filter', 'url(#glow)');
+                group.appendChild(circle);
+
+                // Add only click event - hover is handled by CSS
+                group.addEventListener('click', () => showNodePopup(node));
+
+                nodesGroup.appendChild(group);
+            });
+        }
+
+        // Get status color (synchronized with DevicesViewModel)
+        function getStatusColor(status) {
+            const colors = {
+                'online': '#22C55E',    // Green - Online/Active
+                'offline': '#94A3B8',     // Gray - Offline
+                'fault': '#EF4444',        // Red - Fault/Error
+                'disabled': '#64748B'      // Slate - Disabled/Off
+            };
+            return colors[status] || colors.offline;
+        }
+
+        // Show node popup
+        function showNodePopup(node) {
+            selectedNode = node;
+            const popup = document.getElementById('nodePopup');
+            const popupTitle = document.getElementById('popupTitle');
+            const popupContent = document.getElementById('popupContent');
+
+            // Update title
+            popupTitle.textContent = node.name;
+
+            // Update content with proper status labels
+            const statusLabels = {
+                'online': 'Hoạt động',
+                'offline': 'Ngoại tuyến',
+                'fault': 'Lỗi',
+                'disabled': 'Tắt'
+            };
+
+            let content = `
+  <div class="popup-row">
+             <div class="popup-label">
+<span class="status-dot" style="background: ${getStatusColor(node.status)};"></span>
+ <span>Status</span>
+         </div>
+      <div class="popup-value">${statusLabels[node.status] || node.status}</div>
+            </div>
+           <div class="popup-row">
+            <div class="popup-label">Location</div>
+          <div class="popup-value">${node.area} / ${node.region} / ${node.nodeNumber}</div>
+        </div>
+    `;
+
+            if (node.status !== 'offline' && node.status !== 'disabled') {
+                content += `
+   <div class="popup-row">
+           <div class="popup-label">
+      <span class="status-dot" style="background: ${node.radar > 2.5 ? '#EF4444' : '#22C55E'};"></span>
+     <span>Radar</span>
+               </div>
+     <div class="popup-value">${node.radar.toFixed(2)} mm/m</div>
+          </div>
+      <div class="popup-row">
+   <div class="popup-label">
+          <span class="status-dot" style="background: ${node.vibration > 3.5 ? '#EF4444' : '#22C55E'};"></span>
+         <span>Vibration</span>
+     </div>
+         <div class="popup-value">${node.vibration.toFixed(2)} mm/s</div>
+   </div>
+        <div class="popup-row">
+       <div class="popup-label">
+          <span class="status-dot" style="background: ${node.smokeFire > 40 ? '#EF4444' : '#22C55E'};"></span>
+       <span>Smoke/Fire</span>
+    </div>
+  <div class="popup-value">${node.smokeFire.toFixed(2)} L</div>
+         </div>
+    <div class="popup-row">
+         <div class="popup-label">Temperature</div>
+     <div class="popup-value">${node.temperature.toFixed(2)} °C</div>
+          </div>
+         `;
+            }
+
+            content += `
+ <div class="popup-buttons">`;
+
+            // Only show View Camera button if node has a camera
+            if (node.cameraId) {
+                content += `<button class="popup-btn popup-btn-primary" onclick="viewCamera('${node.cameraId}')">View Camera</button>`;
+            }
+
+            content += `<button class="popup-btn popup-btn-secondary" onclick="manageDevice('${node.id}')">Manage Device</button>
+     </div>
+   `;
+
+            popupContent.innerHTML = content;
+
+            // Position popup near node with smart edge detection
+            const svg = document.getElementById('mapCanvas');
+            const rect = svg.getBoundingClientRect();
+            const scale = rect.width / 700; // SVG viewBox width
+
+            const nodeX = node.x * scale;
+            const nodeY = node.y * scale;
+
+            // Popup dimensions
+            const popupWidth = 260;
+            const popupHeight = 200;
+            const offset = 20;
+
+            let left, top;
+
+            // Calculate available space in all directions
+            const spaceRight = rect.width - nodeX;
+            const spaceLeft = nodeX;
+            const spaceBottom = rect.height - nodeY;
+            const spaceTop = nodeY;
+
+            // Horizontal positioning
+            if (spaceRight >= popupWidth + offset) {
+                // Enough space on right
+                left = nodeX + offset;
+            } else if (spaceLeft >= popupWidth + offset) {
+                // Not enough space on right, try left
+                left = nodeX - popupWidth - offset;
+            } else {
+                // Not enough space on either side, center horizontally with margin
+                left = Math.max(10, Math.min(nodeX - popupWidth / 2, rect.width - popupWidth - 10));
+            }
+
+            // Vertical positioning
+            if (spaceBottom >= popupHeight + offset) {
+                // Enough space below
+                top = nodeY + offset;
+            } else if (spaceTop >= popupHeight + offset) {
+                // Not enough space below, try above
+                top = nodeY - popupHeight - offset;
+            } else {
+                // Not enough space above or below, center vertically with margin
+                top = Math.max(10, Math.min(nodeY - popupHeight / 2, rect.height - popupHeight - 10));
+            }
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+            popup.style.display = 'block';
+        }
+
+        // Hide node popup
+        function hideNodePopup() {
+            const popup = document.getElementById('nodePopup');
+            popup.style.display = 'none';
+            selectedNode = null;
+        }
+
+        // View camera (called from C#)
+        function viewCamera(cameraId) {
+            window.chrome.webview.postMessage({
+                type: 'viewCamera',
+                cameraId: cameraId,
+                nodeId: selectedNode?.id
+            });
+            hideNodePopup();
+        }
+
+        // Manage device (called from C#)
+        function manageDevice(nodeId) {
+            window.chrome.webview.postMessage({
+                type: 'manageDevice',
+                nodeId: nodeId
+            });
+            hideNodePopup();
+        }
+
+        // Update node data from C#
+        function updateNode(nodeData) {
+            const node = nodes.find(n => n.id === nodeData.id);
+            if (node) {
+                Object.assign(node, nodeData);
+                drawNodes(); // Redraw nodes with updated data
+            }
+        }
+
+        // Update multiple nodes
+        function updateNodes(nodesData) {
+            nodesData.forEach(nodeData => {
+                const node = nodes.find(n => n.id === nodeData.id);
+                if (node) {
+                    Object.assign(node, nodeData);
+                }
+            });
+            drawNodes();
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('nodePopup');
+            const clickedNode = e.target.closest('.node');
+
+            if (!clickedNode && !popup.contains(e.target)) {
+                hideNodePopup();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (selectedNode) {
+                showNodePopup(selectedNode);
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeMap();
+
+            // Notify C# that map is ready
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({
+                    type: 'mapReady'
+                });
+            }
+        });
+
+        // Auto-update simulation (simulates real-time updates)
+        setInterval(() => {
+            // Randomly update some node values to simulate real-time monitoring
+            nodes.forEach(node => {
+                if (node.status !== 'offline' && Math.random() > 0.7) {
+                    node.radar += (Math.random() - 0.5) * 0.2;
+                    node.vibration += (Math.random() - 0.5) * 0.2;
+                    node.smokeFire += (Math.random() - 0.5) * 2;
+                    node.temperature += (Math.random() - 0.5) * 1;
+
+                    // Keep values in reasonable ranges
+                    node.radar = Math.max(0.5, Math.min(5, node.radar));
+                    node.vibration = Math.max(0.5, Math.min(5, node.vibration));
+                    node.smokeFire = Math.max(0, Math.min(100, node.smokeFire));
+                    node.temperature = Math.max(15, Math.min(50, node.temperature));
+
+                    // Update status based on new values
+                    if (node.radar > 3.0 || node.vibration > 4.0 || node.smokeFire > 50 || node.temperature > 45) {
+                        node.status = 'critical';
+                    } else if (node.radar > 2.5 || node.vibration > 3.5 || node.smokeFire > 35 || node.temperature > 35) {
+                        node.status = 'warning';
+                    } else {
+                        node.status = 'secure';
+                    }
+                }
+            });
+
+            drawNodes();
+
+            // Update popup if it's showing the updated node
+            if (selectedNode) {
+                const updatedNode = nodes.find(n => n.id === selectedNode.id);
+                if (updatedNode) {
+                    showNodePopup(updatedNode);
+                }
+            }
+        }, 3000); // Update every 3 seconds
+    </script>
+</body>
+
+</html>

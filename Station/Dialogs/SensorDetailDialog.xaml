@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Station.Dialogs.SensorDetailDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Chi tiết cảm biến"
+    PrimaryButtonText="Lưu"
+    CloseButtonText="Đóng"
+    DefaultButton="Primary"
+    Style="{StaticResource DefaultContentDialogStyle}">
+
+    <Grid MinWidth="700" MinHeight="500">
+        <TabView x:Name="SensorTabView"
+                 TabWidthMode="Equal"
+                 IsAddTabButtonVisible="False"
+                 CanDragTabs="False"
+                 CanReorderTabs="False">
+            
+            <!-- Configuration Tab -->
+            <TabView.TabItems>
+                <TabViewItem Header="Cấu hình">
+                    <TabViewItem.IconSource>
+                        <SymbolIconSource Symbol="Setting"/>
+                    </TabViewItem.IconSource>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+                        <StackPanel Spacing="20">
+                            <!-- Sensor Information Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Thông tin cảm biến"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                        CornerRadius="8"
+                                        Padding="16">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="ID Cảm biến:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center" Margin="0,0,0,12"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" 
+                                                 Text="{x:Bind Sensor.SensorId, Mode=OneWay}" 
+                                                 IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tên cảm biến:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center" Margin="0,0,0,12"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" 
+                                                 Text="{x:Bind Sensor.SensorName, Mode=TwoWay}" 
+                                                 Margin="0,0,0,12"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Loại cảm biến:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center" Margin="0,0,0,12"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" 
+                                                 Text="{x:Bind Sensor.SensorType, Mode=OneWay}" 
+                                                 IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Trạng thái:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center"/>
+                                        <ComboBox Grid.Row="3" Grid.Column="1" 
+                                                  SelectedIndex="0"
+                                                  HorizontalAlignment="Stretch">
+                                            <ComboBoxItem Content="Hoạt động"/>
+                                            <ComboBoxItem Content="Tạm dừng"/>
+                                            <ComboBoxItem Content="Bảo trì"/>
+                                        </ComboBox>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Threshold Settings Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Cấu hình ngưỡng cảnh báo"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                        CornerRadius="8"
+                                        Padding="16">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ngưỡng thấp:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center" Margin="0,0,0,12"/>
+                                        <NumberBox Grid.Row="0" Grid.Column="1" 
+                                                   Value="0" 
+                                                   SpinButtonPlacementMode="Inline"
+                                                   Margin="0,0,0,12"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Ngưỡng cao:" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center" Margin="0,0,0,12"/>
+                                        <NumberBox Grid.Row="1" Grid.Column="1" 
+                                                   Value="100" 
+                                                   SpinButtonPlacementMode="Inline"
+                                                   Margin="0,0,0,12"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Chu kỳ đọc (s):" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" 
+                                                   VerticalAlignment="Center"/>
+                                        <NumberBox Grid.Row="2" Grid.Column="1" 
+                                                   Value="5" 
+                                                   Minimum="1"
+                                                   SpinButtonPlacementMode="Inline"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Alert Settings Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Cấu hình cảnh báo"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                        CornerRadius="8"
+                                        Padding="16">
+                                    <StackPanel Spacing="12">
+                                        <ToggleSwitch Header="Bật cảnh báo email" IsOn="True"/>
+                                        <ToggleSwitch Header="Bật cảnh báo SMS" IsOn="False"/>
+                                        <ToggleSwitch Header="Bật cảnh báo âm thanh" IsOn="True"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabViewItem>
+
+                <!-- Data Tab -->
+                <TabViewItem Header="Dữ liệu">
+                    <TabViewItem.IconSource>
+                        <FontIconSource Glyph="&#xE9D9;"/>
+                    </TabViewItem.IconSource>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+                        <StackPanel Spacing="20">
+                            <!-- Current Reading Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Giá trị hiện tại"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Border Background="{StaticResource BackgroundAccentBrush}"
+                                        CornerRadius="8"
+                                        Padding="24">
+                                    <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                        <TextBlock FontSize="48"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource PrimaryDarkBrush}"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="{x:Bind Sensor.CurrentValue, Mode=OneWay}"/>
+                                            <Run Text=" "/>
+                                            <Run Text="{x:Bind Sensor.Unit, Mode=OneWay}" FontSize="24"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{x:Bind Sensor.SensorName, Mode=OneWay}"
+                                                   FontSize="14"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock FontSize="12"
+                                                   Foreground="{StaticResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Cập nhật:"/>
+                                            <Run Text="{x:Bind Sensor.LastUpdateText, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Statistics Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Thống kê 24 giờ qua"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" 
+                                            Background="{StaticResource BackgroundSecondaryBrush}"
+                                            CornerRadius="8"
+                                            Padding="16"
+                                            Margin="0,0,8,0">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Giá trị TB"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Text="25.5"
+                                                       FontSize="24"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="1" 
+                                            Background="{StaticResource BackgroundSecondaryBrush}"
+                                            CornerRadius="8"
+                                            Padding="16"
+                                            Margin="0,0,8,0">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Tối thiểu"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Text="18.2"
+                                                       FontSize="24"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource SeverityLowBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="2" 
+                                            Background="{StaticResource BackgroundSecondaryBrush}"
+                                            CornerRadius="8"
+                                            Padding="16">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Tối đa"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Text="32.8"
+                                                       FontSize="24"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource SeverityCriticalBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Recent Readings Section -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Lịch sử đọc gần đây"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                        CornerRadius="8"
+                                        Padding="16">
+                                    <StackPanel Spacing="8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="09:30:15" 
+                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="26.5°C" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="09:25:10" 
+                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="26.3°C" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="09:20:05" 
+                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="26.1°C" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="09:15:00" 
+                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="25.8°C" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="09:10:55" 
+                                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="25.5°C" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
+    </Grid>
+</ContentDialog>

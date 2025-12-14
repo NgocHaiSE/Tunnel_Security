@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Station.Dialogs.AddNodeDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Style="{StaticResource DefaultContentDialogStyle}"
+    Title="Thêm Node mới"
+    PrimaryButtonText="Thêm thiết bị"
+    CloseButtonText="Hủy"
+    DefaultButton="Primary"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
+        <StackPanel Spacing="24" Padding="4">
+
+            <!-- Node Information Section -->
+            <StackPanel Spacing="16">
+                <TextBlock Text="Thông tin Node"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+
+                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="16">
+                        <!-- Node Name -->
+                        <StackPanel>
+                            <TextBlock Text="Tên Node *"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="NodeNameTextBox"
+                                     PlaceholderText="Ví dụ: N1, Node-01..."
+                                     Style="{StaticResource DefaultTextBoxStyle}"/>
+                        </StackPanel>
+
+                        <!-- Line Selection -->
+                        <StackPanel>
+                            <TextBlock Text="Tuyến *"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <ComboBox x:Name="LineComboBox"
+                                      Style="{StaticResource StandardComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Chọn tuyến">
+                                <ComboBoxItem Content="Tuyến A1"/>
+                                <ComboBoxItem Content="Tuyến A2"/>
+                                <ComboBoxItem Content="Tuyến A3"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Location -->
+                        <StackPanel>
+                            <TextBlock Text="Vị trí *"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="LocationTextBox"
+                                     PlaceholderText="Ví dụ: R1, Khu vực 1..."
+                                     Style="{StaticResource DefaultTextBoxStyle}"/>
+                        </StackPanel>
+
+                        <!-- Description -->
+                        <StackPanel>
+                            <TextBlock Text="Mô tả"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="DescriptionTextBox"
+                                     PlaceholderText="Mô tả vị trí hoặc ghi chú..."
+                                     Style="{StaticResource DefaultTextBoxStyle}"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     MinHeight="80"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Sensors Configuration Section -->
+            <StackPanel Spacing="16">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE957;"
+                              FontSize="20"
+                              Foreground="{StaticResource PrimaryDarkBrush}"/>
+                    <TextBlock Text="Cấu hình 7 Cảm biến"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Sensor 1: Radar phát hiện người -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE701;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="1. Radar phát hiện người"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="RadarIdTextBox"
+                                         PlaceholderText="RAD-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="RadarStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 2: Camera hồng ngoại -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE714;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="2. Camera hồng ngoại"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="CameraIdTextBox"
+                                         PlaceholderText="CAM-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CameraStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 3: Cảm biến hồng ngoại (PIR) -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7C1;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="3. Cảm biến hồng ngoại (PIR)"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="PirIdTextBox"
+                                         PlaceholderText="PIR-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="PirStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 4: Cảm biến nhiệt độ & độ ẩm -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE9CA;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="4. Cảm biến nhiệt độ và độ ẩm"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="TempHumidIdTextBox"
+                                         PlaceholderText="THM-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="TempHumidStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 5: Cảm biến ánh sáng -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE706;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="5. Cảm biến ánh sáng"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="LightIdTextBox"
+                                         PlaceholderText="LUX-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="LightStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 6: Cảm biến mực nước -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE9F2;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="6. Cảm biến mực nước"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="WaterIdTextBox"
+                                         PlaceholderText="WTR-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="WaterStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sensor 7: Cảm biến gia tốc (rung động) -->
+                <Border Background="{StaticResource BackgroundAccentBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xEDA4;"
+                                      FontSize="18"
+                                      Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            <TextBlock Text="7. Cảm biến gia tốc (rung động)"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="ID Cảm biến"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="AccelerometerIdTextBox"
+                                         PlaceholderText="ACC-001"
+                                         Style="{StaticResource DefaultTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Trạng thái"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="AccelerometerStatusComboBox"
+                                          Style="{StaticResource StandardComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Hoạt động"/>
+                                    <ComboBoxItem Content="Tắt"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Information Note -->
+            <Border Background="{StaticResource BackgroundAccentBrush}"
+                    BorderBrush="{StaticResource PrimaryLightBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE946;"
+                              FontSize="16"
+                              Foreground="{StaticResource PrimaryDarkBrush}"
+                              VerticalAlignment="Top"
+                              Margin="0,2,0,0"/>
+                    <TextBlock TextWrapping="Wrap"
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}">
+                        <Run Text="Mỗi node sẽ được tự động cấu hình với 7 loại cảm biến cơ bản. Bạn có thể chỉnh sửa ID và trạng thái cho từng cảm biến."/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>
