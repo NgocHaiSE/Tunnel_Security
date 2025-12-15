@@ -28,7 +28,7 @@
 
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16" Margin="0,0,0,16">
-                    <TextBlock Text="Qu?n l� Thi?t b?"
+                    <TextBlock Text="Quản lý Thiết bị"
                                FontSize="22" FontWeight="Bold"
                                Foreground="{StaticResource TextPrimaryBrush}"/>
                     <Border Background="{StaticResource BackgroundPrimaryBrush}"
@@ -36,7 +36,7 @@
                             BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
                         <TextBlock FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}">
                             <Run Text="{x:Bind ViewModel.TotalDevices, Mode=OneWay}"/>
-                            <Run Text=" thi?t b?"/>
+                            <Run Text=" thiết bị"/>
                         </TextBlock>
                     </Border>
                 </StackPanel>
@@ -59,7 +59,7 @@
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center" Spacing="2">
-                                <TextBlock Text="Ho?t d?ng" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Hoạt động" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{x:Bind ViewModel.OnlineDevices, Mode=OneWay}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </StackPanel>
@@ -75,7 +75,7 @@
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center" Spacing="2">
-                                <TextBlock Text="Ngo?i tuy?n" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Ngoại tuyến" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{x:Bind ViewModel.OfflineDevices, Mode=OneWay}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </StackPanel>
@@ -91,7 +91,7 @@
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center" Spacing="2">
-                                <TextBlock Text="L?i" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Lỗi" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{x:Bind ViewModel.FaultDevices, Mode=OneWay}"
                                            FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </StackPanel>
@@ -100,315 +100,115 @@
                 </Grid>
             </Grid>
 
-            <!-- Filters Bar -->
-            <Border Grid.Row="1" Background="{StaticResource BackgroundPrimaryBrush}"
-                    Margin="24,0" Padding="16" CornerRadius="12"
-                    BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
-                <Grid>
+            <!-- Filter Bar -->
+            <Border Grid.Row="1" Margin="24,0" Background="{StaticResource BackgroundPrimaryBrush}"
+                    CornerRadius="10" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                <Grid Padding="16,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Filter Dropdowns -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                        <!-- Line Filter -->
-                        <Button MinWidth="160" Style="{StaticResource FilterDropdownButtonStyle}" x:Name="LineFilterButton">
-                            <Button.Flyout>
-                                <Flyout Placement="Bottom" FlyoutPresenterStyle="{StaticResource DarkFlyoutPresenterStyle}" x:Name="LineFlyout">
-                                    <ListView ItemsSource="{x:Bind ViewModel.LineFilters, Mode=OneWay}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedLine, Mode=TwoWay}"
-                                              Style="{StaticResource FlyoutListViewStyle}"
-                                              MinWidth="200"
-                                              ItemClick="FilterListView_ItemClick">
-                                        <ListView.ItemContainerStyle>
-                                            <Style TargetType="ListViewItem" BasedOn="{StaticResource FlyoutListViewItemStyle}"/>
-                                        </ListView.ItemContainerStyle>
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate x:DataType="x:String">
-                                                <TextBlock Text="{x:Bind}" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                </Flyout>
-                            </Button.Flyout>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Grid.Column="0" Glyph="&#xE81D;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedLine, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                <FontIcon Grid.Column="2" Glyph="&#xE70D;" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                            </Grid>
-                        </Button>
+                    <!-- Search Box -->
+                    <TextBox Grid.Column="0" PlaceholderText="Tìm kiếm thiết bị..."
+                             Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             BorderThickness="0" Background="Transparent" FontSize="14"/>
 
-                        <!-- Status Filter -->
-                        <Button MinWidth="160" Style="{StaticResource FilterDropdownButtonStyle}" x:Name="StatusFilterButton">
-                            <Button.Flyout>
-                                <Flyout Placement="Bottom" FlyoutPresenterStyle="{StaticResource DarkFlyoutPresenterStyle}" x:Name="StatusFlyout">
-                                    <ListView ItemsSource="{x:Bind ViewModel.StatusFilters, Mode=OneWay}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"
-                                              Style="{StaticResource FlyoutListViewStyle}"
-                                              MinWidth="200"
-                                              ItemClick="FilterListView_ItemClick">
-                                        <ListView.ItemContainerStyle>
-                                            <Style TargetType="ListViewItem" BasedOn="{StaticResource FlyoutListViewItemStyle}"/>
-                                        </ListView.ItemContainerStyle>
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate x:DataType="x:String">
-                                                <TextBlock Text="{x:Bind}" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                </Flyout>
-                            </Button.Flyout>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Grid.Column="0" Glyph="&#xE8F8;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedStatus, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                <FontIcon Grid.Column="2" Glyph="&#xE70D;" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
+                    <!-- Status Filter -->
+                    <ComboBox Grid.Column="1" Width="160" Margin="12,0,0,0"
+                              ItemsSource="{x:Bind ViewModel.StatusFilters}"
+                              SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"/>
 
-                    <!-- Search & Actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                        <Button Style="{StaticResource PrimaryButtonStyle}" Click="AddDeviceButton_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE710;" FontSize="12"/>
-                                <TextBlock Text="Th�m thi?t b?"/>
-                            </StackPanel>
-                        </Button>
-                        <TextBox PlaceholderText="T�m ki?m..."
-                                 Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 MinWidth="200" Style="{StaticResource SearchTextBoxStyle}"/>
-                    </StackPanel>
+                    <!-- Line Filter -->
+                    <ComboBox Grid.Column="2" Width="140" Margin="12,0,0,0"
+                              ItemsSource="{x:Bind ViewModel.LineFilters}"
+                              SelectedItem="{x:Bind ViewModel.SelectedLine, Mode=TwoWay}"/>
+
+                    <!-- Add Button -->
+                    <Button Grid.Column="3" Style="{StaticResource PrimaryButtonStyle}" Margin="12,0,0,0"
+                            Command="{x:Bind ViewModel.AddDeviceCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                            <TextBlock Text="Thêm thiết bị" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
-            <!-- Devices List -->
+            <!-- Devices List - Clickable Node Cards -->
             <Border Grid.Row="2" Margin="24,16,24,24"
                     Background="{StaticResource BackgroundSecondaryBrush}"
                     CornerRadius="12">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,12,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
                     <ItemsRepeater ItemsSource="{x:Bind ViewModel.FilteredNodes, Mode=OneWay}">
                         <ItemsRepeater.Layout>
-                            <StackLayout Spacing="16"/>
+                            <StackLayout Spacing="12"/>
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate>
-                                <!-- Node Card -->
+                                <!-- Clickable Node Card -->
                                 <Border Background="{StaticResource BackgroundPrimaryBrush}"
                                         BorderBrush="{StaticResource BorderLightBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="12"
-                                        Padding="0">
+                                        CornerRadius="10"
+                                        Padding="16"
+                                        PointerEntered="NodeCard_PointerEntered"
+                                        PointerExited="NodeCard_PointerExited"
+                                        Tapped="NodeCard_Tapped">
                                     <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                        <!-- Node Header -->
-                                        <Grid Grid.Row="0"
-                                              Background="{StaticResource BackgroundAccentBrush}"
-                                              Padding="20,16"
-                                              CornerRadius="12,12,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                        <!-- Node Icon -->
+                                        <Border Grid.Column="0"
+                                                Background="{StaticResource BackgroundAccentBrush}"
+                                                CornerRadius="10"
+                                                Width="52" Height="52"
+                                                Margin="0,0,16,0">
+                                            <FontIcon Glyph="&#xE968;" FontSize="24"
+                                                      Foreground="{StaticResource PrimaryDarkBrush}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
 
-                                            <!-- Node Icon -->
-                                            <Border Grid.Column="0"
-                                                    Background="{StaticResource BackgroundPrimaryBrush}"
-                                                    CornerRadius="8"
-                                                    Width="48"
-                                                    Height="48"
-                                                    Margin="0,0,16,0">
-                                                <FontIcon Glyph="&#xE968;"
-                                                          FontSize="24"
-                                                          Foreground="{StaticResource PrimaryDarkBrush}"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
-                                            </Border>
-
-                                            <!-- Node Info -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                                                <TextBlock Text="{Binding NodeName}"
-                                                           FontSize="18"
-                                                           FontWeight="Bold"
-                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                                    <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
-                                                        <Run Text="Tuy?n:"/>
-                                                        <Run Text="{Binding LineName}" FontWeight="SemiBold"/>
-                                                    </TextBlock>
-                                                    <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
-                                                        <Run Text="�"/>
-                                                        <Run Text="{Binding Location}"/>
-                                                    </TextBlock>
-                                                </StackPanel>
+                                        <!-- Node Info -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                            <TextBlock Text="{Binding NodeName}"
+                                                       FontSize="16" FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                                    <Run Text="{Binding LineName}"/>
+                                                    <Run Text=" • "/>
+                                                    <Run Text="{Binding Location}"/>
+                                                </TextBlock>
                                             </StackPanel>
-
-                                            <!-- Node Status Badge -->
-                                            <Border Grid.Column="2"
-                                                    Background="{Binding StatusBackgroundColor}"
-                                                    CornerRadius="8"
-                                                    Padding="12,8"
-                                                    VerticalAlignment="Center"
-                                                    Margin="0,0,12,0">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <Ellipse Width="8" Height="8" Fill="{Binding StatusColor}"/>
-                                                    <TextBlock Text="{Binding StatusText}"
-                                                               FontSize="13"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{Binding StatusColor}"/>
-                                                </StackPanel>
-                                            </Border>
-
-                                            <!-- Expand/Collapse Button -->
-                                            <Button Grid.Column="3"
-                                                    Click="NodeExpandButton_Click"
-                                                    Background="Transparent"
-                                                    BorderThickness="0"
-                                                    Padding="8"
-                                                    VerticalAlignment="Center">
-                                                <FontIcon x:Name="ExpandIcon"
-                                                          Glyph="&#xE70D;"
-                                                          FontSize="14"
-                                                          Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            </Button>
-                                        </Grid>
-
-                                        <!-- Sensors List (Collapsible) -->
-                                        <StackPanel Grid.Row="1"
-                                                    x:Name="SensorsPanel"
-                                                    Padding="20"
-                                                    Spacing="12"
-                                                    Visibility="{Binding IsExpanded}">
-
-                                            <!-- Sensors Header -->
-                                            <Grid Margin="0,0,0,8">
-                                                <TextBlock Text="C?m bi?n trong node"
-                                                           FontSize="14"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                                                <TextBlock Text="{Binding SensorCountText}"
-                                                           FontSize="13"
-                                                           Foreground="{StaticResource TextTertiaryBrush}"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"/>
-                                            </Grid>
-
-                                            <!-- Sensors Grid -->
-                                            <ItemsRepeater ItemsSource="{Binding Sensors}">
-                                                <ItemsRepeater.Layout>
-                                                    <UniformGridLayout MinItemWidth="250"
-                                                                       MinItemHeight="120"
-                                                                       ItemsStretch="Fill"
-                                                                       MinColumnSpacing="12"
-                                                                       MinRowSpacing="12"/>
-                                                </ItemsRepeater.Layout>
-                                                <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <!-- Sensor Card -->
-                                                        <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                                                BorderBrush="{StaticResource BorderLightBrush}"
-                                                                BorderThickness="1"
-                                                                CornerRadius="8"
-                                                                Padding="16"
-                                                                PointerEntered="SensorCard_PointerEntered"
-                                                                PointerExited="SensorCard_PointerExited"
-                                                                Tapped="SensorCard_Tapped">
-                                                            <Grid>
-                                                                <Grid.RowDefinitions>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                    <RowDefinition Height="*"/>
-                                                                </Grid.RowDefinitions>
-
-                                                                <!-- Sensor Header -->
-                                                                <Grid Grid.Row="0" Margin="0,0,0,8">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
-
-                                                                    <FontIcon Grid.Column="0"
-                                                                              Glyph="{Binding TypeIcon}"
-                                                                              FontSize="18"
-                                                                              Foreground="{StaticResource PrimaryDarkBrush}"
-                                                                              Margin="0,0,10,0"
-                                                                              VerticalAlignment="Center"/>
-
-                                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding SensorName}"
-                                                                                   FontSize="14"
-                                                                                   FontWeight="SemiBold"
-                                                                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                                                                   TextTrimming="CharacterEllipsis"/>
-                                                                        <TextBlock Text="{Binding SensorType}"
-                                                                                   FontSize="11"
-                                                                                   Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                                    </StackPanel>
-
-                                                                    <!-- Sensor Status -->
-                                                                    <Ellipse Grid.Column="2"
-                                                                             Width="10"
-                                                                             Height="10"
-                                                                             Fill="{Binding SensorStatusColor}"
-                                                                             VerticalAlignment="Center"/>
-                                                                </Grid>
-
-                                                                <!-- Current Reading -->
-                                                                <Border Grid.Row="1"
-                                                                        Background="{StaticResource BackgroundAccentBrush}"
-                                                                        CornerRadius="6"
-                                                                        Padding="12,8"
-                                                                        Margin="0,0,0,8">
-                                                                    <Grid>
-                                                                        <TextBlock Text="{Binding CurrentValue}"
-                                                                                   FontSize="15"
-                                                                                   FontWeight="Bold"
-                                                                                   Foreground="{StaticResource PrimaryDarkBrush}"
-                                                                                   HorizontalAlignment="Left"
-                                                                                   VerticalAlignment="Center"/>
-                                                                        <TextBlock Text="{Binding Unit}"
-                                                                                   FontSize="12"
-                                                                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                                                                   HorizontalAlignment="Right"
-                                                                                   VerticalAlignment="Center"/>
-                                                                    </Grid>
-                                                                </Border>
-
-                                                                <!-- Sensor Details -->
-                                                                <StackPanel Grid.Row="2" Spacing="4">
-                                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextTertiaryBrush}">
-                                                                        <Run Text="C?p nh?t:"/>
-                                                                        <Run Text="{Binding LastUpdateText}"/>
-                                                                    </TextBlock>
-                                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextTertiaryBrush}">
-                                                                        <Run Text="ID:"/>
-                                                                        <Run Text="{Binding SensorId}"/>
-                                                                    </TextBlock>
-                                                                </StackPanel>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
+                                            <TextBlock Text="{Binding SensorCountText}"
+                                                       FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
                                         </StackPanel>
+
+                                        <!-- Status Badge -->
+                                        <Border Grid.Column="2"
+                                                Background="{Binding StatusBackgroundColor}"
+                                                CornerRadius="6" Padding="10,6"
+                                                VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse Width="8" Height="8" Fill="{Binding StatusColor}"/>
+                                                <TextBlock Text="{Binding StatusText}"
+                                                           FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="{Binding StatusColor}"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Arrow Icon -->
+                                        <FontIcon Grid.Column="3" Glyph="&#xE76C;" FontSize="14"
+                                                  Foreground="{StaticResource TextTertiaryBrush}"
+                                                  VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -418,384 +218,471 @@
             </Border>
         </Grid>
 
-        <!-- Detail Panel (Right Sidebar) -->
+        <!-- Detail Panel (Right Sidebar) - Windows 11 Style with Sensor Icons -->
         <Border Grid.Column="1" Background="{StaticResource BackgroundPrimaryBrush}"
                 BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1,0,0,0"
-                Width="380"
-                Visibility="{x:Bind ViewModel.SelectedSensor, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
+                Width="440"
+                Visibility="{x:Bind ViewModel.SelectedNode, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
             <Grid>
-                <!-- Summary View -->
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- Global Sidebar Header -->
-                <Grid Grid.Row="0" Padding="16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Main Content Area -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Tabs -->
-                    <Border Grid.Column="0" Background="Transparent" CornerRadius="8" Padding="4" HorizontalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
+                    <!-- Sidebar Header - Node Info -->
+                    <Border Grid.Row="0" Padding="20,16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Node Icon -->
+                            <Border Grid.Column="0"
+                                    Background="{StaticResource BackgroundAccentBrush}"
+                                    CornerRadius="10" Width="48" Height="48" Margin="0,0,14,0">
+                                <FontIcon Glyph="&#xE968;" FontSize="22" Foreground="{StaticResource PrimaryDarkBrush}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Node Title -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.NodeName, Mode=OneWay}"
+                                           FontSize="17" FontWeight="Bold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="{x:Bind ViewModel.SelectedNode.StatusColor, Mode=OneWay}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedNode.StatusText, Mode=OneWay}"
+                                               FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Close Button -->
+                            <Button Grid.Column="2" Style="{StaticResource IconButtonStyle}"
+                                    Command="{x:Bind ViewModel.CloseSidebarCommand}" ToolTipService.ToolTip="Đóng">
+                                <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Tab Navigation -->
+                    <Border Grid.Row="1" Padding="12,8" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1"
+                            Background="{StaticResource BackgroundSecondaryBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
                             <!-- Info Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowSummaryCommand}"
-                                    BorderThickness="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
-                                    BorderBrush="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
-                                    Padding="12,6" Background="Transparent" CornerRadius="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Grid.Column="0" Command="{x:Bind ViewModel.ShowSummaryCommand}"
+                                    HorizontalAlignment="Stretch" Padding="8,10" 
+                                    Background="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentBackgroundConverter}}"
+                                    BorderThickness="0" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE946;" FontSize="14"
                                               Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
-                                    <TextBlock Text="Th�ng tin" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="Thông tin" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                 </StackPanel>
                             </Button>
 
                             <!-- Data Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowDetailsCommand}"
-                                    BorderThickness="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
-                                    BorderBrush="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
-                                    Padding="12,6" Background="Transparent" CornerRadius="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Grid.Column="1" Command="{x:Bind ViewModel.ShowDetailsCommand}"
+                                    HorizontalAlignment="Stretch" Padding="8,10" Margin="4,0"
+                                    Background="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToAccentBackgroundConverter}}"
+                                    BorderThickness="0" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE957;" FontSize="14"
                                               Foreground="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
-                                    <TextBlock Text="D? li?u" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="Dữ liệu" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                 </StackPanel>
                             </Button>
 
                             <!-- Config Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowEditCommand}"
-                                    BorderThickness="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
-                                    BorderBrush="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
-                                    Padding="12,6" Background="Transparent" CornerRadius="6">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Grid.Column="2" Command="{x:Bind ViewModel.ShowEditCommand}"
+                                    HorizontalAlignment="Stretch" Padding="8,10"
+                                    Background="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToAccentBackgroundConverter}}"
+                                    BorderThickness="0" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <FontIcon Glyph="&#xE713;" FontSize="14"
                                               Foreground="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
-                                    <TextBlock Text="C?u h�nh" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="Cấu hình" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                 </StackPanel>
                             </Button>
-                        </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <!-- Close Button -->
-                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}"
-                            Command="{x:Bind ViewModel.CloseSidebarCommand}" ToolTipService.ToolTip="��ng">
-                        <FontIcon Glyph="&#xE711;" FontSize="12"/>
-                    </Button>
-                </Grid>
+                    <!-- Content Area -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Padding="20" Spacing="16">
 
-                <!-- Summary Content -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                              Visibility="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Padding="20" Spacing="16">
+                            <!-- ===== SUMMARY TAB (Thông tin) ===== -->
+                            <StackPanel Visibility="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay}">
 
-                        <!-- Sensor Header -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}"
-                                       FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
-
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Background="{StaticResource BackgroundTertiaryBrush}"
-                                        CornerRadius="4" Padding="8,4">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorType, Mode=OneWay}"
-                                               FontSize="11" FontWeight="Bold"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
-                                </Border>
-                                <Border Background="{StaticResource BackgroundTertiaryBrush}" CornerRadius="4" Padding="8,4">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <Ellipse Width="8" Height="8" Fill="{x:Bind ViewModel.SelectedSensor.SensorStatusColor, Mode=OneWay}"/>
-                                        <TextBlock Text="Online" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <!-- Node Info (default view when no sensor selected) -->
+                                <StackPanel Visibility="{x:Bind ViewModel.SelectedSensor, Mode=OneWay, Converter={StaticResource NullToInverseVisibilityConverter}}"
+                                            Spacing="16">
+                                    
+                                    <!-- Node Overview Header -->
+                                    <StackPanel Spacing="8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource BackgroundAccentBrush}"
+                                                    CornerRadius="8" Width="42" Height="42" Margin="0,0,12,0">
+                                                <FontIcon Glyph="&#xE968;" FontSize="20"
+                                                          Foreground="{StaticResource PrimaryDarkBrush}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="Thông tin Node"
+                                                           FontSize="16" FontWeight="Bold"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                <TextBlock Text="Tổng quan về thiết bị"
+                                                           FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
-                                </Border>
+
+                                    <!-- Node Stats -->
+                                    <Border Background="{StaticResource BackgroundAccentBrush}" CornerRadius="12" Padding="20">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="4">
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedNode.Sensors.Count, Mode=OneWay}"
+                                                           FontSize="32" FontWeight="Bold" 
+                                                           Foreground="{StaticResource PrimaryDarkBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Cảm biến" FontSize="13"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                                                    <Ellipse Width="10" Height="10" Fill="{x:Bind ViewModel.SelectedNode.StatusColor, Mode=OneWay}"/>
+                                                    <TextBlock Text="{x:Bind ViewModel.SelectedNode.StatusText, Mode=OneWay}"
+                                                               FontSize="16" FontWeight="SemiBold" 
+                                                               Foreground="{StaticResource PrimaryDarkBrush}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="Trạng thái" FontSize="13"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Node Details Section -->
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Chi tiết" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="10" Padding="14">
+                                            <StackPanel Spacing="10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Tên Node:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="80"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedNode.NodeName, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Tuyến:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="80"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedNode.LineName, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Vị trí:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="80"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedNode.Location, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Sensors List Preview -->
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Danh sách cảm biến" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="Nhấn vào icon cảm biến bên phải để xem chi tiết" FontSize="12"
+                                                   Foreground="{StaticResource TextTertiaryBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Sensor Info (when sensor is selected) -->
+                                <StackPanel Visibility="{x:Bind ViewModel.SelectedSensor, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" Spacing="16">
+                                    
+                                    <!-- Sensor Header -->
+                                    <StackPanel Spacing="8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource BackgroundAccentBrush}"
+                                                    CornerRadius="8" Width="42" Height="42" Margin="0,0,12,0">
+                                                <FontIcon Glyph="{x:Bind ViewModel.SelectedSensor.TypeIcon, Mode=OneWay}" FontSize="20"
+                                                          Foreground="{StaticResource PrimaryDarkBrush}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}"
+                                                           FontSize="16" FontWeight="Bold"
+                                                           Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorType, Mode=OneWay}"
+                                                               FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                    <Ellipse Width="6" Height="6" Fill="{x:Bind ViewModel.SelectedSensor.SensorStatusColor, Mode=OneWay}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Current Value Display -->
+                                    <Border Background="{StaticResource BackgroundAccentBrush}" CornerRadius="12" Padding="20">
+                                        <StackPanel HorizontalAlignment="Center" Spacing="6">
+                                            <TextBlock FontSize="36" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" HorizontalAlignment="Center">
+                                                <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
+                                                <Run Text=" "/>
+                                                <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}" FontSize="18"/>
+                                            </TextBlock>
+                                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center">
+                                                <Run Text="Cập nhật: "/>
+                                                <Run Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Sensor Info Section -->
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Thông tin" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="10" Padding="14">
+                                            <StackPanel Spacing="10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="ID:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="70"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedSensor.SensorId, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Tuyến:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="70"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedSensor.LineName, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Vị trí:" FontSize="13" Foreground="{StaticResource TextTertiaryBrush}" Width="70"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedSensor.Location, Mode=OneWay}"
+                                                               FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+
                             </StackPanel>
-                        </StackPanel>
 
-                        <!-- Location Info -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="?? V? tr�" FontSize="14" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                    CornerRadius="8" Padding="12">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Tuy?n:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LineName, Mode=OneWay}"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="N�t:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.NodeName, Mode=OneWay}"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="V? tr�:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.Location, Mode=OneWay}"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Sensor Data -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="?? D? li?u th?i gian th?c" FontSize="14" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                    CornerRadius="8" Padding="12">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Gi� tr?:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock FontSize="14" Foreground="{StaticResource PrimaryDarkBrush}"
-                                                   FontWeight="Bold">
-                                            <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
-                                            <Run Text=" "/>
-                                            <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}"/>
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="C?p nh?t:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"
-                                                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Device Info -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="?? Th�ng tin thi?t b?" FontSize="14" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
-                                    CornerRadius="8" Padding="12">
-                                <StackPanel Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="ID:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorId, Mode=OneWay}"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="H�ng:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="Bosch"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Firmware:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="v2.1.0"
-                                                   FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Actions -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="??? Thao t�c" FontSize="14" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Button Grid.Column="0" Margin="0,0,4,0"
-                                        Style="{StaticResource SecondaryButtonStyle}"
-                                        HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE72C;" FontSize="12"/>
-                                        <TextBlock Text="L�m m?i" FontSize="13"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <Button Grid.Column="1" Margin="4,0,0,0"
-                                        Style="{StaticResource SecondaryButtonStyle}"
-                                        HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE711;" FontSize="12"/>
-                                        <TextBlock Text="X�a" FontSize="13"/>
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
-                        </StackPanel>
-
-                    </StackPanel>
-                </ScrollViewer>
-
-
-                <!-- Details View -->
-                <!-- Details Content -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20"
-                              Visibility="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Spacing="20">
-                        <!-- Current Reading Section -->
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Gi� tr? hi?n t?i" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundAccentBrush}" CornerRadius="8" Padding="24">
-                                <StackPanel HorizontalAlignment="Center" Spacing="8">
-                                    <TextBlock FontSize="48" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" HorizontalAlignment="Center">
-                                        <Run Text="{x:Bind ViewModel.SelectedSensor.CurrentValue, Mode=OneWay}"/>
-                                        <Run Text=" "/>
-                                        <Run Text="{x:Bind ViewModel.SelectedSensor.Unit, Mode=OneWay}" FontSize="24"/>
-                                    </TextBlock>
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=OneWay}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                                    <TextBlock FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center">
-                                        <Run Text="C?p nh?t:"/>
-                                        <Run Text="{x:Bind ViewModel.SelectedSensor.LastUpdateText, Mode=OneWay}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Statistics Section -->
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Th?ng k� 24 gi? qua" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="0,0,4,0">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="TB" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="25.5" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="1" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Min" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="18.2" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityLowBrush}"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="2" Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="12" Margin="4,0,0,0">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Max" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="32.8" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SeverityCriticalBrush}"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-
-                        <!-- Recent Readings Section -->
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="L?ch s? d?c g?n d�y" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="16">
+                            <!-- ===== DATA TAB (Dữ liệu) ===== -->
+                            <StackPanel Visibility="{x:Bind ViewModel.IsSidebarDetailVisible, Mode=OneWay}" Spacing="16">
+                                
                                 <StackPanel Spacing="8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="09:30:15" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="26.5�C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="09:25:10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="26.3�C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="09:20:05" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                        <TextBlock Grid.Column="1" Text="26.1�C" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <Border Grid.Column="0" Background="{StaticResource BackgroundAccentBrush}"
+                                                CornerRadius="8" Width="42" Height="42" Margin="0,0,12,0">
+                                            <FontIcon Glyph="&#xE957;" FontSize="20"
+                                                      Foreground="{StaticResource PrimaryDarkBrush}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="Dữ liệu cảm biến"
+                                                       FontSize="16" FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="Lịch sử đo và biểu đồ"
+                                                       FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        </StackPanel>
                                     </Grid>
                                 </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
 
+                                <!-- Placeholder for chart/data -->
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="10" Padding="20" MinHeight="200">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                        <FontIcon Glyph="&#xE9D9;" FontSize="36" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        <TextBlock Text="Biểu đồ dữ liệu" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="Sẽ hiển thị lịch sử đo của cảm biến được chọn" FontSize="12" 
+                                                   Foreground="{StaticResource TextTertiaryBrush}" TextAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
 
-                <!-- Edit View -->
-                <!-- Edit View -->
-                <Grid Grid.Row="1" Visibility="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                            </StackPanel>
 
-                    <!-- Content (from SensorDetailDialog Config Tab) -->
-                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="20">
-                        <StackPanel Spacing="20">
-                            <!-- Sensor Information Section -->
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="Th�ng tin c?m bi?n" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="16">
+                            <!-- ===== CONFIG TAB (Cấu hình) ===== -->
+                            <StackPanel Visibility="{x:Bind ViewModel.IsSidebarEditVisible, Mode=OneWay}" Spacing="16">
+                                
+                                <StackPanel Spacing="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Background="{StaticResource BackgroundAccentBrush}"
+                                                CornerRadius="8" Width="42" Height="42" Margin="0,0,12,0">
+                                            <FontIcon Glyph="&#xE713;" FontSize="20"
+                                                      Foreground="{StaticResource PrimaryDarkBrush}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock Text="Cấu hình thiết bị"
+                                                       FontSize="16" FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="Cài đặt và tham số"
+                                                       FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- Config options -->
+                                <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="10" Padding="14">
                                     <StackPanel Spacing="12">
-                                        <StackPanel>
-                                            <TextBlock Text="ID C?m bi?n" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{x:Bind ViewModel.SelectedSensor.SensorId, Mode=OneWay}" IsReadOnly="True"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="T�n c?m bi?n" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{x:Bind ViewModel.SelectedSensor.SensorName, Mode=TwoWay}"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="Lo?i c?m bi?n" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{x:Bind ViewModel.SelectedSensor.SensorType, Mode=OneWay}" IsReadOnly="True"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="Tr?ng th�i" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Content="Ho?t d?ng"/>
-                                                <ComboBoxItem Content="T?m d?ng"/>
-                                                <ComboBoxItem Content="B?o tr�"/>
+                                        <TextBlock Text="Cài đặt chung" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Tần suất cập nhật" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Column="1" Width="120" SelectedIndex="1">
+                                                <ComboBoxItem>5 giây</ComboBoxItem>
+                                                <ComboBoxItem>10 giây</ComboBoxItem>
+                                                <ComboBoxItem>30 giây</ComboBoxItem>
+                                                <ComboBoxItem>1 phút</ComboBoxItem>
                                             </ComboBox>
-                                        </StackPanel>
+                                        </Grid>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Thông báo cảnh báo" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <ToggleSwitch Grid.Column="1" IsOn="True" OnContent="" OffContent=""/>
+                                        </Grid>
                                     </StackPanel>
                                 </Border>
+
+                                <!-- Actions -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0" Margin="0,0,4,0"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE72C;" FontSize="12"/>
+                                            <TextBlock Text="Làm mới" FontSize="13"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Grid.Column="1" Margin="4,0,0,0"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74E;" FontSize="12"/>
+                                            <TextBlock Text="Lưu" FontSize="13"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
                             </StackPanel>
 
-                            <!-- Threshold Settings Section -->
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="C?u h�nh ngu?ng" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="16">
-                                    <StackPanel Spacing="12">
-                                        <StackPanel>
-                                            <TextBlock Text="Ngu?ng th?p" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <NumberBox Value="0" SpinButtonPlacementMode="Inline"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="Ngu?ng cao" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <NumberBox Value="100" SpinButtonPlacementMode="Inline"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="Chu k? d?c (s)" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
-                                            <NumberBox Value="5" Minimum="1" SpinButtonPlacementMode="Inline"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
-
-                    <!-- Footer Actions -->
-                    <Border Grid.Row="1" Padding="20,16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,1,0,0" Background="{StaticResource BackgroundSecondaryBrush}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="H?y" Style="{StaticResource SecondaryButtonStyle}"
-                                    HorizontalAlignment="Stretch" Margin="0,0,6,0"
-                                    Command="{x:Bind ViewModel.ShowSummaryCommand}"/>
-                            <Button Grid.Column="1" Content="Luu thay d?i" Style="{StaticResource PrimaryButtonStyle}"
-                                    HorizontalAlignment="Stretch" Margin="6,0,0,0"
-                                    Command="{x:Bind ViewModel.ShowSummaryCommand}"/>
-                        </Grid>
-                    </Border>
                 </Grid>
+
+                <!-- Vertical Icons Toolbar (Right Side) - Windows 11 Style -->
+                <Border Grid.Column="1" Background="{StaticResource BackgroundSecondaryBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1,0,0,0"
+                        Width="60">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,12,0,12" Spacing="6">
+                            
+                            <!-- Node Icon (Show Node Info) -->
+                            <Button Width="44" Height="44" CornerRadius="8" Padding="0"
+                                    HorizontalAlignment="Center"
+                                    Background="{StaticResource BackgroundAccentBrush}"
+                                    ToolTipService.ToolTip="Thông tin Node"
+                                    Tapped="NodeIcon_Tapped">
+                                <FontIcon Glyph="&#xE968;" FontSize="18"
+                                          Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            </Button>
+                            
+                            <!-- Separator -->
+                            <Border Height="1" Width="36" Background="{StaticResource BorderLightBrush}" 
+                                    HorizontalAlignment="Center" Margin="0,4"/>
+                            
+                            <!-- Sensor Icons -->
+                            <ItemsRepeater ItemsSource="{x:Bind ViewModel.SelectedNode.Sensors, Mode=OneWay}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Spacing="6" Orientation="Vertical"/>
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Width="44" Height="44" CornerRadius="8" Padding="0"
+                                                HorizontalAlignment="Center"
+                                                Background="Transparent"
+                                                ToolTipService.ToolTip="{Binding SensorName}"
+                                                Tapped="SensorIcon_Tapped">
+                                            <FontIcon Glyph="{Binding TypeIcon}" FontSize="18"
+                                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
             </Grid>
         </Border>
     </Grid>
