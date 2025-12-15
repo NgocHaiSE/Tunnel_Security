@@ -52,6 +52,17 @@ namespace Station.ViewModels
             }
         }
 
+        [ObservableProperty]
+        private NodeItemViewModel? _selectedNode;
+
+        partial void OnSelectedNodeChanged(NodeItemViewModel? value)
+        {
+            if (value != null)
+            {
+                SidebarMode = DeviceSidebarMode.Summary;
+            }
+        }
+
         private string? _selectedLine = "Tất cả tuyến";
         public string? SelectedLine
         {

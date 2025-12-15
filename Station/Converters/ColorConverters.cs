@@ -91,4 +91,45 @@ namespace Station.Converters
             throw new NotImplementedException();
         }
     }
+
+    public class BoolToAccentBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            bool isTrue = value is bool b && b;
+
+            // Default keys: true -> accent background, false -> transparent
+            string trueKey = "PrimaryLightBrush";
+            string falseKey = "Transparent";
+
+            if (parameter is string paramStr)
+            {
+                var parts = paramStr.Split('|');
+                if (parts.Length > 0 && !string.IsNullOrWhiteSpace(parts[0])) trueKey = parts[0];
+                if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1])) falseKey = parts[1];
+            }
+
+            string targetKey = isTrue ? trueKey : falseKey;
+
+            if (targetKey.Equals("Transparent", StringComparison.OrdinalIgnoreCase))
+            {
+                return new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+            }
+
+            if (Application.Current.Resources.TryGetValue(targetKey, out object resource))
+            {
+                return resource;
+            }
+
+            // Fallback
+            return isTrue
+                ? new SolidColorBrush(Windows.UI.Color.FromArgb(40, 22, 163, 74)) // Light accent
+                : new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0)); // Transparent
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
