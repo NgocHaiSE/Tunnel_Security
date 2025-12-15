@@ -131,54 +131,47 @@
                 <ColumnDefinition Width="280" MinWidth="250"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Right Panel - Trend Analysis & Error Statistics -->
-            <Grid Grid.Column="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- Right Panel - Phân tích & thống kê (Single Panel) -->
+            <Border Grid.Column="4"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <!-- Trend Analysis Section -->
-                <Border Grid.Row="0"
-                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="16"
-                        Margin="0,0,0,4">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                    <!--Header with hamburger menu-->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Phân tích &amp; thống kê"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                        </StackPanel>
 
-                        <!--Header-->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Phân tích xu hướng"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                            </StackPanel>
+                        <Button x:Name="ErrorNodesMenuButton"
+                                Click="DataPanelMenuButton_Click"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="8"
+                                HorizontalAlignment="Right"
+                                ToolTipService.ToolTip="Mở cửa sổ phân tích">
+                            <FontIcon Glyph="&#xE700;"
+                                      FontSize="16"
+                                      Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </Button>
+                    </Grid>
 
-                            <Button x:Name="ErrorNodesMenuButton"
-                                    Click="DataPanelMenuButton_Click"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="8"
-                                    HorizontalAlignment="Right"
-                                    ToolTipService.ToolTip="Mở cửa sổ lỗi">
-                                <FontIcon Glyph="&#xE700;"
-                                          FontSize="16"
-                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                            </Button>
-                        </Grid>
-
-                        <!--Error Nodes Bar Chart-->
-                        <Border Grid.Row="1"
-                                Background="{StaticResource MonitoringBackgroundBrush}"
-                                CornerRadius="8"
-                                Padding="12"
-                                MinWidth="300">
+                    <!--Content: Trend Chart + Error Statistics in one ScrollViewer-->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <!--Trend Analysis Chart Section-->
+                            <Border Background="{StaticResource MonitoringBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="12"
+                                    MinWidth="300">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
@@ -275,57 +268,13 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-
-                <!-- GridSplitter for Resizable Panels -->
-                <controls2:GridSplitter Grid.Row="1"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Center"
-                                        Height="8"
-                                        Background="Transparent"
-                                        ResizeBehavior="PreviousAndNext">
-                </controls2:GridSplitter>
-
-                <!-- Error Statistics Section -->
-                <Border Grid.Row="2"
-                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="16"
-                        Margin="0,4,0,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <Grid Grid.Row="0" Margin="0,0,0,10">
-                            <Border Height="1" Background="{StaticResource MonitoringBorderBrush}" VerticalAlignment="Center"/>
-                            <Border Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                                    Padding="0,0"
-                                    >
-                                <Grid Margin="0,0,0,0">
-                                    <TextBlock Text="Thống kê lỗi"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTextPrimaryBrush}"
-                                               />
-                                    <TextBlock Text="24 giờ qua"
-                                               FontSize="11"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               HorizontalAlignment="Right"/>
-                                </Grid>
                             </Border>
-                        </Grid>
-
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            
+                            <!--Error Statistics Section-->
                             <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                     CornerRadius="8"
                                     Padding="12">
                                 <StackPanel Spacing="8">
-
-
                                     <!--Bar Chart Items-->
                                     <StackPanel x:Name="ErrorNodesChart" Spacing="4">
                                         <Grid>
@@ -485,10 +434,10 @@
                                     </Border>
                                 </StackPanel>
                             </Border>
-                        </ScrollViewer>
-                    </Grid>
-                </Border>
-            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
 
 
             <!-- GridSplitter between Left and Center panels -->
@@ -545,53 +494,46 @@
             </controls2:GridSplitter>
 
 
-            <!-- Left Panel - Alert Distribution & Latest Alerts -->
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- Left Panel - Cảnh báo & sự cố (Single Panel) -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource MonitoringPanelBackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <!-- Alert Distribution Section -->
-                <Border Grid.Row="0"
-                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="16"
-                        Margin="0,0,0,4">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                    <!--Header with hamburger menu-->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Cảnh báo &amp; sự cố"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                        </StackPanel>
 
-                        <!--Header-->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Cảnh báo "
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                            </StackPanel>
+                        <Button x:Name="AlertDistributionMenuButton"
+                                Click="AlertPanelMenuButton_Click"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="8"
+                                HorizontalAlignment="Right"
+                                ToolTipService.ToolTip="Mở cửa sổ cảnh báo">
+                            <FontIcon Glyph="&#xE700;"
+                                      FontSize="16"
+                                      Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                        </Button>
+                    </Grid>
 
-                            <Button x:Name="AlertDistributionMenuButton"
-                                    Click="AlertPanelMenuButton_Click"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="8"
-                                    HorizontalAlignment="Right"
-                                    ToolTipService.ToolTip="Mở cửa sổ phân bố">
-                                <FontIcon Glyph="&#xE700;"
-                                          FontSize="16"
-                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                            </Button>
-                        </Grid>
-
-                        <!--Chart Content-->
-                        <Border Grid.Row="1"
-                                Background="{StaticResource MonitoringBackgroundBrush}"
-                                CornerRadius="8"
-                                Padding="12">
+                    <!--Content: Chart + Alert List in one ScrollViewer-->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <!--Chart Section-->
+                            <Border Background="{StaticResource MonitoringBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -677,55 +619,9 @@
                                     </Grid>
                                 </StackPanel>
                             </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-
-                <!-- GridSplitter for Resizable Panels -->
-                <controls2:GridSplitter Grid.Row="1"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Center"
-                                        Height="8"
-                                        Background="Transparent"
-                                        ResizeBehavior="PreviousAndNext">
-                </controls2:GridSplitter>
-
-                <!-- Latest Alerts Section -->
-                <Border Grid.Row="2"
-                        Background="{StaticResource MonitoringPanelBackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="16"
-                        Margin="0,4,0,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!--Header with hamburger menu-->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Sự cố"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                            </StackPanel>
-
-                            <Button x:Name="RightPanelAlertMenuButton"
-                                    Click="AlertPanelMenuButton_Click"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="8"
-                                    HorizontalAlignment="Right"
-                                    ToolTipService.ToolTip="Mở cửa sổ cảnh báo">
-                                <FontIcon Glyph="&#xE700;"
-                                          FontSize="16"
-                                          Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                            </Button>
-                        </Grid>
-
-                        <!--Alert List-->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            </Border>
+                            
+                            <!--Alert List Section-->
                             <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                     CornerRadius="8"
                                     Padding="12">
@@ -965,10 +861,10 @@
                                     </Border>
                                 </StackPanel>
                             </Border>
-                        </ScrollViewer>
-                    </Grid>
-                </Border>
-            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- Horizontal GridSplitter between Main Content and Bottom Section -->
