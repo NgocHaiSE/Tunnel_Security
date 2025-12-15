@@ -149,58 +149,12 @@ namespace Station.Views
             }
         }
 
-        private void RefreshLogs_Click(object sender, RoutedEventArgs e)
+        private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
-            SystemLogs.Clear();
-            InitializeSystemLogs();
+            OpenModuleWindow("Quản trị người dùng", typeof(UserManagementPage));
         }
 
-        private void TimeFilter_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button)
-            {
-                // Get resources safely
-                var transparentBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
-                var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
-                var secondaryBrush = Application.Current.Resources.TryGetValue("MonitoringTextSecondaryBrush", out var secBrush)
-                    ? (SolidColorBrush)secBrush
-                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 139, 148, 158));
-                var borderBrush = Application.Current.Resources.TryGetValue("MonitoringBorderBrush", out var brdBrush)
-                    ? (SolidColorBrush)brdBrush
-                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 54, 61));
-                var accentBrush = Application.Current.Resources.TryGetValue("MonitoringAccentButtonBrush", out var accBrush)
-                    ? (SolidColorBrush)accBrush
-                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 33, 150, 243));
 
-                // Reset all filter buttons
-                //Filter24HButton.Background = transparentBrush;
-                //Filter24HButton.Foreground = secondaryBrush;
-                //Filter24HButton.BorderBrush = borderBrush;
-                //Filter24HButton.BorderThickness = new Thickness(1);
-
-                //Filter7DButton.Background = transparentBrush;
-                //Filter7DButton.Foreground = secondaryBrush;
-                //Filter7DButton.BorderBrush = borderBrush;
-                //Filter7DButton.BorderThickness = new Thickness(1);
-
-                //Filter30DButton.Background = transparentBrush;
-                //Filter30DButton.Foreground = secondaryBrush;
-                //Filter30DButton.BorderBrush = borderBrush;
-                //Filter30DButton.BorderThickness = new Thickness(1);
-
-                // Set clicked button as active
-                button.Background = accentBrush;
-                button.Foreground = whiteBrush;
-                button.BorderThickness = new Thickness(0);
-
-                // Get filter type
-                string filterTag = button.Tag?.ToString() ?? "24H";
-                Debug.WriteLine($"Time filter changed to: {filterTag}");
-
-                // TODO: Update chart data based on time filter
-                // You can call a method to fetch and display data for the selected time range
-            }
-        }
 
         private void AlertTimeFilter_Click(object sender, RoutedEventArgs e)
         {
@@ -583,7 +537,7 @@ namespace Station.Views
 
         private void DataPanelMenuButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenModuleWindow("Dữ liệu", typeof(DataPage));
+            OpenModuleWindow("Phân tích xu hướng", typeof(AnalyticsReportPage));
         }
 
         private void AlertPanelMenuButton_Click(object sender, RoutedEventArgs e)
@@ -683,6 +637,14 @@ namespace Station.Views
                     else if (pageType == typeof(ConfigurationPage))
                     {
                         mainWindow.OpenPageInNewWindow<ConfigurationPage>(title);
+                    }
+                    else if (pageType == typeof(UserManagementPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<UserManagementPage>(title);
+                    }
+                    else if (pageType == typeof(AnalyticsReportPage))
+                    {
+                        mainWindow.OpenPageInNewWindow<AnalyticsReportPage>(title);
                     }
                     else
                     {

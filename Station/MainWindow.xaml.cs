@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using Station.Services;
@@ -22,8 +23,8 @@ namespace Station
 
             Title = "Trạm Nghĩa Đô - Hệ thống giám sát xâm nhập";
 
-            // Set window to maximized for 4K dashboard
-            AppWindow.Resize(new Windows.Graphics.SizeInt32(1920, 1080));
+            // Set window to maximized/fullscreen for 4K dashboard
+            MaximizeWindow(this);
 
             // Subscribe to theme changes
             _themeService.ThemeChanged += OnThemeChanged;
@@ -127,7 +128,7 @@ namespace Station
             {
                 Background = Application.Current.Resources["BackgroundSecondaryBrush"] as Microsoft.UI.Xaml.Media.Brush
             };
-            
+
             frame.Navigate(pageType);
             newWindow.Content = frame;
 
@@ -137,8 +138,8 @@ namespace Station
                 element.RequestedTheme = _themeService.CurrentTheme;
             }
 
-            // Set window size
-            newWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32(1400, 900));
+            // Set window to maximized/fullscreen
+            MaximizeWindow(newWindow);
 
             // Handle window closed event
             newWindow.Closed += (s, e) =>
@@ -154,6 +155,21 @@ namespace Station
             newWindow.Activate();
 
             System.Diagnostics.Debug.WriteLine($"Opened new window: {title}");
+        }
+
+        /// <summary>
+        /// Maximize/Fullscreen a window
+        /// </summary>
+        private static void MaximizeWindow(Window window)
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = AppWindow.GetFromWindowId(windowId);
+
+            if (appWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+            }
         }
     }
 }

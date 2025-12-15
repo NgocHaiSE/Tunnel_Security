@@ -74,10 +74,19 @@
                     <Run Text="  "/>
                     <Run Text="{x:Bind ViewModel.CurrentTime, Mode=OneWay}"/>
                 </TextBlock>
-                <TextBlock Text="Admin"
-                           FontSize="14"
-                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                           VerticalAlignment="Center"/>
+                <Button x:Name="AdminButton"
+                        Click="AdminButton_Click"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="8"
+                        ToolTipService.ToolTip="Tài khoản / Quản trị"
+                        VerticalAlignment="Center">
+
+                    <FontIcon Glyph="&#xE77B;"
+                              FontSize="20"
+                              Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
+                </Button>
+
                 <Button x:Name="ThemeToggleButton"
                         Click="ThemeToggleButton_Click"
                         Background="Transparent"
