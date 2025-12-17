@@ -7,6 +7,13 @@
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     Background="{StaticResource BackgroundSecondaryBrush}">
 
+    <Page.Resources>
+        <ThemeShadow x:Key="CommonShadow"/>
+        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+        </Style>
+    </Page.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -29,19 +36,30 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16" Margin="0,0,0,16">
-                    <TextBlock Text="🚨 Trung tâm Cảnh báo" 
-                               FontSize="22" FontWeight="Bold" 
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <Border Background="{StaticResource SeverityCriticalBrush}" 
-                            CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind ViewModel.UnprocessedCount, Mode=OneWay}" 
-                                   FontSize="13" FontWeight="Bold" Foreground="White"/>
-                    </Border>
-                    <TextBlock Text="cảnh báo chưa xử lý" FontSize="13" 
-                               Foreground="{StaticResource TextSecondaryBrush}" 
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                        <TextBlock Text="🚨 Trung tâm Cảnh báo"
+                                   FontSize="24" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Border Background="{StaticResource BackgroundTertiaryBrush}"
+                                CornerRadius="12" Padding="10,4" VerticalAlignment="Center"
+                                BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="12" Foreground="{StaticResource SeverityCriticalBrush}"/>
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">
+                                    <Run Text="{x:Bind ViewModel.UnprocessedCount, Mode=OneWay}"/>
+                                    <Run Text="chưa xử lý" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
                 <!-- Statistics Cards -->
                 <Grid Grid.Row="1">
@@ -50,89 +68,125 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.5*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Critical -->
-                    <Border Grid.Column="0" Background="#FEE2E2" CornerRadius="12" Padding="16" Margin="0,0,8,0">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xEB90;" FontSize="18" Foreground="#DC2626"/>
-                                <TextBlock Text="Nghiêm trọng" FontSize="12" Foreground="#991B1B"/>
-                            </StackPanel>
-                            <TextBlock Text="{x:Bind ViewModel.CriticalCount, Mode=OneWay}" 
-                                       FontSize="28" FontWeight="Bold" Foreground="#DC2626" Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- High -->
-                    <Border Grid.Column="1" Background="#FFEDD5" CornerRadius="12" Padding="16" Margin="4,0">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE783;" FontSize="18" Foreground="#EA580C"/>
-                                <TextBlock Text="Cao" FontSize="12" Foreground="#9A3412"/>
-                            </StackPanel>
-                            <TextBlock Text="{x:Bind ViewModel.HighCount, Mode=OneWay}" 
-                                       FontSize="28" FontWeight="Bold" Foreground="#EA580C" Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Medium -->
-                    <Border Grid.Column="2" Background="#FEF9C3" CornerRadius="12" Padding="16" Margin="4,0">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE7BA;" FontSize="18" Foreground="#CA8A04"/>
-                                <TextBlock Text="Trung bình" FontSize="12" Foreground="#854D0E"/>
-                            </StackPanel>
-                            <TextBlock Text="{x:Bind ViewModel.MediumCount, Mode=OneWay}" 
-                                       FontSize="28" FontWeight="Bold" Foreground="#CA8A04" Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Low -->
-                    <Border Grid.Column="3" Background="#DCFCE7" CornerRadius="12" Padding="16" Margin="4,0">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE946;" FontSize="18" Foreground="#16A34A"/>
-                                <TextBlock Text="Thấp" FontSize="12" Foreground="#166534"/>
-                            </StackPanel>
-                            <TextBlock Text="{x:Bind ViewModel.LowCount, Mode=OneWay}" 
-                                       FontSize="28" FontWeight="Bold" Foreground="#16A34A" Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Today/Week/Month Summary -->
-                    <Border Grid.Column="4" Background="{StaticResource BackgroundPrimaryBrush}" 
-                            CornerRadius="12" Padding="16" Margin="8,0,0,0"
-                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                    <Border Grid.Column="0" Background="{StaticResource BackgroundPrimaryBrush}"
+                            CornerRadius="12" Padding="16" Margin="0,0,8,0"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                            Shadow="{StaticResource CommonShadow}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Text="Thống kê" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Row="1" Margin="0,8,0,0">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="{x:Bind ViewModel.TodayCount, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    <TextBlock Text="hôm nay" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="{x:Bind ViewModel.WeekCount, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    <TextBlock Text="tuần này" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="{x:Bind ViewModel.MonthCount, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    <TextBlock Text="tháng này" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xEB90;" FontSize="16" Foreground="#DC2626"/> <!-- Outlined Icon style approximation via font -->
+                                <TextBlock Text="Nghiêm trọng" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
+                            <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.CriticalCount, Mode=OneWay}"
+                                       FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,12,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- High -->
+                    <Border Grid.Column="1" Background="{StaticResource BackgroundPrimaryBrush}"
+                            CornerRadius="12" Padding="16" Margin="4,0"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                            Shadow="{StaticResource CommonShadow}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE783;" FontSize="16" Foreground="#EA580C"/>
+                                <TextBlock Text="Cao" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.HighCount, Mode=OneWay}"
+                                       FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,12,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Medium -->
+                    <Border Grid.Column="2" Background="{StaticResource BackgroundPrimaryBrush}"
+                            CornerRadius="12" Padding="16" Margin="4,0"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                            Shadow="{StaticResource CommonShadow}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="16" Foreground="#CA8A04"/>
+                                <TextBlock Text="Trung bình" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.MediumCount, Mode=OneWay}"
+                                       FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,12,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Low -->
+                    <Border Grid.Column="3" Background="{StaticResource BackgroundPrimaryBrush}"
+                            CornerRadius="12" Padding="16" Margin="4,0"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                            Shadow="{StaticResource CommonShadow}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="#16A34A"/>
+                                <TextBlock Text="Thấp" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.LowCount, Mode=OneWay}"
+                                       FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,12,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Trend Chart (Sparkline) -->
+                    <Border Grid.Column="4" Background="{StaticResource BackgroundPrimaryBrush}"
+                            CornerRadius="12" Padding="16,12" Margin="8,0,0,0"
+                            BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                            Shadow="{StaticResource CommonShadow}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE9D2;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="Xu hướng 7 ngày" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="{x:Bind ViewModel.TodayCount, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="hôm nay" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Sparkline Chart -->
+                            <lvc:CartesianChart Grid.Row="1"
+                                                Series="{x:Bind ViewModel.AlertTrendSeries, Mode=OneWay}"
+                                                XAxes="{x:Bind ViewModel.AlertTrendXAxes, Mode=OneWay}"
+                                                YAxes="{x:Bind ViewModel.AlertTrendYAxes, Mode=OneWay}"
+                                                TooltipPosition="Hidden"
+                                                Margin="0,4,0,0"/>
                         </Grid>
                     </Border>
                 </Grid>
             </Grid>
 
             <!-- Filters Bar -->
-            <Border Grid.Row="1" Background="{StaticResource BackgroundPrimaryBrush}" 
-                    Margin="24,0" Padding="16" CornerRadius="12"
+            <Border Grid.Row="1" Background="{StaticResource BackgroundPrimaryBrush}"
+                    Margin="24,0" Padding="16,12" CornerRadius="12"
                     BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -142,61 +196,59 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Filter Dropdowns -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <!-- Period Filter -->
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Periods}" 
+                        <ComboBox ItemsSource="{x:Bind ViewModel.Periods}"
                                   SelectedItem="{x:Bind ViewModel.SelectedPeriod, Mode=TwoWay}"
                                   MinWidth="120" Style="{StaticResource ComboBoxStyle}"/>
 
                         <!-- Line Filter -->
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Lines}" 
+                        <ComboBox ItemsSource="{x:Bind ViewModel.Lines}"
                                   SelectedItem="{x:Bind ViewModel.SelectedLine, Mode=TwoWay}"
                                   MinWidth="160" Style="{StaticResource ComboBoxStyle}"/>
 
                         <!-- Severity Filter -->
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Severities}" 
+                        <ComboBox ItemsSource="{x:Bind ViewModel.Severities}"
                                   SelectedItem="{x:Bind ViewModel.SelectedSeverity, Mode=TwoWay}"
                                   MinWidth="140" Style="{StaticResource ComboBoxStyle}"/>
 
                         <!-- Status Filter -->
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Statuses}" 
+                        <ComboBox ItemsSource="{x:Bind ViewModel.Statuses}"
                                   SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"
                                   MinWidth="140" Style="{StaticResource ComboBoxStyle}"/>
 
                         <!-- Category Filter -->
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Categories}" 
+                        <ComboBox ItemsSource="{x:Bind ViewModel.Categories}"
                                   SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
                                   MinWidth="130" Style="{StaticResource ComboBoxStyle}"/>
                     </StackPanel>
 
                     <!-- Search & Actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                        <TextBox PlaceholderText="Tìm kiếm..." 
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                        <TextBox PlaceholderText="Tìm kiếm..."
                                  Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 MinWidth="200" Style="{StaticResource SearchTextBoxStyle}"/>
-                        
-                        <Button Style="{StaticResource SecondaryButtonStyle}" 
+                                 MinWidth="220" CornerRadius="12" Style="{StaticResource SearchTextBoxStyle}"/>
+
+                        <Button Style="{StaticResource IconButtonStyle}"
                                 Command="{x:Bind ViewModel.ClearFiltersCommand}"
                                 ToolTipService.ToolTip="Xóa bộ lọc">
                             <FontIcon Glyph="&#xE711;" FontSize="14"/>
                         </Button>
-                        
-                        <Button Style="{StaticResource PrimaryButtonStyle}" 
+
+                        <!-- Refresh Icon Button -->
+                        <Button Style="{StaticResource IconButtonStyle}"
                                 Command="{x:Bind ViewModel.RefreshAlertsCommand}"
                                 ToolTipService.ToolTip="Làm mới">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon Glyph="&#xE72C;" FontSize="14"/>
-                                <TextBlock Text="Làm mới"/>
-                            </StackPanel>
+                            <FontIcon Glyph="&#xE72C;" FontSize="16"/>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Alerts List -->
-            <Border Grid.Row="2" Margin="24,16,24,24" 
-                    Background="{StaticResource BackgroundPrimaryBrush}" 
-                    CornerRadius="12" 
+            <Border Grid.Row="2" Margin="24,16,24,24"
+                    Background="{StaticResource BackgroundPrimaryBrush}"
+                    CornerRadius="12"
                     BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -205,13 +257,13 @@
                     </Grid.RowDefinitions>
 
                     <!-- List Header -->
-                    <Border Grid.Row="0" Padding="20,12" 
+                    <Border Grid.Row="0" Padding="20,12"
                             BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="0,0,0,1">
                         <Grid>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="Danh sách cảnh báo" FontSize="14" FontWeight="SemiBold" 
+                                <TextBlock Text="Danh sách cảnh báo" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border Background="{StaticResource BackgroundTertiaryBrush}" 
+                                <Border Background="{StaticResource BackgroundTertiaryBrush}"
                                         CornerRadius="10" Padding="8,2">
                                     <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}">
                                         <Run Text="{x:Bind ViewModel.FilteredCount, Mode=OneWay}"/>
@@ -229,97 +281,86 @@
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="local:AlertItemViewModel">
                                     <Border Background="{StaticResource BackgroundPrimaryBrush}"
-                                            CornerRadius="10" Padding="16" Margin="0,0,0,8"
+                                            CornerRadius="8" Padding="16,12" Margin="0,0,0,8"
                                             BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
                                             PointerPressed="AlertItem_PointerPressed">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/> <!-- Status Dot -->
+                                                <ColumnDefinition Width="*"/>    <!-- Content -->
+                                                <ColumnDefinition Width="Auto"/> <!-- Right Info/Actions -->
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- Severity Indicator Bar -->
-                                            <Border Grid.Column="0" Background="{Binding SeverityColor}" 
-                                                    CornerRadius="2" Margin="0,0,12,0"/>
+                                            <!-- Status Dot -->
+                                            <FontIcon Grid.Column="0" Glyph="&#xE73B;" FontSize="12"
+                                                      Foreground="{Binding SeverityColor}"
+                                                      Margin="0,4,12,0" VerticalAlignment="Top"/>
 
-                                            <!-- Alert Content -->
-                                            <StackPanel Grid.Column="1" Spacing="6">
-                                                <!-- Title & Badges -->
+                                            <!-- Content -->
+                                            <StackPanel Grid.Column="1" Spacing="4">
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" 
+                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Bold"
                                                                Foreground="{StaticResource TextPrimaryBrush}"
-                                                               TextTrimming="CharacterEllipsis" MaxWidth="400"/>
-                                                    
-                                                    <!-- Severity Badge -->
-                                                    <Border Background="{Binding SeverityBgColor}" CornerRadius="4" Padding="6,2">
-                                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                                            <FontIcon Glyph="{Binding SeverityIcon}" FontSize="10" 
-                                                                      Foreground="{Binding SeverityTextColor}"/>
-                                                            <TextBlock Text="{Binding SeverityText}" FontSize="10" 
-                                                                       FontWeight="SemiBold" Foreground="{Binding SeverityTextColor}"/>
-                                                        </StackPanel>
-                                                    </Border>
+                                                               TextTrimming="CharacterEllipsis"/>
 
-                                                    <!-- Category Badge -->
-                                                    <Border Background="{StaticResource BackgroundTertiaryBrush}" 
-                                                            CornerRadius="4" Padding="6,2">
-                                                        <TextBlock Text="{Binding CategoryText}" FontSize="10" 
+                                                    <!-- Category Badge as small text label -->
+                                                    <Border Background="{StaticResource BackgroundTertiaryBrush}"
+                                                            CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CategoryText}" FontSize="10"
                                                                    Foreground="{StaticResource TextSecondaryBrush}"/>
                                                     </Border>
                                                 </StackPanel>
 
-                                                <!-- Location & Time -->
-                                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <FontIcon Glyph="&#xE81D;" FontSize="12" 
-                                                                  Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                        <TextBlock Text="{Binding LocationText}" FontSize="12" 
+                                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <FontIcon Glyph="&#xE81D;" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                        <TextBlock Text="{Binding LocationText}" FontSize="13"
                                                                    Foreground="{StaticResource TextSecondaryBrush}"/>
                                                     </StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <FontIcon Glyph="&#xE787;" FontSize="12" 
-                                                                  Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                        <TextBlock Text="{Binding TimeAgo}" FontSize="12" 
+
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <FontIcon Glyph="&#xE787;" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                        <TextBlock Text="{Binding TimeAgo}" FontSize="12" FontStyle="Italic"
                                                                    Foreground="{StaticResource TextTertiaryBrush}"/>
                                                     </StackPanel>
-                                                    
-                                                    <!-- Sensor Value if exists -->
-                                                    <StackPanel Orientation="Horizontal" Spacing="4" 
-                                                                Visibility="{Binding HasSensor, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <FontIcon Glyph="&#xE9D9;" FontSize="12" 
-                                                                  Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                        <TextBlock Text="{Binding SensorValueText}" FontSize="12" 
-                                                                   Foreground="{Binding SeverityColor}" FontWeight="SemiBold"/>
-                                                    </StackPanel>
-
-                                                    <!-- Camera indicator -->
-                                                    <FontIcon Glyph="&#xE714;" FontSize="12" 
-                                                              Foreground="{StaticResource AccentBrush}"
-                                                              Visibility="{Binding HasCamera, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                              ToolTipService.ToolTip="Có camera"/>
                                                 </StackPanel>
                                             </StackPanel>
 
-                                            <!-- Status & Actions -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" 
-                                                        VerticalAlignment="Center">
-                                                <!-- Status Badge -->
-                                                <Border Background="{Binding StateBgColor}" CornerRadius="6" Padding="10,5">
-                                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                                        <FontIcon Glyph="{Binding StateIcon}" FontSize="12" 
-                                                                  Foreground="{Binding StateColor}"/>
-                                                        <TextBlock Text="{Binding StateText}" FontSize="11" 
-                                                                   FontWeight="SemiBold" Foreground="{Binding StateColor}"/>
+                                            <!-- Right Side: Status Text & Actions -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+
+                                                <!-- Sensor Data (Compact) -->
+                                                <Border Background="{StaticResource BackgroundSecondaryBrush}"
+                                                        CornerRadius="6" Padding="8,4"
+                                                        Visibility="{Binding HasSensor, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <FontIcon Glyph="&#xE9D9;" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                        <TextBlock Text="{Binding SensorValueText}" FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{Binding SeverityColor}"/>
                                                     </StackPanel>
                                                 </Border>
 
-                                                <!-- Quick Actions -->
-                                                <Button Style="{StaticResource IconButtonStyle}" 
-                                                        ToolTipService.ToolTip="Chi tiết"
-                                                        Click="ViewDetailButton_Click" Tag="{Binding}">
-                                                    <FontIcon Glyph="&#xE76C;" FontSize="14"/>
-                                                </Button>
+                                                <!-- Status Text -->
+                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                    <FontIcon Glyph="{Binding StateIcon}" FontSize="12" Foreground="{Binding StateColor}"/>
+                                                    <TextBlock Text="{Binding StateText}" FontSize="12"
+                                                               Foreground="{Binding StateColor}" FontWeight="SemiBold"/>
+                                                </StackPanel>
+
+                                                <!-- Ghost Actions (Visible on Hover mechanism would usually be CSS/VisualState, here just simple ghost buttons) -->
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <Button Style="{StaticResource IconButtonStyle}"
+                                                            Visibility="{Binding HasCamera, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                            ToolTipService.ToolTip="Xem Camera">
+                                                        <FontIcon Glyph="&#xE714;" FontSize="14" Foreground="{StaticResource AccentBrush}"/>
+                                                    </Button>
+
+                                                    <Button Style="{StaticResource IconButtonStyle}"
+                                                            Click="ViewDetailButton_Click" Tag="{Binding}"
+                                                            ToolTipService.ToolTip="Chi tiết">
+                                                        <FontIcon Glyph="&#xE76C;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                    </Button>
+                                                </StackPanel>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -353,20 +394,20 @@
                     <Border Grid.Column="0" Background="Transparent" CornerRadius="8" Padding="4" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <!-- Info Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowSummaryCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowSummaryCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon Glyph="&#xE946;" FontSize="14" 
+                                    <FontIcon Glyph="&#xE946;" FontSize="14"
                                               Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                     <TextBlock Text="Thông tin" FontSize="13" FontWeight="SemiBold"
                                                Foreground="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"/>
                                 </StackPanel>
                             </Button>
-                            
+
                             <!-- History Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowHistoryCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowHistoryCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarHistoryVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarHistoryVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
@@ -379,7 +420,7 @@
                             </Button>
 
                             <!-- Process Tab -->
-                            <Button Command="{x:Bind ViewModel.ShowProcessingCommand}" 
+                            <Button Command="{x:Bind ViewModel.ShowProcessingCommand}"
                                     BorderThickness="{x:Bind ViewModel.IsSidebarProcessingVisible, Mode=OneWay, Converter={StaticResource BoolToThicknessConverter}}"
                                     BorderBrush="{x:Bind ViewModel.IsSidebarProcessingVisible, Mode=OneWay, Converter={StaticResource BoolToAccentColorConverter}}"
                                     Padding="12,6" Background="Transparent" CornerRadius="6">
@@ -394,7 +435,7 @@
                     </Border>
 
                     <!-- Close Button -->
-                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}" 
+                    <Button Grid.Column="1" Style="{StaticResource IconButtonStyle}"
                             Command="{x:Bind ViewModel.CloseSidebarCommand}" ToolTipService.ToolTip="Đóng">
                         <FontIcon Glyph="&#xE711;" FontSize="12"/>
                     </Button>
@@ -403,54 +444,54 @@
                 <!-- Summary Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                               Visibility="{x:Bind ViewModel.IsSidebarSummaryVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Padding="20" Spacing="16" 
+                    <StackPanel Padding="20" Spacing="16"
                                 Visibility="{x:Bind ViewModel.SelectedAlert, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                        
+
                         <!-- Alert Header -->
                         <StackPanel Spacing="8">
-                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.Title, Mode=OneWay}" 
-                                       FontSize="16" FontWeight="Bold" 
+                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.Title, Mode=OneWay}"
+                                       FontSize="16" FontWeight="Bold"
                                        Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
-                            
+
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Border Background="{x:Bind ViewModel.SelectedAlert.SeverityBgColor, Mode=OneWay}" 
+                                <Border Background="{x:Bind ViewModel.SelectedAlert.SeverityBgColor, Mode=OneWay}"
                                         CornerRadius="4" Padding="8,4">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedAlert.SeverityText, Mode=OneWay}" 
-                                               FontSize="11" FontWeight="Bold" 
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedAlert.SeverityText, Mode=OneWay}"
+                                               FontSize="11" FontWeight="Bold"
                                                Foreground="{x:Bind ViewModel.SelectedAlert.SeverityTextColor, Mode=OneWay}"/>
                                 </Border>
-                                <Border Background="{x:Bind ViewModel.SelectedAlert.StateBgColor, Mode=OneWay}" 
+                                <Border Background="{x:Bind ViewModel.SelectedAlert.StateBgColor, Mode=OneWay}"
                                         CornerRadius="4" Padding="8,4">
-                                    <TextBlock Text="{x:Bind ViewModel.SelectedAlert.StateText, Mode=OneWay}" 
-                                               FontSize="11" FontWeight="Bold" 
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedAlert.StateText, Mode=OneWay}"
+                                               FontSize="11" FontWeight="Bold"
                                                Foreground="{x:Bind ViewModel.SelectedAlert.StateColor, Mode=OneWay}"/>
                                 </Border>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Description -->
-                        <Border Background="{StaticResource BackgroundSecondaryBrush}" 
+                        <Border Background="{StaticResource BackgroundSecondaryBrush}"
                                 CornerRadius="8" Padding="12">
-                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.Description, Mode=OneWay}" 
-                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" 
+                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.Description, Mode=OneWay}"
+                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
                                        TextWrapping="Wrap"/>
                         </Border>
 
                         <!-- Location Info -->
                         <StackPanel Spacing="8">
-                            <TextBlock Text="📍 Vị trí" FontSize="13" FontWeight="SemiBold" 
+                            <TextBlock Text="📍 Vị trí" FontSize="13" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}" 
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
                                     CornerRadius="8" Padding="12">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Text="Tuyến:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.LineName, Mode=OneWay}" 
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.LineName, Mode=OneWay}"
                                                    FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Text="Nút:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.NodeName, Mode=OneWay}" 
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.NodeName, Mode=OneWay}"
                                                    FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -459,19 +500,19 @@
 
                         <!-- Sensor Info (if exists) -->
                         <StackPanel Spacing="8" x:Name="SensorInfoPanel">
-                            <TextBlock Text="📊 Dữ liệu cảm biến" FontSize="13" FontWeight="SemiBold" 
+                            <TextBlock Text="📊 Dữ liệu cảm biến" FontSize="13" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}" 
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
                                     CornerRadius="8" Padding="12">
                                 <StackPanel Spacing="6">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Text="Loại:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.SensorType, Mode=OneWay}" 
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedAlert.SensorType, Mode=OneWay}"
                                                    FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Text="Giá trị:" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Width="60"/>
-                                        <TextBlock FontSize="12" Foreground="{x:Bind ViewModel.SelectedAlert.SeverityColor, Mode=OneWay}" 
+                                        <TextBlock FontSize="12" Foreground="{x:Bind ViewModel.SelectedAlert.SeverityColor, Mode=OneWay}"
                                                    FontWeight="Bold">
                                             <Run Text="{x:Bind ViewModel.SelectedAlert.SensorValue, Mode=OneWay}"/>
                                             <Run Text=" "/>
@@ -492,7 +533,7 @@
 
                         <!-- Camera & Map Buttons -->
                         <StackPanel Spacing="8">
-                            <Button Style="{StaticResource AccentButtonStyle}" 
+                            <Button Style="{StaticResource AccentButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     Visibility="{x:Bind ViewModel.SelectedAlert.HasCamera, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Click="ViewCameraButton_Click">
@@ -502,7 +543,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     Click="ViewOnMapButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -517,14 +558,14 @@
                 <!-- History Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                               Visibility="{x:Bind ViewModel.IsSidebarHistoryVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Padding="20" Spacing="16" 
+                    <StackPanel Padding="20" Spacing="16"
                                 Visibility="{x:Bind ViewModel.SelectedAlert, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                        
+
                         <!-- Timeline -->
                         <StackPanel Spacing="8">
-                            <TextBlock Text="⏱️ Dòng sự kiện" FontSize="13" FontWeight="SemiBold" 
+                            <TextBlock Text="⏱️ Dòng sự kiện" FontSize="13" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <Border Background="{StaticResource BackgroundSecondaryBrush}" 
+                            <Border Background="{StaticResource BackgroundSecondaryBrush}"
                                     CornerRadius="8" Padding="12">
                                 <StackPanel Spacing="16">
                                     <!-- Created -->
@@ -535,7 +576,7 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                             <TextBlock Text="Phát sinh cảnh báo" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.CreatedAt, Mode=OneWay}" 
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.CreatedAt, Mode=OneWay}"
                                                        FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
                                         </StackPanel>
                                     </Grid>
@@ -548,11 +589,11 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                             <TextBlock Text="Đã xác nhận" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                             <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
                                                 <Run Text="bởi"/>
                                                 <Run Text="{x:Bind ViewModel.SelectedAlert.AcknowledgedBy, Mode=OneWay}"/>
                                             </TextBlock>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.AcknowledgedAt, Mode=OneWay}" 
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.AcknowledgedAt, Mode=OneWay}"
                                                        FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
                                         </StackPanel>
                                     </Grid>
@@ -569,7 +610,7 @@
                                                 <Run Text="bởi"/>
                                                 <Run Text="{x:Bind ViewModel.SelectedAlert.ResolvedBy, Mode=OneWay}"/>
                                             </TextBlock>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.ResolvedAt, Mode=OneWay}" 
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedAlert.ResolvedAt, Mode=OneWay}"
                                                        FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
                                         </StackPanel>
                                     </Grid>
@@ -579,7 +620,7 @@
 
                         <!-- Notes List -->
                         <StackPanel Spacing="8">
-                             <TextBlock Text="📝 Ghi chú" FontSize="13" FontWeight="SemiBold" 
+                            <TextBlock Text="📝 Ghi chú" FontSize="13" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
                             <ItemsRepeater ItemsSource="{x:Bind ViewModel.SelectedAlert.Notes, Mode=OneWay}">
                                 <ItemsRepeater.ItemTemplate>
@@ -600,10 +641,10 @@
 
                         <!-- Add Note Section -->
                         <StackPanel Spacing="8">
-                            <TextBox x:Name="NoteTextBox" PlaceholderText="Nhập ghi chú mới..." 
+                            <TextBox x:Name="NoteTextBox" PlaceholderText="Nhập ghi chú mới..."
                                      AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"
                                      Style="{StaticResource DefaultTextBoxStyle}"/>
-                            <Button Style="{StaticResource PrimaryButtonStyle}" 
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
                                     HorizontalAlignment="Right" Click="AddNoteButton_Click">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE710;" FontSize="12"/>
@@ -618,27 +659,27 @@
                 <!-- Processing Content -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                               Visibility="{x:Bind ViewModel.IsSidebarProcessingVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Padding="20" Spacing="16" 
+                    <StackPanel Padding="20" Spacing="16"
                                 Visibility="{x:Bind ViewModel.SelectedAlert, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
-                        
+
                         <TextBlock Text="Quy trình xử lý sự cố" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                        
+
                         <Border Background="#FEF9C3" CornerRadius="8" Padding="12" BorderBrush="#FDE047" BorderThickness="1">
                             <StackPanel Spacing="8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="#B45309"/>
                                     <TextBlock Text="Hướng dẫn xử lý" FontWeight="Bold" Foreground="#B45309"/>
                                 </StackPanel>
-                                <TextBlock Text="1. Xác nhận sự cố và kiểm tra camera/hiện trường.&#x0a;2. Cách ly khu vực nếu cần thiết.&#x0a;3. Cập nhật trạng thái và ghi chú quá trình xử lý.&#x0a;4. Đóng cảnh báo khi hoàn tất." 
+                                <TextBlock Text="1. Xác nhận sự cố và kiểm tra camera/hiện trường.&#x0a;2. Cách ly khu vực nếu cần thiết.&#x0a;3. Cập nhật trạng thái và ghi chú quá trình xử lý.&#x0a;4. Đóng cảnh báo khi hoàn tất."
                                            FontSize="12" Foreground="#854D0E" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
 
                         <StackPanel Spacing="12">
                             <TextBlock Text="Thao tác" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            
+
                             <!-- Acknowledge Button -->
-                            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     IsEnabled="{x:Bind ViewModel.SelectedAlert.CanAcknowledge, Mode=OneWay}"
                                     Click="AcknowledgeButton_Click">
@@ -652,7 +693,7 @@
                             </Button>
 
                             <!-- Process Button -->
-                            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     IsEnabled="{x:Bind ViewModel.SelectedAlert.CanProcess, Mode=OneWay}"
                                     Click="ProcessButton_Click">
@@ -666,7 +707,7 @@
                             </Button>
 
                             <!-- Resolve Button -->
-                            <Button Style="{StaticResource SuccessButtonStyle}" 
+                            <Button Style="{StaticResource SuccessButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     IsEnabled="{x:Bind ViewModel.SelectedAlert.CanResolve, Mode=OneWay}"
                                     Click="ResolveButton_Click">
@@ -680,7 +721,7 @@
                             </Button>
 
                             <!-- Close Button -->
-                            <Button Style="{StaticResource SecondaryButtonStyle}" 
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     IsEnabled="{x:Bind ViewModel.SelectedAlert.CanClose, Mode=OneWay}"
                                     Click="CloseAlertButton_Click">
@@ -700,7 +741,7 @@
                 <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12"
                             Visibility="{x:Bind ViewModel.SelectedAlert, Mode=OneWay, Converter={StaticResource NullToInverseVisibilityConverter}}">
                     <FontIcon Glyph="&#xE7BA;" FontSize="48" Foreground="{StaticResource TextTertiaryBrush}"/>
-                    <TextBlock Text="Chọn một cảnh báo để xem chi tiết" 
+                    <TextBlock Text="Chọn một cảnh báo để xem chi tiết"
                                FontSize="13" Foreground="{StaticResource TextTertiaryBrush}"
                                TextAlignment="Center"/>
                 </StackPanel>

@@ -537,6 +537,11 @@ namespace Station.Views
 
         private void DataPanelMenuButton_Click(object sender, RoutedEventArgs e)
         {
+            OpenModuleWindow("Giám sát dữ liệu", typeof(DataPage));
+        }
+
+        private void TrendPanelMenuButton_Click(object sender, RoutedEventArgs e)
+        {
             OpenModuleWindow("Phân tích xu hướng", typeof(AnalyticsReportPage));
         }
 

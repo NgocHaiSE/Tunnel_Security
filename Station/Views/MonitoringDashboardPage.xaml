@@ -152,7 +152,7 @@
                         </StackPanel>
 
                         <Button x:Name="ErrorNodesMenuButton"
-                                Click="DataPanelMenuButton_Click"
+                                Click="TrendPanelMenuButton_Click"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 Padding="8"

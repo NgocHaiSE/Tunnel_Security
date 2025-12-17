@@ -11,6 +11,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.Generic;
+using LiveChartsCore.Kernel.Sketches;
 
 namespace Station.ViewModels
 {
@@ -166,8 +167,8 @@ namespace Station.ViewModels
         #region Charts
 
         public ISeries[] AlertTrendSeries { get; private set; } = Array.Empty<ISeries>();
-        public Axis[] AlertTrendXAxes { get; private set; } = Array.Empty<Axis>();
-        public Axis[] AlertTrendYAxes { get; private set; } = Array.Empty<Axis>();
+        public IEnumerable<ICartesianAxis> AlertTrendXAxes { get; private set; } = Array.Empty<Axis>();
+        public IEnumerable<ICartesianAxis> AlertTrendYAxes { get; private set; } = Array.Empty<Axis>();
 
         public ISeries[] SeverityPieSeries { get; private set; } = Array.Empty<ISeries>();
 
@@ -611,9 +612,7 @@ namespace Station.ViewModels
             {
                 new Axis
                 {
-                    Labels = labels,
-                    LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                    TextSize = 11
+                    IsVisible = false // Hide X axis for sparkline effect
                 }
             };
 
@@ -621,8 +620,7 @@ namespace Station.ViewModels
             {
                 new Axis
                 {
-                    LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                    TextSize = 11,
+                    IsVisible = false, // Hide Y axis for sparkline effect
                     MinLimit = 0
                 }
             };

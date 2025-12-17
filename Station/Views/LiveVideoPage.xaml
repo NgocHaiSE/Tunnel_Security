@@ -11,13 +11,108 @@
     Background="{StaticResource BackgroundSecondaryBrush}">
 
 	<Grid Padding="32,24">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="280"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 
+		<!-- Camera Selection Sidebar -->
+		<Border Grid.Column="0" Grid.RowSpan="2"
+				Background="{StaticResource BackgroundPrimaryBrush}"
+				CornerRadius="8"
+				Margin="0,0,16,0"
+				Padding="16">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+
+				<!-- Sidebar Header -->
+				<TextBlock Grid.Row="0" 
+						   Text="Chọn Camera"
+						   FontSize="16"
+						   FontWeight="SemiBold"
+						   Foreground="{StaticResource TextPrimaryBrush}"
+						   Margin="0,0,0,12"/>
+
+				<!-- Layout Buttons -->
+				<StackPanel Grid.Row="1" Spacing="8" Margin="0,0,0,16">
+					<TextBlock Text="Layout hiển thị"
+							   FontSize="12"
+							   Foreground="{StaticResource TextSecondaryBrush}"
+							   Margin="0,0,0,8"/>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+						<Button x:Name="Layout1x1Button" Grid.Row="0" Grid.Column="0"
+								Content="1×1" Click="Layout1x1_Click"
+								HorizontalAlignment="Stretch" Margin="0,0,4,4"
+								Style="{StaticResource SecondaryButtonStyle}"/>
+						<Button x:Name="Layout2x2Button" Grid.Row="0" Grid.Column="1"
+								Content="2×2" Click="Layout2x2_Click"
+								HorizontalAlignment="Stretch" Margin="4,0,0,4"
+								Style="{StaticResource SecondaryButtonStyle}"/>
+						<Button x:Name="Layout3x3Button" Grid.Row="1" Grid.Column="0"
+								Content="3×3" Click="Layout3x3_Click"
+								HorizontalAlignment="Stretch" Margin="0,4,4,0"
+								Style="{StaticResource SecondaryButtonStyle}"/>
+						<Button x:Name="Layout4x4Button" Grid.Row="1" Grid.Column="1"
+								Content="4×4" Click="Layout4x4_Click"
+								HorizontalAlignment="Stretch" Margin="4,4,0,0"
+								Style="{StaticResource SecondaryButtonStyle}"/>
+					</Grid>
+				</StackPanel>
+
+				<!-- Camera List with Checkboxes -->
+				<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+					<StackPanel Spacing="4">
+						<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+							<Button x:Name="SelectAllButton" Content="Chọn tất cả" 
+									Click="SelectAll_Click"
+									FontSize="11" Padding="8,4"
+									Style="{StaticResource SecondaryButtonStyle}"/>
+							<Button x:Name="DeselectAllButton" Content="Bỏ chọn" 
+									Click="DeselectAll_Click"
+									FontSize="11" Padding="8,4"
+									Style="{StaticResource SecondaryButtonStyle}"/>
+						</StackPanel>
+						<ItemsControl ItemsSource="{x:Bind ViewModel.CameraStreams, Mode=OneWay}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="viewmodels:CameraStreamViewModel">
+									<CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+											  Margin="0,4">
+										<StackPanel Orientation="Horizontal" Spacing="8">
+											<Ellipse Width="8" Height="8"
+													 Fill="{x:Bind StatusColor, Mode=OneWay}"
+													 VerticalAlignment="Center"/>
+											<TextBlock Text="{x:Bind CameraName}"
+													   FontSize="13"
+													   Foreground="{StaticResource TextPrimaryBrush}"
+													   VerticalAlignment="Center"/>
+										</StackPanel>
+									</CheckBox>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+				</ScrollViewer>
+			</Grid>
+		</Border>
+
 		<!-- Header Section -->
-		<Grid Grid.Row="0" Margin="0,0,0,24">
+		<Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,24">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
@@ -132,10 +227,11 @@
 		</Grid>
 
 		<!-- Camera Grid with ScrollViewer -->
-		<ScrollViewer Grid.Row="1"
+		<ScrollViewer Grid.Row="1" Grid.Column="1"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-			<ItemsControl ItemsSource="{x:Bind ViewModel.CameraStreams, Mode=OneWay}"
+			<ItemsControl x:Name="CameraItemsControl" 
+			              ItemsSource="{x:Bind ViewModel.CameraStreams, Mode=OneWay}"
                           Padding="0,0,0,24">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
@@ -153,6 +249,7 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Margin="0,0,16,16"
+                                Visibility="{x:Bind IsSelected, Mode=OneWay}"
                                 Padding="0">
 							<Grid>
 								<Grid.RowDefinitions>
