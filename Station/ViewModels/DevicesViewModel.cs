@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
 using Station.Models;
+using System.Threading.Tasks;
 using Windows.UI;
 
 namespace Station.ViewModels
@@ -514,6 +515,13 @@ Type = "Sensor",
         [RelayCommand]
         private void CloseSidebar()
         {
+            SelectedNode = null;
+            SelectedSensor = null;
+        }
+
+        [RelayCommand]
+        private void NavigateBack()
+        {
             SelectedSensor = null;
         }
 
@@ -640,7 +648,7 @@ Type = "Sensor",
 
         // Device Menu Commands
         [RelayCommand]
-        private async void EditDevice()
+        private async Task EditDevice()
         {
             try
             {
@@ -667,7 +675,7 @@ Type = "Sensor",
         }
 
         [RelayCommand]
-        private async void ControlDevice()
+        private async Task ControlDevice()
         {
             try
             {
@@ -694,7 +702,7 @@ Type = "Sensor",
         }
 
         [RelayCommand]
-        private async void ViewData()
+        private async Task ViewData()
         {
             try
             {
@@ -721,7 +729,7 @@ Type = "Sensor",
         }
 
         [RelayCommand]
-        private async void PlaybackDevice()
+        private async Task PlaybackDevice()
         {
             try
             {
@@ -854,7 +862,7 @@ Type = "Sensor",
         }
 
         [RelayCommand]
-        private async void OpenSensorDetail()
+        private async Task OpenSensorDetail()
         {
             try
             {
