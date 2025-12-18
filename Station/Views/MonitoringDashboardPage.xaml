@@ -38,14 +38,15 @@
                            FontSize="16"
                            FontWeight="SemiBold"
                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                <Border Background="#1E7B4B"
+                <Border Background="{StaticResource SeverityLowLightBrush}"
                         CornerRadius="12"
-                        Padding="8,4">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <Ellipse Width="8" Height="8" Fill="#22C55E"/>
+                        Padding="10,5">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource SeverityLowBrush}"/>
                         <TextBlock Text="Đã kết nối"
                                    FontSize="12"
-                                   Foreground="White"/>
+                                   Foreground="{StaticResource SeverityLowBrush}"
+                                   FontWeight="SemiBold"/>
                     </StackPanel>
                 </Border>
                 <TextBlock Text="Khu vực: Miền Bắc"
@@ -135,7 +136,7 @@
             <Border Grid.Column="4"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
-                    Padding="16">
+                    Padding="20">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -196,27 +197,27 @@
                                                 <Line X1="0" Y1="180" X2="500" Y2="180" Stroke="{StaticResource MonitoringBorderBrush}" StrokeThickness="0.5" StrokeDashArray="2,2" Opacity="0.3"/>
 
                                                 <Polygon Points="0,105 25,98 50,92 75,95 100,88 125,82 150,78 175,85 200,80 225,72 250,68 275,75 300,70 300,105 275,108 250,103 225,108 200,115 175,118 150,113 125,118 100,125 75,132 50,128 25,133 0,140"
-                                                         Fill="#30A0FFDC"
-                                                         Stroke="#10A0FFDC"
+                                                         Fill="{StaticResource SeverityLowLightBrush}"
+                                                         Stroke="{StaticResource SeverityLowBrush}"
                                                          StrokeThickness="1"
                                                          StrokeDashArray="3,2"
                                                          Opacity="0.3"/>
 
                                                 <Polygon Points="0,135 25,128 50,122 75,125 100,118 125,112 150,108 175,115 200,110 225,102 250,98 275,105 300,100 300,135 275,138 250,133 225,138 200,145 175,148 150,143 125,148 100,155 75,162 50,158 25,163 0,170"
-                                                         Fill="#30A0FFDC"
-                                                         Stroke="#10A0FFDC"
+                                                         Fill="{StaticResource SeverityLowLightBrush}"
+                                                         Stroke="{StaticResource SeverityLowBrush}"
                                                          StrokeThickness="1"
                                                          StrokeDashArray="3,2"
                                                          Opacity="0.3"/>
 
-                                                <Line X1="0" Y1="120" X2="500" Y2="120" Stroke="#10A0FFDC" StrokeThickness="1.5" StrokeDashArray="5,3" Opacity="0.8"/>
-                                                <TextBlock Text="Giá trị kỳ vọng" Canvas.Left="10" Canvas.Top="112" FontSize="8" Foreground="#10A0FFDC" Opacity="0.8"/>
+                                                <Line X1="0" Y1="120" X2="500" Y2="120" Stroke="{StaticResource SeverityLowBrush}" StrokeThickness="1.5" StrokeDashArray="5,3" Opacity="0.8"/>
+                                                <TextBlock Text="Giá trị kỳ vọng" Canvas.Left="10" Canvas.Top="112" FontSize="10" Foreground="{StaticResource SeverityLowBrush}" Opacity="1.0" FontWeight="SemiBold"/>
 
-                                                <Line X1="0" Y1="60" X2="500" Y2="60" Stroke="#EAB308" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
-                                                <TextBlock Text="Ngưỡng cảnh báo" Canvas.Left="10" Canvas.Top="52" FontSize="8" Foreground="#EAB308" Opacity="0.8"/>
+                                                <Line X1="0" Y1="60" X2="500" Y2="60" Stroke="{StaticResource SeverityMediumBrush}" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
+                                                <TextBlock Text="Ngưỡng cảnh báo" Canvas.Left="10" Canvas.Top="52" FontSize="9" Foreground="{StaticResource SeverityMediumBrush}" Opacity="0.9"/>
 
-                                                <Line X1="0" Y1="30" X2="500" Y2="30" Stroke="#EF4444" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
-                                                <TextBlock Text="Ngưỡng nghiêm trọng" Canvas.Left="10" Canvas.Top="22" FontSize="8" Foreground="#EF4444" Opacity="0.8"/>
+                                                <Line X1="0" Y1="30" X2="500" Y2="30" Stroke="{StaticResource SeverityCriticalBrush}" StrokeThickness="1.5" StrokeDashArray="4,2" Opacity="0.6"/>
+                                                <TextBlock Text="Ngưỡng nghiêm trọng" Canvas.Left="10" Canvas.Top="22" FontSize="9" Foreground="{StaticResource SeverityCriticalBrush}" Opacity="0.9"/>
 
                                                 <Polyline Points="0,120 25,110 50,100 75,105 100,95 125,85 150,80 175,90 200,85 225,75 250,70 275,80 300,75"
                                                           Stroke="{StaticResource MonitoringAccentButtonBrush}"
@@ -255,15 +256,15 @@
                                             <TextBlock Text="Tổng số" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <Rectangle Width="16" Height="3" Fill="#EF4444" VerticalAlignment="Center"/>
+                                            <Rectangle Width="16" Height="3" Fill="{StaticResource SeverityCriticalBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="Nghiêm trọng" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <Rectangle Width="16" Height="3" Fill="#F97316" VerticalAlignment="Center"/>
+                                            <Rectangle Width="16" Height="3" Fill="{StaticResource SeverityHighBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="Cảnh báo" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <Line X1="0" Y1="4" X2="16" Y2="4" Stroke="#10A0FFDC" StrokeThickness="1.5" StrokeDashArray="5,3"/>
+                                            <Line X1="0" Y1="4" X2="16" Y2="4" Stroke="{StaticResource SeverityLowBrush}" StrokeThickness="1.5" StrokeDashArray="5,3"/>
                                             <TextBlock Text="Kỳ vọng" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </StackPanel>
@@ -284,8 +285,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="SEN-002" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#EF4444" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="140">
-                                                <Border Width="126" Background="#EF4444" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityCriticalBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="140">
+                                                <Border Width="126" Background="{StaticResource SeverityCriticalBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="45" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -297,8 +298,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="CAM-004" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#F97316" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="126">
-                                                <Border Width="113" Background="#F97316" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityHighBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="126">
+                                                <Border Width="113" Background="{StaticResource SeverityHighBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="36" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -310,8 +311,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="RAD-001" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#EAB308" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="112">
-                                                <Border Width="101" Background="#EAB308" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityMediumBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="112">
+                                                <Border Width="101" Background="{StaticResource SeverityMediumBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="28" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -323,8 +324,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="SEN-005" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#EAB308" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="96">
-                                                <Border Width="86" Background="#EAB308" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityMediumBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="96">
+                                                <Border Width="86" Background="{StaticResource SeverityMediumBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="24" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -336,8 +337,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="SEN-001" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="80">
-                                                <Border Width="72" Background="#22C55E" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="80">
+                                                <Border Width="72" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="18" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -349,8 +350,8 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="CAM-002" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="72">
-                                                <Border Width="65" Background="#22C55E" CornerRadius="2"/>
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="72">
+                                                <Border Width="65" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="15" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -362,8 +363,9 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="SEN-003" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="64">
-                                                <Border Width="58" Background="#22C55E" CornerRadius="2"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="64">
+                                                <Border Width="58" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="12" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -375,8 +377,9 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="CAM-001" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="56">
-                                                <Border Width="50" Background="#22C55E" CornerRadius="2"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="56">
+                                                <Border Width="50" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="9" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -388,8 +391,9 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="RAD-002" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="48">
-                                                <Border Width="43" Background="#22C55E" CornerRadius="2"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="48">
+                                                <Border Width="43" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="6" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -401,8 +405,9 @@
                                                 <ColumnDefinition Width="35"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="SEN-006" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#22C55E" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="40">
-                                                <Border Width="36" Background="#22C55E" CornerRadius="2"/>
+
+                                            <Border Grid.Column="1" Background="{StaticResource SeverityLowBrush}" CornerRadius="2" Height="16" HorizontalAlignment="Left" Width="40">
+                                                <Border Width="36" Background="{StaticResource SeverityLowBrush}" CornerRadius="2"/>
                                             </Border>
                                             <TextBlock Grid.Column="2" Text="3" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         </Grid>
@@ -415,20 +420,21 @@
                                             Margin="8,2,0,0">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
                                             <StackPanel Orientation="Horizontal" Spacing="2">
-                                                <Rectangle Width="6" Height="6" Fill="#EF4444"/>
-                                                <TextBlock Text="Nghiêm trọng" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+
+                                                <Rectangle Width="8" Height="8" Fill="{StaticResource SeverityCriticalBrush}" RadiusX="1" RadiusY="1"/>
+                                                <TextBlock Text="Nghiêm trọng" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="3">
-                                                <Rectangle Width="6" Height="6" Fill="#F97316"/>
-                                                <TextBlock Text="Cao" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Rectangle Width="8" Height="8" Fill="{StaticResource SeverityHighBrush}" RadiusX="1" RadiusY="1"/>
+                                                <TextBlock Text="Cao" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="3">
-                                                <Rectangle Width="6" Height="6" Fill="#EAB308"/>
-                                                <TextBlock Text="Trung bình" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Rectangle Width="8" Height="8" Fill="{StaticResource SeverityMediumBrush}" RadiusX="1" RadiusY="1"/>
+                                                <TextBlock Text="Trung bình" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="3">
-                                                <Rectangle Width="6" Height="6" Fill="#22C55E"/>
-                                                <TextBlock Text="Thấp" FontSize="9" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Rectangle Width="8" Height="8" Fill="{StaticResource SeverityLowBrush}" RadiusX="1" RadiusY="1"/>
+                                                <TextBlock Text="Thấp" FontSize="10" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -498,7 +504,7 @@
             <Border Grid.Column="0"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
-                    Padding="16">
+                    Padding="20">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -591,31 +597,31 @@
                                     <StackPanel Grid.Row="2" Spacing="6" Margin="0,8,0,0">
                                         <Grid>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Ellipse Width="8" Height="8" Fill="#22C55E"/>
-                                                <TextBlock Text="Thấp" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Ellipse Width="8" Height="8" Fill="{StaticResource SeverityLowBrush}"/>
+                                                <TextBlock Text="Thấp" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.IntruAlerts, Mode=OneWay}" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{x:Bind ViewModel.IntruAlerts, Mode=OneWay}" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                         <Grid>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Ellipse Width="8" Height="8" Fill="#EAB308"/>
-                                                <TextBlock Text="Trung bình" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Ellipse Width="8" Height="8" Fill="{StaticResource SeverityMediumBrush}"/>
+                                                <TextBlock Text="Trung bình" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.MotionAlerts, Mode=OneWay}" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{x:Bind ViewModel.MotionAlerts, Mode=OneWay}" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                         <Grid>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Ellipse Width="8" Height="8" Fill="#F97316"/>
-                                                <TextBlock Text="Cao" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Ellipse Width="8" Height="8" Fill="{StaticResource SeverityHighBrush}"/>
+                                                <TextBlock Text="Cao" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.FireAlerts, Mode=OneWay}" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{x:Bind ViewModel.FireAlerts, Mode=OneWay}" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                         <Grid>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <Ellipse Width="8" Height="8" Fill="#EF4444"/>
-                                                <TextBlock Text="Nghiêm trọng" FontSize="11" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
+                                                <Ellipse Width="8" Height="8" Fill="{StaticResource SeverityCriticalBrush}"/>
+                                                <TextBlock Text="Nghiêm trọng" FontSize="12" Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
                                             </StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.SmokeAlerts, Mode=OneWay}" FontSize="11" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{x:Bind ViewModel.SmokeAlerts, Mode=OneWay}" FontSize="12" Foreground="{StaticResource MonitoringTextPrimaryBrush}" HorizontalAlignment="Right"/>
                                         </Grid>
                                     </StackPanel>
                                 </Grid>
@@ -629,8 +635,8 @@
                                     <!--Critical Alert-->
                                     <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                             CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="{StaticResource MonitoringTempHighBrush}"
+                                            Padding="16,12"
+                                            BorderBrush="{StaticResource SeverityCriticalBrush}"
                                             BorderThickness="1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -642,7 +648,7 @@
                                             <Ellipse Grid.Column="0"
                                                      Width="8"
                                                      Height="8"
-                                                     Fill="{StaticResource MonitoringTempHighBrush}"
+                                                     Fill="{StaticResource SeverityCriticalBrush}"
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,8,0"/>
 
@@ -668,8 +674,8 @@
                                     <!--Warning Alert-->
                                     <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                             CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="#FF9800"
+                                            Padding="16,12"
+                                            BorderBrush="{StaticResource SeverityMediumBrush}"
                                             BorderThickness="1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -681,7 +687,7 @@
                                             <Ellipse Grid.Column="0"
                                                      Width="8"
                                                      Height="8"
-                                                     Fill="#FF9800"
+                                                     Fill="{StaticResource SeverityMediumBrush}"
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,8,0"/>
 
@@ -785,8 +791,8 @@
                                     <!--Camera Issue Alert-->
                                     <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                             CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="#FF9800"
+                                            Padding="16,12"
+                                            BorderBrush="{StaticResource SeverityHighBrush}"
                                             BorderThickness="1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -798,7 +804,7 @@
                                             <Ellipse Grid.Column="0"
                                                      Width="8"
                                                      Height="8"
-                                                     Fill="#FF9800"
+                                                     Fill="{StaticResource SeverityHighBrush}"
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,8,0"/>
 
@@ -887,7 +893,7 @@
             <Border Grid.Column="0"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
-                    Padding="16"
+                    Padding="20"
                     Margin="0,0,8,0"
                     MinHeight="220">
                 <Grid>
@@ -938,8 +944,8 @@
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="Tuyến"
-                                               FontSize="11"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                               FontSize="14"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
 
@@ -951,9 +957,10 @@
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="Tốt"
-                                               FontSize="11"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               HorizontalAlignment="Center"/>
+                                               FontSize="14"
+                                               Foreground="{StaticResource SeverityLowBrush}"
+                                               HorizontalAlignment="Center"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
 
                                 <!-- Faulty -->
@@ -964,9 +971,10 @@
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="Lỗi"
-                                               FontSize="11"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               HorizontalAlignment="Center"/>
+                                               FontSize="14"
+                                               Foreground="{StaticResource SeverityCriticalBrush}"
+                                               HorizontalAlignment="Center"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
 
                                 <!-- Active -->
@@ -977,14 +985,15 @@
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="Hoạt động"
-                                               FontSize="11"
-                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                               HorizontalAlignment="Center"/>
+                                               FontSize="14"
+                                               Foreground="{StaticResource MonitoringAccentButtonBrush}"
+                                               HorizontalAlignment="Center"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Grid>
 
                             <!-- Device Type Breakdown -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="12">
                                 <!-- Cameras -->
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -1007,9 +1016,9 @@
 
                                     <TextBlock Grid.Column="2"
                                                Text="3 / 4"
-                                               FontSize="12"
+                                               FontSize="14"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringNodeNormalBrush}"/>
+                                               Foreground="{StaticResource SeverityLowBrush}"/>
                                 </Grid>
 
                                 <!-- Sensors -->
@@ -1028,15 +1037,15 @@
 
                                     <TextBlock Grid.Column="1"
                                                Text="Sensors"
-                                               FontSize="12"
+                                               FontSize="14"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
 
                                     <TextBlock Grid.Column="2"
                                                Text="2 / 3"
-                                               FontSize="12"
+                                               FontSize="14"
                                                FontWeight="SemiBold"
-                                               Foreground="#FF9800"/>
+                                               Foreground="{StaticResource SeverityMediumBrush}"/>
                                 </Grid>
 
                                 <!-- Radars -->
@@ -1055,15 +1064,15 @@
 
                                     <TextBlock Grid.Column="1"
                                                Text="Radars"
-                                               FontSize="12"
+                                               FontSize="14"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
 
                                     <TextBlock Grid.Column="2"
                                                Text="0 / 1"
-                                               FontSize="12"
+                                               FontSize="14"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource MonitoringTempHighBrush}"/>
+                                               Foreground="{StaticResource SeverityHighBrush}"/>
                                 </Grid>
                             </StackPanel>
 
@@ -1099,7 +1108,7 @@
                     Grid.ColumnSpan="2"
                     Background="{StaticResource MonitoringPanelBackgroundBrush}"
                     CornerRadius="8"
-                    Padding="16"
+                    Padding="20"
                     Margin="0,0,8,0"
                     MinHeight="220">
                 <Grid>

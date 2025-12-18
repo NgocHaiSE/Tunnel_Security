@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,7 +46,7 @@ namespace Station.ViewModels
         private int _totalCameras = 0;
 
         [ObservableProperty]
-        private string _selectedLayoutText = "2�2 (4 cameras)";
+        private string _selectedLayoutText = "2×2 (4 cameras)";
 
         public LiveVideoViewModel()
         {
@@ -65,7 +66,7 @@ namespace Station.ViewModels
                     CameraId = $"CAM-{i:D2}",
                     CameraName = $"Camera #{i} (demo)",
                     StreamUrl = $"rtsp://demo/camera{i}",
-                    Resolution = "1280�720",
+                    Resolution = "1280×720",
                     IrStatus = "ON",
                     HdrStatus = "AUTO",
                     IsOnline = i <= 12, // First 12 cameras online
@@ -79,80 +80,59 @@ namespace Station.ViewModels
             UpdateActiveCameras();
         }
 
-        private void UpdateActiveCameras()
+        public void UpdateActiveCameras()
         {
-            int count = 0;
-            foreach (var camera in CameraStreams)
-            {
-                if (camera.IsOnline) count++;
-            }
-            ActiveCameras = count;
+            ActiveCameras = CameraStreams.Count(c => c.IsSelected && c.IsOnline);
         }
 
         [RelayCommand]
         private void ChangeLayout(object? parameter)
         {
-            if (parameter is int count || (parameter is string s && int.TryParse(s, out count)))
-            {
-                // Layout changed to count cameras
-                switch (count)
-                {
-                    case 1: CameraItemWidth = 800; CameraItemHeight = 600; break;
-                    case 4: CameraItemWidth = 420; CameraItemHeight = 340; break;
-                    case 9: CameraItemWidth = 300; CameraItemHeight = 250; break;
-                    case 16: CameraItemWidth = 240; CameraItemHeight = 200; break;
-                    default: CameraItemWidth = 420; CameraItemHeight = 340; break;
-                }
-            }
-        }
+            int count = 4; // Default
+            if (parameter is int c) count = c;
+            else if (parameter is string s && int.TryParse(s, out int parsed)) count = parsed;
 
-        private void ChangeLayoutOLD(object? parameter, object? parameter2)
-        {
-            if (parameter == null) return;
-
-            // Convert parameter to CameraGridLayout
-            CameraGridLayout layout;
-            if (parameter is int intValue)
+            // Update item size and layout properties
+            switch (count)
             {
-                layout = (CameraGridLayout)intValue;
-            }
-            else if (parameter is string strValue && int.TryParse(strValue, out int parsedValue))
-            {
-                layout = (CameraGridLayout)parsedValue;
-            }
-            else
-            {
-                return;
-            }
-
-            CurrentLayout = layout;
-
-            switch (layout)
-            {
-                case CameraGridLayout.Single:
+                case 1:
+                    CurrentLayout = CameraGridLayout.Single;
                     GridColumns = 1;
                     GridRows = 1;
-                    SelectedLayoutText = "1�1 (1 camera)";
+                    SelectedLayoutText = "1×1 (1 camera)";
                     break;
-
-                case CameraGridLayout.TwoByTwo:
+                case 4:
+                    CurrentLayout = CameraGridLayout.TwoByTwo;
                     GridColumns = 2;
                     GridRows = 2;
-                    SelectedLayoutText = "2�2 (4 cameras)";
+                    SelectedLayoutText = "2×2 (4 cameras)";
                     break;
-
-                case CameraGridLayout.ThreeByThree:
+                case 9:
+                    CurrentLayout = CameraGridLayout.ThreeByThree;
                     GridColumns = 3;
                     GridRows = 3;
-                    SelectedLayoutText = "3�3 (9 cameras)";
+                    SelectedLayoutText = "3×3 (9 cameras)";
                     break;
-
-                case CameraGridLayout.FourByFour:
+                case 16:
+                    CurrentLayout = CameraGridLayout.FourByFour;
                     GridColumns = 4;
                     GridRows = 4;
-                    SelectedLayoutText = "4�4 (16 cameras)";
+                    SelectedLayoutText = "4×4 (16 cameras)";
+                    break;
+                default:
+                    CurrentLayout = CameraGridLayout.TwoByTwo;
+                    GridColumns = 2;
+                    GridRows = 2;
+                    SelectedLayoutText = "2×2 (4 cameras)";
                     break;
             }
+
+            // FILTER LOGIC: Select first N cameras, deselect others
+            for (int i = 0; i < CameraStreams.Count; i++)
+            {
+                CameraStreams[i].IsSelected = (i < count);
+            }
+            UpdateActiveCameras();
         }
 
         [RelayCommand]
@@ -197,7 +177,7 @@ namespace Station.ViewModels
         private string _streamUrl = string.Empty;
 
         [ObservableProperty]
-        private string _resolution = "1280�720";
+        private string _resolution = "1280×720";
 
         [ObservableProperty]
         private string _irStatus = "AUTO";

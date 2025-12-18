@@ -37,20 +37,16 @@
                 </StackPanel>
 
                 <!-- Selection Actions -->
-                <Grid Grid.Row="1" Margin="0,0,0,16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
                     <Button x:Name="SelectAllButton" Content="Chọn tất cả"
                             Click="SelectAll_Click"
-                            HorizontalAlignment="Stretch" Margin="0,0,4,0"
-                            Style="{StaticResource SecondaryButtonStyle}" FontSize="12" Padding="8,6" MinHeight="32"/>
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource SecondaryButtonStyle}" FontSize="12" Padding="12,6" MinHeight="32" Width="125"/>
                     <Button x:Name="DeselectAllButton" Content="Bỏ chọn"
                             Click="DeselectAll_Click"
-                            HorizontalAlignment="Stretch" Margin="4,0,0,0"
-                            Style="{StaticResource SecondaryButtonStyle}" FontSize="12" Padding="8,6" MinHeight="32"/>
-                </Grid>
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource SecondaryButtonStyle}" FontSize="12" Padding="12,6" MinHeight="32" Width="125"/>
+                </StackPanel>
 
                 <!-- Camera List -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="0,0,12,0">
@@ -122,13 +118,13 @@
                 </StackPanel>
 
                 <!-- Actions -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
                     <!-- Layout Selector -->
-                    <Button Style="{StaticResource SecondaryButtonStyle}" ToolTipService.ToolTip="Thay đổi bố cục" MinWidth="40" Padding="12,8">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE80A;" FontSize="16"/>
-                            <TextBlock Text="Bố cục"/>
-                            <FontIcon Glyph="&#xE70D;" FontSize="12" Opacity="0.5"/>
+                    <Button Style="{StaticResource SecondaryButtonStyle}" ToolTipService.ToolTip="Thay đổi bố cục" Height="36" Padding="12,0">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE80A;" FontSize="14"/>
+                            <TextBlock Text="Bố cục" FontSize="13"/>
+                            <FontIcon Glyph="&#xE70D;" FontSize="10" Opacity="0.6"/>
                         </StackPanel>
                         <Button.Flyout>
                             <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -150,20 +146,22 @@
 
                     <!-- Refresh -->
                     <Button Style="{StaticResource SecondaryButtonStyle}" Command="{x:Bind ViewModel.RefreshStreamsCommand}"
-                            ToolTipService.ToolTip="Làm mới tất cả" MinWidth="40" Padding="10">
-                        <FontIcon Glyph="&#xE72C;" FontSize="16"/>
+                            ToolTipService.ToolTip="Làm mới" Height="36" Width="36" Padding="0">
+                        <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                     </Button>
                 </StackPanel>
             </Grid>
 
             <!-- Video Grid -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="1" x:Name="VideoGridContainer" SizeChanged="VideoGridContainer_SizeChanged"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl x:Name="CameraItemsControl" ItemsSource="{x:Bind ViewModel.CameraStreams, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid Orientation="Horizontal"
-                                           ItemWidth="{Binding ViewModel.CameraItemWidth, ElementName=PageRoot}"
-                                           ItemHeight="{Binding ViewModel.CameraItemHeight, ElementName=PageRoot}"
+                                           MaximumRowsOrColumns="{Binding ViewModel.GridColumns, ElementName=PageRoot, Mode=OneWay}"
+                                           ItemWidth="{Binding ViewModel.CameraItemWidth, ElementName=PageRoot, Mode=OneWay}"
+                                           ItemHeight="{Binding ViewModel.CameraItemHeight, ElementName=PageRoot, Mode=OneWay}"
                                            HorizontalAlignment="Left"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
@@ -254,25 +252,30 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
+                                            <!-- Stats -->
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                                 <Border Background="{StaticResource BackgroundPrimaryBrush}" CornerRadius="4" Padding="4,2" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
-                                                    <TextBlock Text="{x:Bind Resolution}" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                    <TextBlock Text="{x:Bind Resolution}" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="80"/>
                                                 </Border>
                                                 <Border Background="{StaticResource BackgroundPrimaryBrush}" CornerRadius="4" Padding="4,2" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
-                                                    <TextBlock Text="{x:Bind Fps, Mode=OneWay}" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}">
+                                                    <TextBlock FontSize="10" Foreground="{StaticResource TextSecondaryBrush}">
+                                                        <Run Text="{x:Bind Fps, Mode=OneWay}"/>
                                                         <Run Text=" FPS"/>
                                                     </TextBlock>
                                                 </Border>
                                             </StackPanel>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                                <Button Style="{StaticResource IconButtonStyle}" Width="24" Height="24" Padding="0"
-                                                        Command="{Binding ElementName=PageRoot, Path=ViewModel.ToggleRecordingCommand}" CommandParameter="{Binding}">
-                                                    <FontIcon Glyph="&#xE7C8;" FontSize="12"/>
+                                            <!-- Actions -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                                <Button Style="{StaticResource IconButtonStyle}" Width="28" Height="28" Padding="4"
+                                                        Command="{Binding ElementName=PageRoot, Path=ViewModel.ToggleRecordingCommand}" CommandParameter="{Binding}"
+                                                        ToolTipService.ToolTip="Ghi hình">
+                                                    <FontIcon Glyph="{x:Bind RecordingIcon, Mode=OneWay}" Foreground="{x:Bind RecordingColor, Mode=OneWay}" FontSize="14"/>
                                                 </Button>
-                                                <Button Style="{StaticResource IconButtonStyle}" Width="24" Height="24" Padding="0"
-                                                        Command="{Binding ElementName=PageRoot, Path=ViewModel.TakeSnapshotCommand}" CommandParameter="{Binding}">
-                                                    <FontIcon Glyph="&#xE722;" FontSize="12"/>
+                                                <Button Style="{StaticResource IconButtonStyle}" Width="28" Height="28" Padding="4"
+                                                        Command="{Binding ElementName=PageRoot, Path=ViewModel.TakeSnapshotCommand}" CommandParameter="{Binding}"
+                                                        ToolTipService.ToolTip="Chụp ảnh">
+                                                    <FontIcon Glyph="&#xE722;" FontSize="14"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
