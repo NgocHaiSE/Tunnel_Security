@@ -6,6 +6,10 @@
     xmlns:local="using:Center"
     Title="Tunnel Security — Control Center">
 
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="BaseAlt"/>
+    </Window.SystemBackdrop>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="256"/>
