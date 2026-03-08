@@ -34,7 +34,7 @@
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    HorizontalAlignment="Right"/>
-                        <TextBlock Text="Tuyến Cát Linh - Hà Đông"
+                        <TextBlock Text="{x:Bind ViewModel.LineName, Mode=OneWay}"
                                    FontSize="12"
                                    Foreground="{StaticResource TextTertiaryBrush}"
                                    HorizontalAlignment="Right"

@@ -40,6 +40,13 @@ namespace Station.ViewModels
             set => SetProperty(ref _stationName, value);
         }
 
+        private string _lineName = "Tuyến hầm chính";
+        public string LineName
+        {
+            get => _lineName;
+            set => SetProperty(ref _lineName, value);
+        }
+
         private string _currentTime = DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
         public string CurrentTime
         {
