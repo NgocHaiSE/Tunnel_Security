@@ -232,8 +232,11 @@ let sensors = {};          // sensorId → sensor object
 let alertFeedCount = 0;
 let inspectorSensorId = null;
 
+let _reconnectTimer = null;
+
 // ── WebSocket connection ──────────────────────────────────────────────────
 function connectWS() {
+  clearTimeout(_reconnectTimer);
   ws = new WebSocket('ws://localhost:5050/ws');
 
   ws.onopen = () => {
@@ -246,7 +249,7 @@ function connectWS() {
   ws.onclose = () => {
     document.getElementById('wsIndicator').className = 'w-2.5 h-2.5 rounded-full bg-red-500';
     document.getElementById('wsStatus').textContent = 'Disconnected — retrying…';
-    setTimeout(connectWS, 3000);
+    _reconnectTimer = setTimeout(connectWS, 3000);
   };
 
   ws.onerror = () => ws.close();
@@ -304,11 +307,11 @@ function sensorCardHTML(s) {
   const offlineTag = !s.isOnline ? `<span class="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">OFFLINE</span>` : '';
   return `
     <div class="flex items-start justify-between mb-2">
-      <div class="text-xs text-slate-400 leading-tight">${s.sensorName}</div>
+      <div class="text-xs text-slate-400 leading-tight">${esc(s.sensorName)}</div>
       <span class="badge-${s.level} text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 shrink-0">${s.level}</span>
     </div>
-    <div class="text-2xl font-mono font-bold mb-1">${fmt(s.currentValue)} <span class="text-sm font-normal text-slate-400">${s.unit}</span></div>
-    <div class="text-xs text-slate-500">${s.nodeId} · ${s.category}</div>
+    <div class="text-2xl font-mono font-bold mb-1">${fmt(s.currentValue)} <span class="text-sm font-normal text-slate-400">${esc(s.unit)}</span></div>
+    <div class="text-xs text-slate-500">${esc(s.nodeId)} · ${esc(s.category)}</div>
     <div class="flex gap-1 mt-2">${faultTag}${offlineTag}</div>
   `;
 }
@@ -467,11 +470,12 @@ async function clearFault() {
 
 async function saveParams() {
   if (!inspectorSensorId) return;
+  const pv = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
   const body = {
-    nominalValue:      parseFloat(document.getElementById('pNominal').value) || null,
-    driftSpeed:        parseFloat(document.getElementById('pDrift').value)   || null,
-    warnThreshold:     parseFloat(document.getElementById('pWarn').value)    || null,
-    criticalThreshold: parseFloat(document.getElementById('pCrit').value)    || null,
+    nominalValue:      pv('pNominal'),
+    driftSpeed:        pv('pDrift'),
+    warnThreshold:     pv('pWarn'),
+    criticalThreshold: pv('pCrit'),
   };
   try {
     const res = await fetch(`${BASE}/api/sensors/${inspectorSensorId}/params`, {
