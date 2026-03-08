@@ -7,10 +7,12 @@
     <Application.Resources>
       <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-           <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-          <!-- Colors -->
-              <ResourceDictionary Source="Styles/Colors.xaml"/>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="Styles/Colors.xaml"/>
+                <ResourceDictionary Source="Styles/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Override system theme background -->
+            <SolidColorBrush x:Key="ApplicationPageBackgroundThemeBrush" Color="#111621"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
