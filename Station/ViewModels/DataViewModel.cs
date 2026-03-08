@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Station.Models;
+using Station.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -20,6 +21,7 @@ namespace Station.ViewModels
         private readonly DispatcherQueue? _dispatcherQueue;
         private Timer? _realtimeUpdateTimer;
         private readonly Random _random = new();
+        private readonly MockDataService _mockData = MockDataService.Instance;
 
         // Real-time Statistics
         [ObservableProperty]
@@ -58,6 +60,10 @@ namespace Station.ViewModels
             InitializeMockData();
             InitializeCharts();
             StartRealtimeUpdates();
+
+            // Subscribe to live sensor ticks from MockDataService
+            _mockData.SensorTick += OnMockSensorTick;
+            _mockData.AlertGenerated += OnMockAlertGenerated;
         }
 
         private void InitializeMockData()
@@ -332,6 +338,47 @@ MinLimit = 0
         public void ExportToPdf()
         {
             System.Diagnostics.Debug.WriteLine("Export to PDF requested");
+        }
+
+        private void OnMockSensorTick(object? sender, Station.Services.SensorTickEventArgs e)
+        {
+            _dispatcherQueue?.TryEnqueue(() =>
+            {
+                TotalReadingsToday++;
+                if (e.IsAnomaly) AnomalyCount++;
+
+                // Keep RealtimeSensorReadings in sync — update existing or prepend new
+                var existing = RealtimeSensorReadings.FirstOrDefault(r => r.DeviceName == e.Sensor.SensorId);
+                if (existing != null)
+                {
+                    existing.Value     = Math.Round(e.NewValue, 2);
+                    existing.Timestamp = e.Timestamp;
+                    existing.IsAnomaly = e.IsAnomaly;
+                }
+                else
+                {
+                    RealtimeSensorReadings.Insert(0, new SensorReadingViewModel
+                    {
+                        DeviceName = e.Sensor.SensorId,
+                        SensorType = e.Sensor.Category.ToString(),
+                        Value      = Math.Round(e.NewValue, 2),
+                        Unit       = e.Sensor.Unit,
+                        Timestamp  = e.Timestamp,
+                        IsAnomaly  = e.IsAnomaly
+                    });
+                    // Cap list at 50
+                    while (RealtimeSensorReadings.Count > 50)
+                        RealtimeSensorReadings.RemoveAt(RealtimeSensorReadings.Count - 1);
+                }
+            });
+        }
+
+        private void OnMockAlertGenerated(object? sender, Station.Services.AlertGeneratedEventArgs e)
+        {
+            _dispatcherQueue?.TryEnqueue(() =>
+            {
+                AnomalyCount++;
+            });
         }
 
         ~DataViewModel()

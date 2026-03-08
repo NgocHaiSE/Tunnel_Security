@@ -1,16 +1,24 @@
 using System;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Timers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using Station.Models;
+using Station.Services;
 
 namespace Station.ViewModels
 {
     public partial class LiveVideoViewModel : ObservableObject
     {
+        private readonly DispatcherQueue _dispatcherQueue;
+        private readonly Timer _blinkTimer;
+        private bool _blinkState = true;
+        private readonly MockDataService _mockData = MockDataService.Instance;
+
         // Current layout
         [ObservableProperty]
         private CameraGridLayout _currentLayout = CameraGridLayout.TwoByTwo;
@@ -48,29 +56,96 @@ namespace Station.ViewModels
         [ObservableProperty]
         private string _selectedLayoutText = "2×2 (4 cameras)";
 
+        // Alert state
+        [ObservableProperty]
+        private bool _hasActiveAlerts = false;
+
+        [ObservableProperty]
+        private int _activeAlertCount = 0;
+
+        [ObservableProperty]
+        private bool _alertBannerHighlight = true; // toggled for blink overlay
+
+        // Event for requesting dialog display (raised to View)
+        public event Action<CameraStreamViewModel>? AlertDialogRequested;
+
         public LiveVideoViewModel()
         {
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
             LoadCameraStreams();
             ChangeLayout(CameraGridLayout.TwoByTwo);
+
+            // Blink timer: 600ms toggle
+            _blinkTimer = new Timer(600);
+            _blinkTimer.Elapsed += OnBlinkTick;
+            _blinkTimer.AutoReset = true;
+            _blinkTimer.Start();
+
+            // Subscribe to MockDataService camera alert events
+            _mockData.AlertGenerated += OnMockAlertGenerated;
+            _mockData.Start();
+        }
+
+        private void OnMockAlertGenerated(object? sender, AlertGeneratedEventArgs e)
+        {
+            // Only handle camera-triggered alerts here; sensor alerts go to AlertsViewModel
+            if (e.TriggeredByCameraId == null) return;
+
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                var cam = CameraStreams.FirstOrDefault(c => c.CameraId == e.TriggeredByCameraId);
+                if (cam == null || !cam.IsOnline) return;
+
+                // Find matching SimulatedCamera for location info
+                var simCam = _mockData.Cameras.FirstOrDefault(c => c.CameraId == e.TriggeredByCameraId);
+                string location = simCam?.Location ?? cam.CameraName;
+
+                cam.TriggerAlert(
+                    e.Alert.Title,
+                    e.Alert.Description,
+                    e.Alert.Severity,
+                    location);
+
+                RefreshAlertStats();
+            });
+        }
+
+        private void OnBlinkTick(object? sender, ElapsedEventArgs e)
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                if (!HasActiveAlerts) return;
+                _blinkState = !_blinkState;
+                AlertBannerHighlight = _blinkState;
+                foreach (var cam in CameraStreams.Where(c => c.HasAlert))
+                    cam.AlertBorderOpacity = _blinkState ? 1.0 : 0.15;
+            });
+        }
+
+        private void RefreshAlertStats()
+        {
+            ActiveAlertCount = CameraStreams.Count(c => c.HasAlert);
+            HasActiveAlerts = ActiveAlertCount > 0;
         }
 
         private void LoadCameraStreams()
         {
             CameraStreams.Clear();
 
-            // Load camera streams (mock data for demo)
-            for (int i = 1; i <= 16; i++)
+            int camIdx = 0;
+            foreach (var simCam in _mockData.Cameras)
             {
+                int idx = ++camIdx;
                 CameraStreams.Add(new CameraStreamViewModel
                 {
-                    CameraId = $"CAM-{i:D2}",
-                    CameraName = $"Camera #{i} (demo)",
-                    StreamUrl = $"rtsp://demo/camera{i}",
+                    CameraId = simCam.CameraId,
+                    CameraName = $"{simCam.CameraName} · {simCam.Location}",
+                    StreamUrl = $"rtsp://station/{simCam.CameraId.ToLower()}",
                     Resolution = "1280×720",
                     IrStatus = "ON",
                     HdrStatus = "AUTO",
-                    IsOnline = i <= 12, // First 12 cameras online
-                    IsRecording = i <= 10,
+                    IsOnline = simCam.IsOnline,
+                    IsRecording = simCam.IsOnline && idx <= 10,
                     Fps = 30,
                     Bitrate = 2.5
                 });
@@ -86,13 +161,30 @@ namespace Station.ViewModels
         }
 
         [RelayCommand]
+        private void ShowAlertVideo(CameraStreamViewModel? camera)
+        {
+            if (camera == null || !camera.HasAlert) return;
+            AlertDialogRequested?.Invoke(camera);
+        }
+
+        [RelayCommand]
+        private void ShowMostCriticalAlert()
+        {
+            var critical = CameraStreams
+                .Where(c => c.HasAlert)
+                .OrderByDescending(c => (int)c.AlertSeverityLevel)
+                .FirstOrDefault();
+            if (critical != null)
+                AlertDialogRequested?.Invoke(critical);
+        }
+
+        [RelayCommand]
         private void ChangeLayout(object? parameter)
         {
-            int count = 4; // Default
+            int count = 4;
             if (parameter is int c) count = c;
             else if (parameter is string s && int.TryParse(s, out int parsed)) count = parsed;
 
-            // Update item size and layout properties
             switch (count)
             {
                 case 1:
@@ -127,11 +219,8 @@ namespace Station.ViewModels
                     break;
             }
 
-            // FILTER LOGIC: Select first N cameras, deselect others
             for (int i = 0; i < CameraStreams.Count; i++)
-            {
                 CameraStreams[i].IsSelected = (i < count);
-            }
             UpdateActiveCameras();
         }
 
@@ -146,7 +235,6 @@ namespace Station.ViewModels
         {
             if (camera == null) return;
             System.Diagnostics.Debug.WriteLine($"Snapshot taken for {camera.CameraName}");
-            // TODO: Implement snapshot capture
         }
 
         [RelayCommand]
@@ -160,8 +248,6 @@ namespace Station.ViewModels
         private void ShowCameraSettings(CameraStreamViewModel? camera)
         {
             if (camera == null) return;
-            System.Diagnostics.Debug.WriteLine($"Show settings for {camera.CameraName}");
-            // TODO: Show camera settings dialog
         }
     }
 
@@ -197,21 +283,28 @@ namespace Station.ViewModels
         [ObservableProperty]
         private double _bitrate;
 
-        public string StatusText => _isOnline ? "Online" : "Offline";
+        // Alert state
+        [ObservableProperty]
+        private bool _hasAlert = false;
 
-        public SolidColorBrush StatusColor => _isOnline
-    ? new SolidColorBrush(Colors.Green)
-      : new SolidColorBrush(Colors.Gray);
+        [ObservableProperty]
+        private double _alertBorderOpacity = 1.0;
 
-        public string RecordingIcon => _isRecording ? "\uE722" : "\uE714"; // Record/Stop icons
+        [ObservableProperty]
+        private string _alertTitle = string.Empty;
 
-        public SolidColorBrush RecordingColor => _isRecording
-       ? new SolidColorBrush(Colors.Red)
-           : new SolidColorBrush(Colors.Gray);
+        [ObservableProperty]
+        private string _alertDescription = string.Empty;
 
-        public string IrStatusDisplay => $"IR: {_irStatus}";
-        public string HdrStatusDisplay => $"HDR: {_hdrStatus}";
-        public string ResolutionDisplay => $"Resolution: {_resolution}";
+        [ObservableProperty]
+        private AlertSeverity _alertSeverityLevel = AlertSeverity.Low;
+
+        [ObservableProperty]
+        private string _alertLocation = string.Empty;
+
+        [ObservableProperty]
+        private DateTimeOffset _alertTime = DateTimeOffset.Now;
+
         private bool _isSelected = true;
         public bool IsSelected
         {
@@ -219,7 +312,63 @@ namespace Station.ViewModels
             set => SetProperty(ref _isSelected, value);
         }
 
+        public string StatusText => _isOnline ? "Online" : "Offline";
+
+        public SolidColorBrush StatusColor => _isOnline
+            ? new SolidColorBrush(Colors.Green)
+            : new SolidColorBrush(Colors.Gray);
+
+        public string RecordingIcon => _isRecording ? "\uE722" : "\uE714";
+
+        public SolidColorBrush RecordingColor => _isRecording
+            ? new SolidColorBrush(Colors.Red)
+            : new SolidColorBrush(Colors.Gray);
+
+        public string IrStatusDisplay => $"IR: {_irStatus}";
+        public string HdrStatusDisplay => $"HDR: {_hdrStatus}";
+        public string ResolutionDisplay => $"Resolution: {_resolution}";
         public string BitrateDisplay => $"{_bitrate:F1} Mbps";
+
+        public string AlertSeverityText => _alertSeverityLevel switch
+        {
+            AlertSeverity.Critical => "KHẨN CẤP",
+            AlertSeverity.High => "NGUY HIỂM",
+            AlertSeverity.Medium => "TRUNG BÌNH",
+            _ => "THẤP"
+        };
+
+        public SolidColorBrush AlertSeverityBrush => _alertSeverityLevel switch
+        {
+            AlertSeverity.Critical => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 239, 68, 68)),
+            AlertSeverity.High => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 249, 115, 22)),
+            AlertSeverity.Medium => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 234, 179, 8)),
+            _ => new SolidColorBrush(Windows.UI.Color.FromArgb(255, 34, 197, 94))
+        };
+
+        public string AlertTimeDisplay => _alertTime.ToString("HH:mm:ss dd/MM/yyyy");
+
+        public void TriggerAlert(string title, string description, AlertSeverity severity, string location)
+        {
+            AlertTitle = title;
+            AlertDescription = description;
+            AlertSeverityLevel = severity;
+            AlertLocation = location;
+            AlertTime = DateTimeOffset.Now;
+            AlertBorderOpacity = 1.0;
+            HasAlert = true;
+
+            // Notify computed properties
+            OnPropertyChanged(nameof(AlertSeverityText));
+            OnPropertyChanged(nameof(AlertSeverityBrush));
+            OnPropertyChanged(nameof(AlertTimeDisplay));
+        }
+
+        public void DismissAlert()
+        {
+            HasAlert = false;
+            AlertBorderOpacity = 0.0;
+            AlertTitle = string.Empty;
+            AlertDescription = string.Empty;
+        }
     }
 }
-
