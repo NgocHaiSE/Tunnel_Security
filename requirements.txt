@@ -1,0 +1,8 @@
+-	Xây dựng kiến trúc, máy có nhiều luồng kết nối và phải hiển thị dữ liệu trên
+-	Cơ sở dữ liệu timescaledb và db truyền thống (sensor, hình ảnh, âm thanh, video)
+-	Cảm biến đi theo 1 pp, âm thanh, hình ảnh và video 1 pp
+-	Đường truyền dây, wifi, 4g
+-	Tầng CSDL, Tầng services (nhận dữ liệu, xử lý dữ liệu, và đưa vào queue) buffer dữ liệu thời gian thực, Tầng giao diện
+-	Máy chủ trung tâm
+-	Các package dữ liệu truyền theo phương pháp như nào
+-	Node join vào phải thông qua tầng service (node loại nào, vị trí)

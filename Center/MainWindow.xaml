@@ -6,7 +6,6 @@
     xmlns:local="using:Center"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:esri="using:Esri.ArcGISRuntime.UI.Controls"
     mc:Ignorable="d"
     Title="Center - Hệ thống giám sát trung tâm">
 
@@ -91,7 +90,6 @@
         <!-- Map Container -->
         <Grid Grid.Row="1">
             <!-- ArcGIS MapView -->
-            <esri:MapView x:Name="MyMapView" />
 
             <!-- Map Controls Overlay -->
             <Grid>
