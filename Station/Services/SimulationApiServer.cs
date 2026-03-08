@@ -217,10 +217,10 @@ namespace Station.Services
                 {
                     var body = await ReadBodyAsync(ctx.Request);
                     var dto  = JsonSerializer.Deserialize<SensorParamsDto>(body, _jsonOpts);
-                    if (dto != null)
-                        _mock.UpdateSensorParams(parts[3],
-                            dto.NominalValue, dto.DriftSpeed,
-                            dto.WarnThreshold, dto.CriticalThreshold);
+                    if (dto == null) { await WriteJsonAsync(ctx.Response, 400, new { error = "invalid body" }); return; }
+                    _mock.UpdateSensorParams(parts[3],
+                        dto.NominalValue, dto.DriftSpeed,
+                        dto.WarnThreshold, dto.CriticalThreshold);
                     await WriteJsonAsync(ctx.Response, 200, new { ok = true });
                     return;
                 }
