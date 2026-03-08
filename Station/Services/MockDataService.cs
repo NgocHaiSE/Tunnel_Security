@@ -383,8 +383,8 @@ namespace Station.Services
         {
             var alert = new Alert
             {
-                Title = title,
-                Description = description,
+                Title = title ?? string.Empty,
+                Description = description ?? string.Empty,
                 Category = category,
                 Severity = severity,
                 State = AlertState.Unprocessed,
