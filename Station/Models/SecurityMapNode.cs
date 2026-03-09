@@ -28,10 +28,11 @@ namespace Station.Models
         public NodeStatus Status { get; set; }
 
         // Sensor readings
-        public double? RadarValue { get; set; }         // mm/m
-        public double? VibrationValue { get; set; }             // mm/s
-        public double? SmokeFireValue { get; set; }           // L or %
-        public double? TemperatureValue { get; set; }       // �C
+        public bool?   RadarDetected { get; set; }          // phát hiện người
+        public bool?   InfraredDetected { get; set; }       // PIR kích hoạt
+        public double? LightValue { get; set; }             // lux
+        public double? AccelerometerValue { get; set; }     // m/s²
+        public double? TemperatureValue { get; set; }       // °C
         public double? HumidityValue { get; set; }       // %
 
         // Device info
@@ -73,14 +74,15 @@ namespace Station.Models
             }
 
             // Check for critical conditions
-            if (RadarValue > 3.0 || VibrationValue > 4.0 || SmokeFireValue > 50 || TemperatureValue > 45)
+            if ((RadarDetected == true) || (InfraredDetected == true) ||
+                AccelerometerValue > 5.0 || TemperatureValue > 45)
             {
                 Status = NodeStatus.Critical;
                 return;
             }
 
             // Check for warning conditions
-            if (RadarValue > 2.0 || VibrationValue > 3.0 || SmokeFireValue > 30 || TemperatureValue > 35)
+            if (AccelerometerValue > 3.0 || TemperatureValue > 35 || LightValue > 900)
             {
                 Status = NodeStatus.Warning;
                 return;
