@@ -18,7 +18,6 @@
 
             <!-- Converters -->
             <converters:StringFormatConverter x:Key="StringFormatConverter"/>
-            <converters:IndexToPositionConverter x:Key="IndexToPositionConverter"/>
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <converters:RecordingTextConverter x:Key="RecordingTextConverter"/>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -28,7 +27,6 @@
             <converters:NullableDateTimeFormatConverter x:Key="NullableDateTimeFormatConverter"/>
             <converters:BoolToAccentColorConverter x:Key="BoolToAccentColorConverter"/>
             <converters:BoolToInverseColorConverter x:Key="BoolToInverseColorConverter"/>
-            <converters:BoolToThicknessConverter x:Key="BoolToThicknessConverter"/>
             <converters:BoolToAccentBackgroundConverter x:Key="BoolToAccentBackgroundConverter"/>
         </ResourceDictionary>
     </Application.Resources>
