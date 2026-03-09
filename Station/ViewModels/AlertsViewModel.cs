@@ -142,6 +142,9 @@ namespace Station.ViewModels
         private int _lowCount;
         public int LowCount { get => _lowCount; set => SetProperty(ref _lowCount, value); }
 
+        // Warning = High + Medium (matches HTML 3-card layout)
+        public int WarningCount => HighCount + MediumCount;
+
         private int _todayCount;
         public int TodayCount { get => _todayCount; set => SetProperty(ref _todayCount, value); }
 
@@ -214,11 +217,12 @@ namespace Station.ViewModels
 
             // Categories
             Categories.Add("Tất cả loại");
-            Categories.Add("Mực nước");
-            Categories.Add("Khí gas");
+            Categories.Add("Radar");
+            Categories.Add("Hồng ngoại");
             Categories.Add("Nhiệt độ");
             Categories.Add("Độ ẩm");
-            Categories.Add("Chuyển động");
+            Categories.Add("Ánh sáng");
+            Categories.Add("Gia tốc");
             Categories.Add("Xâm nhập");
             Categories.Add("Thiết bị");
             Categories.Add("Kết nối");
@@ -238,35 +242,30 @@ namespace Station.ViewModels
                 new()
                 {
                     Id = "ALR-001",
-                    Title = "Mực nước vượt ngưỡng nguy hiểm",
-                    Description = "Mực nước tại hố ga TTT-3 đã vượt ngưỡng critical (2.8m > 2.5m). Cần xử lý khẩn cấp.",
-                    Category = AlertCategory.WaterLevel,
-                    Severity = AlertSeverity.Critical,
+                    Title = "Rung động bất thường tại Nút 2-03",
+                    Description = "Gia tốc kế ghi nhận 3.8 m/s².",
+                    Category = AlertCategory.Accelerometer,
+                    Severity = AlertSeverity.High,
                     State = AlertState.Unprocessed,
-                    LineId = "L3", LineName = "Cống Trần Thái Tông",
-                    NodeId = "TTT-3", NodeName = "Cống Trần Thái Tông 3",
-                    SensorId = "S-TTT3-WL", SensorName = "WaterLevel Sensor",
-                    SensorType = "WaterLevel", SensorValue = 2.8, SensorUnit = "m", Threshold = 2.5,
-                    CameraId = "CAM-TTT-1",
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-5),
-                    Lng = 105.7945, Lat = 21.0255
+                    LineId = "LINE-02", LineName = "Tuyến Trung",
+                    NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
+                    SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
+                    SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
+                    CreatedAt = DateTimeOffset.Now.AddMinutes(-12)
                 },
                 new()
                 {
                     Id = "ALR-002",
-                    Title = "Phát hiện khí gas nguy hiểm",
-                    Description = "Nồng độ khí CH4 tại nút DT-1 vượt ngưỡng an toàn (850ppm > 500ppm).",
-                    Category = AlertCategory.Gas,
-                    Severity = AlertSeverity.Critical,
-                    State = AlertState.Acknowledged,
-                    LineId = "L4", LineName = "Cống Duy Tân",
-                    NodeId = "DT-1", NodeName = "Cống Duy Tân 1",
-                    SensorId = "S-DT1-GAS", SensorName = "Gas Sensor",
-                    SensorType = "Gas", SensorValue = 850, SensorUnit = "ppm", Threshold = 500,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-12),
-                    AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-8),
-                    AcknowledgedBy = "Nguyễn Văn A",
-                    Lng = 105.7855, Lat = 21.0335
+                    Title = "Radar phát hiện người tại Nút 1-01",
+                    Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
+                    Category = AlertCategory.Radar,
+                    Severity = AlertSeverity.High,
+                    State = AlertState.Unprocessed,
+                    LineId = "LINE-01", LineName = "Tuyến Bắc",
+                    NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
+                    SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
+                    SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
+                    CreatedAt = DateTimeOffset.Now.AddMinutes(-5)
                 },
 
                 // High alerts
@@ -336,34 +335,30 @@ namespace Station.ViewModels
                 new()
                 {
                     Id = "ALR-006",
-                    Title = "Mực nước cảnh báo",
-                    Description = "Mực nước tại CG-3 đạt mức cảnh báo (1.8m > 1.5m).",
-                    Category = AlertCategory.WaterLevel,
-                    Severity = AlertSeverity.Medium,
+                    Title = "Rung động bất thường tại Nút 2-03",
+                    Description = "Gia tốc kế ghi nhận 3.8 m/s².",
+                    Category = AlertCategory.Accelerometer,
+                    Severity = AlertSeverity.High,
                     State = AlertState.Unprocessed,
-                    LineId = "L2", LineName = "Cống Cầu Giấy",
-                    NodeId = "CG-3", NodeName = "Cống Cầu Giấy 3",
-                    SensorId = "S-CG3-WL", SensorName = "WaterLevel Sensor",
-                    SensorType = "WaterLevel", SensorValue = 1.8, SensorUnit = "m", Threshold = 1.5,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-35),
-                    Lng = 105.7985, Lat = 21.0485
+                    LineId = "LINE-02", LineName = "Tuyến Trung",
+                    NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
+                    SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
+                    SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
+                    CreatedAt = DateTimeOffset.Now.AddMinutes(-35)
                 },
                 new()
                 {
                     Id = "ALR-007",
-                    Title = "Rung động bất thường",
-                    Description = "Cảm biến rung động tại PVD-3 phát hiện dao động bất thường.",
-                    Category = AlertCategory.Motion,
+                    Title = "Cảm biến hồng ngoại kích hoạt tại Nút 3-02",
+                    Description = "PIR phát hiện chuyển động nhiệt trong khu vực hạn chế.",
+                    Category = AlertCategory.Infrared,
                     Severity = AlertSeverity.Medium,
                     State = AlertState.Acknowledged,
-                    LineId = "L5", LineName = "Cống Phạm Văn Đồng",
-                    NodeId = "PVD-3", NodeName = "Cống Phạm Văn Đồng 3",
-                    SensorId = "S-PVD3-VIB", SensorName = "Vibration Sensor",
-                    SensorType = "Vibration", SensorValue = 4.5, SensorUnit = "mm/s", Threshold = 3.0,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-45),
-                    AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-40),
-                    AcknowledgedBy = "Phạm Văn D",
-                    Lng = 105.8063, Lat = 21.0485
+                    LineId = "LINE-03", LineName = "Tuyến Nam",
+                    NodeId = "NODE-L3-02", NodeName = "Nút 3-02",
+                    SensorId = "PIR-L3-N02", SensorName = "Hồng ngoại Nút 3-02",
+                    SensorType = "Infrared", SensorValue = 65, SensorUnit = "%", Threshold = 60,
+                    CreatedAt = DateTimeOffset.Now.AddMinutes(-28)
                 },
 
                 // Low alerts
@@ -426,20 +421,18 @@ namespace Station.ViewModels
                 new()
                 {
                     Id = "ALR-011",
-                    Title = "Phát hiện khói",
-                    Description = "Cảm biến khói tại TTT-1 phát hiện nồng độ khói cao.",
-                    Category = AlertCategory.Gas,
+                    Title = "Radar phát hiện người tại Nút 1-01",
+                    Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
+                    Category = AlertCategory.Radar,
                     Severity = AlertSeverity.High,
                     State = AlertState.InProgress,
-                    LineId = "L3", LineName = "Cống Trần Thái Tông",
-                    NodeId = "TTT-1", NodeName = "Cống Trần Thái Tông 1",
-                    SensorId = "S-TTT1-SMK", SensorName = "Smoke Sensor",
-                    SensorType = "SmokeFire", SensorValue = 120, SensorUnit = "ppm", Threshold = 50,
-                    CameraId = "CAM-TTT-1",
+                    LineId = "LINE-01", LineName = "Tuyến Bắc",
+                    NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
+                    SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
+                    SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
                     CreatedAt = DateTimeOffset.Now.AddMinutes(-15),
                     AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-12),
-                    AcknowledgedBy = "Nguyễn Văn A",
-                    Lng = 105.7958, Lat = 21.0328
+                    AcknowledgedBy = "Nguyễn Văn A"
                 },
                 new()
                 {
@@ -522,14 +515,15 @@ namespace Station.ViewModels
             {
                 filtered = SelectedCategory switch
                 {
-                    "Mực nước" => filtered.Where(a => a.Category == AlertCategory.WaterLevel),
-                    "Khí gas" => filtered.Where(a => a.Category == AlertCategory.Gas),
-                    "Nhiệt độ" => filtered.Where(a => a.Category == AlertCategory.Temperature),
-                    "Độ ẩm" => filtered.Where(a => a.Category == AlertCategory.Humidity),
-                    "Chuyển động" => filtered.Where(a => a.Category == AlertCategory.Motion),
-                    "Xâm nhập" => filtered.Where(a => a.Category == AlertCategory.Intrusion),
-                    "Thiết bị" => filtered.Where(a => a.Category == AlertCategory.Equipment),
-                    "Kết nối" => filtered.Where(a => a.Category == AlertCategory.Connection),
+                    "Radar"      => filtered.Where(a => a.Category == AlertCategory.Radar),
+                    "Hồng ngoại" => filtered.Where(a => a.Category == AlertCategory.Infrared),
+                    "Nhiệt độ"   => filtered.Where(a => a.Category == AlertCategory.Temperature),
+                    "Độ ẩm"      => filtered.Where(a => a.Category == AlertCategory.Humidity),
+                    "Ánh sáng"   => filtered.Where(a => a.Category == AlertCategory.Light),
+                    "Gia tốc"    => filtered.Where(a => a.Category == AlertCategory.Accelerometer),
+                    "Xâm nhập"   => filtered.Where(a => a.Category == AlertCategory.Intrusion),
+                    "Thiết bị"   => filtered.Where(a => a.Category == AlertCategory.Equipment),
+                    "Kết nối"    => filtered.Where(a => a.Category == AlertCategory.Connection),
                     _ => filtered
                 };
             }
@@ -572,6 +566,7 @@ namespace Station.ViewModels
             HighCount = AllAlerts.Count(a => a.Severity == AlertSeverity.High);
             MediumCount = AllAlerts.Count(a => a.Severity == AlertSeverity.Medium);
             LowCount = AllAlerts.Count(a => a.Severity == AlertSeverity.Low);
+            OnPropertyChanged(nameof(WarningCount));
 
             // Count by period
             TodayCount = AllAlerts.Count(a => a.CreatedAt.Date == now.Date);
@@ -755,6 +750,37 @@ namespace Station.ViewModels
             SearchQuery = string.Empty;
         }
 
+        /// <summary>Called from code-behind on UI thread when MockDataService fires AlertGenerated.</summary>
+        public void AddLiveAlert(Station.Models.Alert alert)
+        {
+            var vm = new AlertItemViewModel
+            {
+                Id = alert.Id,
+                Title = alert.Title,
+                Description = alert.Description,
+                Severity = alert.Severity,
+                State = AlertState.Unprocessed,
+                LineId = alert.LineId,
+                LineName = string.IsNullOrEmpty(alert.LineName) ? alert.NodeId : alert.LineName,
+                NodeId = alert.NodeId,
+                NodeName = string.IsNullOrEmpty(alert.NodeName) ? alert.NodeId : alert.NodeName,
+                SensorId = alert.SensorId,
+                SensorName = alert.SensorName,
+                SensorType = alert.SensorType,
+                SensorValue = alert.SensorValue,
+                SensorUnit = alert.SensorUnit,
+                Threshold = alert.Threshold,
+                CameraId = alert.CameraId,
+                CreatedAt = alert.CreatedAt,
+                Lng = alert.Lng,
+                Lat = alert.Lat
+            };
+            vm.InitializeSelectedStatus();
+            AllAlerts.Insert(0, vm);
+            ApplyFilters();
+            CalculateStatistics();
+        }
+
         #endregion
     }
 
@@ -780,6 +806,8 @@ namespace Station.ViewModels
                     OnPropertyChanged(nameof(StateIcon));
                     OnPropertyChanged(nameof(StateColor));
                     OnPropertyChanged(nameof(StateBgColor));
+                    OnPropertyChanged(nameof(StateDarkBgBrush));
+                    OnPropertyChanged(nameof(StateDarkBorderBrush));
                     OnPropertyChanged(nameof(CanAcknowledge));
                     OnPropertyChanged(nameof(CanProcess));
                     OnPropertyChanged(nameof(CanResolve));
@@ -914,27 +942,29 @@ namespace Station.ViewModels
 
         public string CategoryIcon => Category switch
         {
-            AlertCategory.WaterLevel => "\uE81E",   // Water
-            AlertCategory.Gas => "\uE9CA",          // Cloud
-            AlertCategory.Temperature => "\uE9CA", // Thermometer
-            AlertCategory.Humidity => "\uE81E",    // Drop
-            AlertCategory.Motion => "\uE805",      // Walk
-            AlertCategory.Intrusion => "\uE785",   // Shield
-            AlertCategory.Equipment => "\uE950",   // Device
-            AlertCategory.Connection => "\uE839",  // Wifi
+            AlertCategory.Radar         => "\uE701",
+            AlertCategory.Infrared      => "\uE7C1",
+            AlertCategory.Temperature   => "\uE9CA", // Thermometer
+            AlertCategory.Humidity      => "\uE81E", // Drop
+            AlertCategory.Light         => "\uE706",
+            AlertCategory.Accelerometer => "\uEDA4",
+            AlertCategory.Intrusion     => "\uE785",  // Shield
+            AlertCategory.Equipment     => "\uE950",  // Device
+            AlertCategory.Connection    => "\uE839",  // Wifi
             _ => "\uE7BA"
         };
 
         public string CategoryText => Category switch
         {
-            AlertCategory.WaterLevel => "Mực nước",
-            AlertCategory.Gas => "Khí gas",
-            AlertCategory.Temperature => "Nhiệt độ",
-            AlertCategory.Humidity => "Độ ẩm",
-            AlertCategory.Motion => "Chuyển động",
-            AlertCategory.Intrusion => "Xâm nhập",
-            AlertCategory.Equipment => "Thiết bị",
-            AlertCategory.Connection => "Kết nối",
+            AlertCategory.Radar         => "Radar",
+            AlertCategory.Infrared      => "Hồng ngoại",
+            AlertCategory.Temperature   => "Nhiệt độ",
+            AlertCategory.Humidity      => "Độ ẩm",
+            AlertCategory.Light         => "Ánh sáng",
+            AlertCategory.Accelerometer => "Gia tốc",
+            AlertCategory.Intrusion     => "Xâm nhập",
+            AlertCategory.Equipment     => "Thiết bị",
+            AlertCategory.Connection    => "Kết nối",
             _ => "Khác"
         };
 
@@ -1022,6 +1052,57 @@ namespace Station.ViewModels
             AlertState.Closed => new SolidColorBrush(Color.FromArgb(255, 243, 244, 246)),
             _ => new SolidColorBrush(Color.FromArgb(255, 243, 244, 246))
         };
+
+        // ── Dark-mode tinted colors (matching alert.html) ───────────────────
+
+        public SolidColorBrush SeverityDarkBgBrush => Severity switch
+        {
+            AlertSeverity.Critical => new SolidColorBrush(Color.FromArgb(26, 239, 68, 68)),
+            AlertSeverity.High     => new SolidColorBrush(Color.FromArgb(26, 249, 115, 22)),
+            AlertSeverity.Medium   => new SolidColorBrush(Color.FromArgb(26, 234, 179, 8)),
+            AlertSeverity.Low      => new SolidColorBrush(Color.FromArgb(26, 59, 130, 246)),
+            _                      => new SolidColorBrush(Color.FromArgb(26, 107, 114, 128))
+        };
+
+        public SolidColorBrush SeverityDarkBorderBrush => Severity switch
+        {
+            AlertSeverity.Critical => new SolidColorBrush(Color.FromArgb(51, 239, 68, 68)),
+            AlertSeverity.High     => new SolidColorBrush(Color.FromArgb(51, 249, 115, 22)),
+            AlertSeverity.Medium   => new SolidColorBrush(Color.FromArgb(51, 234, 179, 8)),
+            AlertSeverity.Low      => new SolidColorBrush(Color.FromArgb(51, 59, 130, 246)),
+            _                      => new SolidColorBrush(Color.FromArgb(51, 107, 114, 128))
+        };
+
+        public SolidColorBrush SeverityDarkTextBrush => Severity switch
+        {
+            AlertSeverity.Critical => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+            AlertSeverity.High     => new SolidColorBrush(Color.FromArgb(255, 249, 115, 22)),
+            AlertSeverity.Medium   => new SolidColorBrush(Color.FromArgb(255, 234, 179, 8)),
+            AlertSeverity.Low      => new SolidColorBrush(Color.FromArgb(255, 59, 130, 246)),
+            _                      => new SolidColorBrush(Color.FromArgb(255, 107, 114, 128))
+        };
+
+        public SolidColorBrush StateDarkBgBrush => State switch
+        {
+            AlertState.Unprocessed  => new SolidColorBrush(Color.FromArgb(13, 239, 68, 68)),
+            AlertState.Acknowledged => new SolidColorBrush(Color.FromArgb(13, 59, 130, 246)),
+            AlertState.InProgress   => new SolidColorBrush(Color.FromArgb(13, 245, 158, 11)),
+            AlertState.Resolved     => new SolidColorBrush(Color.FromArgb(13, 34, 197, 94)),
+            AlertState.Closed       => new SolidColorBrush(Color.FromArgb(13, 107, 114, 128)),
+            _                       => new SolidColorBrush(Color.FromArgb(13, 107, 114, 128))
+        };
+
+        public SolidColorBrush StateDarkBorderBrush => State switch
+        {
+            AlertState.Unprocessed  => new SolidColorBrush(Color.FromArgb(26, 239, 68, 68)),
+            AlertState.Acknowledged => new SolidColorBrush(Color.FromArgb(26, 59, 130, 246)),
+            AlertState.InProgress   => new SolidColorBrush(Color.FromArgb(26, 245, 158, 11)),
+            AlertState.Resolved     => new SolidColorBrush(Color.FromArgb(26, 34, 197, 94)),
+            AlertState.Closed       => new SolidColorBrush(Color.FromArgb(26, 107, 114, 128)),
+            _                       => new SolidColorBrush(Color.FromArgb(26, 107, 114, 128))
+        };
+
+        public string CreatedAtFormatted => CreatedAt.ToString("dd/MM/yyyy - HH:mm");
 
         #endregion
     }
