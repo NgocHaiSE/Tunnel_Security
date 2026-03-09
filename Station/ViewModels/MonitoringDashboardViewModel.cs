@@ -1,14 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Windows.UI;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Dispatching;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
-using System.Linq;
 using Station.Models;
+using Station.Services;
 
 namespace Station.ViewModels
 {
@@ -21,28 +23,28 @@ namespace Station.ViewModels
         private string currentDate = DateTime.Now.ToString("dd/MM/yyyy");
 
         [ObservableProperty]
-        private int totalNodes = 42;
+        private int totalNodes;
 
         [ObservableProperty]
-        private int activeNodes = 38;
+        private int activeNodes;
 
         [ObservableProperty]
-        private int offlineNodes = 4;
+        private int offlineNodes;
 
         [ObservableProperty]
-        private int todayAlerts = 127;
+        private int todayAlerts;
 
         [ObservableProperty]
-        private int criticalAlerts = 8;
+        private int criticalAlerts;
 
         [ObservableProperty]
-        private int warningAlerts = 23;
+        private int warningAlerts;
 
         [ObservableProperty]
-        private double averageTemperature = 28.5;
+        private double averageTemperature;
 
         [ObservableProperty]
-        private double maxTemperature = 42.3;
+        private double maxTemperature;
 
         [ObservableProperty]
         private string systemStatus = "Hoạt động bình thường";
@@ -56,409 +58,438 @@ namespace Station.ViewModels
         [ObservableProperty]
         private double memoryUsage = 68.7;
 
-        public ISeries[] AlertDistributionSeries { get; set; }
+        public ISeries[] AlertDistributionSeries { get; set; } = Array.Empty<ISeries>();
 
         // Mini chart series for sensor data
-        public ISeries[] TemperatureSeries { get; set; }
-        public ISeries[] HumiditySeries { get; set; }
-        public ISeries[] VibrationSeries { get; set; }
-        public ISeries[] WaterLevelSeries { get; set; }
-        public ISeries[] LightSeries { get; set; }
+        public ISeries[] TemperatureSeries { get; set; } = Array.Empty<ISeries>();
+        public ISeries[] HumiditySeries { get; set; } = Array.Empty<ISeries>();
+        public ISeries[] VibrationSeries { get; set; } = Array.Empty<ISeries>();
+        public ISeries[] WaterLevelSeries { get; set; } = Array.Empty<ISeries>();
+        public ISeries[] LightSeries { get; set; } = Array.Empty<ISeries>();
 
         // Hidden axes for mini charts
         public System.Collections.Generic.IEnumerable<LiveChartsCore.Kernel.Sketches.ICartesianAxis> HiddenXAxis { get; set; }
+            = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
         public System.Collections.Generic.IEnumerable<LiveChartsCore.Kernel.Sketches.ICartesianAxis> HiddenYAxis { get; set; }
+            = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
         // Alert type counts
         [ObservableProperty]
-        private int intruAlerts = 0;
+        private int intruAlerts;
 
         [ObservableProperty]
-        private int motionAlerts = 0;
+        private int motionAlerts;
 
         [ObservableProperty]
-        private int fireAlerts = 0;
+        private int fireAlerts;
 
         [ObservableProperty]
-        private int smokeAlerts = 0;
+        private int smokeAlerts;
 
         [ObservableProperty]
-        private int waterAlerts = 0;
+        private int waterAlerts;
 
-        private readonly AlertsViewModel _alertsViewModel;
+        // Device counts
+        [ObservableProperty]
+        private int totalCameras;
+
+        [ObservableProperty]
+        private int onlineCameras;
+
+        [ObservableProperty]
+        private int totalSensors;
+
+        [ObservableProperty]
+        private int onlineSensors;
+
+        [ObservableProperty]
+        private double systemHealth;
+
+        [ObservableProperty]
+        private string systemHealthText = "0%";
+
+        [ObservableProperty]
+        private string cameraCountText = "0 / 0";
+
+        [ObservableProperty]
+        private string sensorCountText = "0 / 0";
+
+        [ObservableProperty]
+        private int anomalyCount;
+
+        [ObservableProperty]
+        private int activeAlertCount;
+
+        // Sensor category averages
+        [ObservableProperty]
+        private double averageHumidity;
+
+        [ObservableProperty]
+        private double averageVibration;
+
+        [ObservableProperty]
+        private double averageGasLevel;
+
+        [ObservableProperty]
+        private double averageWaterLevel;
+
+        [ObservableProperty]
+        private string averageHumidityText = "0%";
+
+        [ObservableProperty]
+        private string averageVibrationText = "0 mm/s";
+
+        [ObservableProperty]
+        private string averageGasLevelText = "0 ppm";
 
         public ObservableCollection<NodeStatus> Nodes { get; } = new();
         public ObservableCollection<RealtimeAlert> RealtimeAlerts { get; } = new();
         public ObservableCollection<TemperatureReading> TemperatureReadings { get; } = new();
         public ObservableCollection<CameraStatus> Cameras { get; } = new();
 
+        private readonly MockDataService _mock = MockDataService.Instance;
+        private readonly DispatcherQueue? _dispatcherQueue;
+        private readonly Random _rng = new();
+
         public MonitoringDashboardViewModel()
         {
-            _alertsViewModel = new AlertsViewModel();
-            CalculateAlertDistribution();
-            InitializeCharts();
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
             InitializeMiniCharts();
-            InitializeSampleData();
-            StartRealtimeUpdates();
+            LoadFromMockData();
+            RefreshAlertCounts();
+            InitializeCharts();
+
+            _mock.SensorTick += OnSensorTick;
+            _mock.AlertGenerated += OnAlertGenerated;
+
+            StartClockUpdates();
         }
 
-        private void CalculateAlertDistribution()
+        // ── Load initial state from MockDataService ──────────────────
+
+        private void LoadFromMockData()
         {
-            // Calculate alert distribution based on AlertsViewModel data
-            var allAlerts = _alertsViewModel.AllAlerts;
+            var sensors = _mock.Sensors;
+            var cameras = _mock.Cameras;
 
-            // Map severity levels to chart values
-            IntruAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Low);
-            MotionAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Medium);
-            FireAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.High);
-            SmokeAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Critical);
-            WaterAlerts = 0; // Not used in current dataset
+            var allNodes = _mock.Lines.SelectMany(l => l.Nodes).ToList();
+            TotalNodes   = allNodes.Count;
+            ActiveNodes  = allNodes.Count(n => sensors.Any(s => s.NodeId == n.NodeId && s.IsOnline));
+            OfflineNodes = allNodes.Count(n => sensors.All(s => s.NodeId == n.NodeId && !s.IsOnline));
 
-            // Update total alerts
-            TodayAlerts = allAlerts.Count;
-            CriticalAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.Critical);
-            WarningAlerts = allAlerts.Count(a => a.Severity == AlertSeverity.High || a.Severity == AlertSeverity.Medium);
-        }
+            TotalCameras = cameras.Count;
+            OnlineCameras = cameras.Count(c => c.IsOnline);
+            TotalSensors = sensors.Count;
+            OnlineSensors = sensors.Count(s => s.IsOnline);
+            int totalDevices = TotalCameras + TotalSensors;
+            SystemHealth = totalDevices > 0
+                ? Math.Round((OnlineCameras + OnlineSensors) * 100.0 / totalDevices, 0)
+                : 0;
+            SystemHealthText = $"{SystemHealth:F0}%";
+            CameraCountText = $"{OnlineCameras} / {TotalCameras}";
+            SensorCountText = $"{OnlineSensors} / {TotalSensors}";
+            AnomalyCount = sensors.Count(s => s.CurrentLevel >= SensorAlertLevel.Warning);
+            ActiveAlertCount = _mock.ActiveAlerts.Count;
 
-        private void InitializeCharts()
-        {
-            // Alert Distribution Pie Chart with data from AlertsViewModel
-            // Only show severity levels that have alerts
-            var seriesList = new System.Collections.Generic.List<ISeries>();
+            var tempSensors = sensors.Where(s => s.Category == AlertCategory.Temperature).ToList();
+            AverageTemperature = tempSensors.Count > 0 ? Math.Round(tempSensors.Average(s => s.CurrentValue), 1) : 0;
+            MaxTemperature = tempSensors.Count > 0 ? Math.Round(tempSensors.Max(s => s.CurrentValue), 1) : 0;
 
-            if (IntruAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Thấp",
-                    Values = new int[] { IntruAlerts },
-                    Fill = new SolidColorPaint(new SKColor(34, 197, 94)), // #22C55E - Green
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
+            var humSensors = sensors.Where(s => s.Category == AlertCategory.Humidity).ToList();
+            AverageHumidity = humSensors.Count > 0 ? Math.Round(humSensors.Average(s => s.CurrentValue), 1) : 0;
+            AverageHumidityText = $"{AverageHumidity:F0}%";
 
-            if (MotionAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Trung bình",
-                    Values = new int[] { MotionAlerts },
-                    Fill = new SolidColorPaint(new SKColor(234, 179, 8)), // #EAB308 - Yellow
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
+            var accSensors = sensors.Where(s => s.Category == AlertCategory.Accelerometer).ToList();
+            AverageVibration     = accSensors.Count > 0 ? Math.Round(accSensors.Average(s => s.CurrentValue), 2) : 0;
+            AverageVibrationText = $"{AverageVibration:F2} m/s²";
 
-            if (FireAlerts > 0)
-            {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Cao",
-                    Values = new int[] { FireAlerts },
-                    Fill = new SolidColorPaint(new SKColor(249, 115, 22)), // #F97316 - Orange
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
+            var radSensors = sensors.Where(s => s.Category == AlertCategory.Radar).ToList();
+            AverageGasLevel     = radSensors.Count > 0 ? Math.Round(radSensors.Average(s => s.CurrentValue), 1) : 0;
+            AverageGasLevelText = $"{AverageGasLevel:F0}%";
 
-            if (SmokeAlerts > 0)
+            // Nodes
+            Nodes.Clear();
+            foreach (var node in allNodes)
             {
-                seriesList.Add(new PieSeries<int>
-                {
-                    Name = "Nghiêm trọng",
-                    Values = new int[] { SmokeAlerts },
-                    Fill = new SolidColorPaint(new SKColor(239, 68, 68)), // #EF4444 - Red
-                    DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    DataLabelsSize = 16,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
-                    HoverPushout = 15,
-                    MaxRadialColumnWidth = double.MaxValue
-                });
-            }
-
-            AlertDistributionSeries = seriesList.ToArray();
-        }
-
-        private void InitializeMiniCharts()
-        {
-            var random = new Random();
-
-            // Hidden axes configuration
-            HiddenXAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
-            {
-                new Axis
-                {
-                    IsVisible = false,
-                    MinLimit = 0,
-                    MaxLimit = 24
-                }
-            };
-
-            HiddenYAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
-            {
-                new Axis
-                {
-                    IsVisible = false
-                }
-            };
-
-            // Temperature mini chart (last 24 points)
-            var tempValues = new double[24];
-            for (int i = 0; i < 24; i++)
-            {
-                tempValues[i] = 26 + random.NextDouble() * 6; // 26-32°C
-            }
-            TemperatureSeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = tempValues,
-                    Fill = new SolidColorPaint(new SKColor(239, 68, 68, 30)), // #EF4444 with transparency
-                    Stroke = new SolidColorPaint(new SKColor(239, 68, 68)) { StrokeThickness = 2 },
-                    GeometrySize = 0,
-                    LineSmoothness = 0.65
-                }
-            };
-
-            // Humidity mini chart
-            var humidityValues = new double[24];
-            for (int i = 0; i < 24; i++)
-            {
-                humidityValues[i] = 60 + random.NextDouble() * 15; // 60-75%
-            }
-            HumiditySeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = humidityValues,
-                    Fill = new SolidColorPaint(new SKColor(59, 130, 246, 30)), // #3B82F6 with transparency
-                    Stroke = new SolidColorPaint(new SKColor(59, 130, 246)) { StrokeThickness = 2 },
-                    GeometrySize = 0,
-                    LineSmoothness = 0.65
-                }
-            };
-
-            // Vibration mini chart
-            var vibrationValues = new double[24];
-            for (int i = 0; i < 24; i++)
-            {
-                vibrationValues[i] = 0.1 + random.NextDouble() * 0.5; // 0.1-0.6 m/s²
-            }
-            VibrationSeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = vibrationValues,
-                    Fill = new SolidColorPaint(new SKColor(245, 158, 11, 30)), // #F59E0B with transparency
-                    Stroke = new SolidColorPaint(new SKColor(245, 158, 11)) { StrokeThickness = 2 },
-                    GeometrySize = 0,
-                    LineSmoothness = 0.65
-                }
-            };
-
-            // Water Level mini chart
-            var waterValues = new double[24];
-            for (int i = 0; i < 24; i++)
-            {
-                waterValues[i] = 5 + random.NextDouble() * 15; // 5-20 cm
-            }
-            WaterLevelSeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = waterValues,
-                    Fill = new SolidColorPaint(new SKColor(239, 68, 68, 30)), // #EF4444 with transparency
-                    Stroke = new SolidColorPaint(new SKColor(239, 68, 68)) { StrokeThickness = 2 },
-                    GeometrySize = 0,
-                    LineSmoothness = 0.65
-                }
-            };
-
-            // Light Level mini chart
-            var lightValues = new double[24];
-            for (int i = 0; i < 24; i++)
-            {
-                lightValues[i] = 150 + random.NextDouble() * 50; // 150-200 lux
-            }
-            LightSeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Values = lightValues,
-                    Fill = new SolidColorPaint(new SKColor(139, 92, 246, 30)), // #8B5CF6 with transparency
-                    Stroke = new SolidColorPaint(new SKColor(139, 92, 246)) { StrokeThickness = 2 },
-                    GeometrySize = 0,
-                    LineSmoothness = 0.65
-                }
-            };
-        }
-
-        private void InitializeSampleData()
-        {
-            // Sample Nodes
-            var random = new Random();
-            for (int i = 1; i <= 12; i++)
-            {
+                var nodeSensors = sensors.Where(s => s.NodeId == node.NodeId).ToList();
+                var tempSensor = nodeSensors.FirstOrDefault(s => s.Category == AlertCategory.Temperature);
                 Nodes.Add(new NodeStatus
                 {
-                    NodeId = $"NODE-{i:D3}",
-                    Location = $"Khu vực {(char)('A' + (i - 1) / 4)}-{((i - 1) % 4) + 1}",
-                    IsOnline = random.Next(100) > 10,
-                    Temperature = 20 + random.Next(25),
-                    LastUpdate = DateTime.Now.AddMinutes(-random.Next(30))
+                    NodeId = node.NodeId,
+                    Location = node.NodeName,
+                    IsOnline = nodeSensors.Any(s => s.IsOnline),
+                    Temperature = tempSensor != null ? Math.Round(tempSensor.CurrentValue, 1) : 0,
+                    LastUpdate = DateTime.Now
                 });
             }
 
-            // Sample Cameras
-            for (int i = 1; i <= 8; i++)
+            // Cameras
+            Cameras.Clear();
+            foreach (var cam in cameras)
             {
                 Cameras.Add(new CameraStatus
                 {
-                    CameraId = $"CAM-{i:D2}",
-                    Location = $"Cổng {i}",
-                    IsRecording = random.Next(100) > 5,
-                    Fps = 25 + random.Next(5),
+                    CameraId = cam.CameraId,
+                    Location = cam.Location,
+                    IsRecording = cam.IsOnline,
+                    Fps = 25,
                     Resolution = "1920x1080"
                 });
             }
 
-            // Sample Temperature Readings
+            // Temperature readings (hourly baseline using nominal values)
+            TemperatureReadings.Clear();
+            double baseTemp = tempSensors.Count > 0 ? tempSensors.Average(s => s.NominalValue) : 24.0;
             for (int i = 0; i < 24; i++)
             {
                 TemperatureReadings.Add(new TemperatureReading
                 {
                     Hour = i,
-                    Temperature = 20 + random.Next(15) + random.NextDouble()
+                    Temperature = baseTemp
                 });
             }
 
-            // Sample Realtime Alerts
-            AddRealtimeAlert("NODE-005", "Phát hiện chuyển động bất thường", "high");
-            AddRealtimeAlert("CAM-03", "Mất tín hiệu camera", "critical");
-            AddRealtimeAlert("NODE-012", "Nhiệt độ vượt ngưỡng", "warning");
-            AddRealtimeAlert("NODE-008", "Cảnh báo radar", "high");
-        }
-
-        private void AddRealtimeAlert(string source, string message, string severity)
-        {
-            var alert = new RealtimeAlert
+            // Recent alerts from history
+            RealtimeAlerts.Clear();
+            foreach (var alert in _mock.AlertHistory.Take(10))
             {
-                Source = source,
-                Message = message,
-                Timestamp = DateTime.Now,
-                Severity = severity
-            };
-
-            RealtimeAlerts.Insert(0, alert);
-            if (RealtimeAlerts.Count > 10)
-            {
-                RealtimeAlerts.RemoveAt(RealtimeAlerts.Count - 1);
+                RealtimeAlerts.Add(new RealtimeAlert
+                {
+                    Source = alert.NodeId,
+                    Message = alert.Title,
+                    Timestamp = alert.CreatedAt.DateTime,
+                    Severity = SeverityToString(alert.Severity)
+                });
             }
         }
 
-        private async void StartRealtimeUpdates()
+        private void RefreshAlertCounts()
         {
-            var random = new Random();
-            
+            var history = _mock.AlertHistory;
+            TodayAlerts = history.Count;
+            CriticalAlerts = history.Count(a => a.Severity == AlertSeverity.Critical);
+            WarningAlerts = history.Count(a => a.Severity == AlertSeverity.High || a.Severity == AlertSeverity.Medium);
+
+            IntruAlerts = history.Count(a => a.Severity == AlertSeverity.Low);
+            MotionAlerts = history.Count(a => a.Severity == AlertSeverity.Medium);
+            FireAlerts = history.Count(a => a.Severity == AlertSeverity.High);
+            SmokeAlerts = history.Count(a => a.Severity == AlertSeverity.Critical);
+            WaterAlerts = 0;
+        }
+
+        // ── Live event handlers ───────────────────────────────────────
+
+        private void OnSensorTick(object? sender, SensorTickEventArgs e)
+        {
+            _dispatcherQueue?.TryEnqueue(() =>
+            {
+                switch (e.Sensor.Category)
+                {
+                    case AlertCategory.Temperature:
+                        UpdateMiniChart(TemperatureSeries, e.NewValue);
+                        var tempSensors = _mock.Sensors.Where(s => s.Category == AlertCategory.Temperature).ToList();
+                        if (tempSensors.Count > 0)
+                        {
+                            AverageTemperature = Math.Round(tempSensors.Average(s => s.CurrentValue), 1);
+                            MaxTemperature = Math.Round(tempSensors.Max(s => s.CurrentValue), 1);
+                        }
+                        var node = Nodes.FirstOrDefault(n => n.NodeId == e.Sensor.NodeId);
+                        if (node != null)
+                        {
+                            node.Temperature = Math.Round(e.NewValue, 1);
+                            node.LastUpdate = DateTime.Now;
+                        }
+                        // Update hourly temperature reading for current hour
+                        int hour = DateTime.Now.Hour;
+                        if (hour < TemperatureReadings.Count)
+                            TemperatureReadings[hour].Temperature = Math.Round(e.NewValue, 1);
+                        break;
+
+                    case AlertCategory.Humidity:
+                        UpdateMiniChart(HumiditySeries, e.NewValue);
+                        var humSensors = _mock.Sensors.Where(s => s.Category == AlertCategory.Humidity).ToList();
+                        if (humSensors.Count > 0)
+                        {
+                            AverageHumidity = Math.Round(humSensors.Average(s => s.CurrentValue), 1);
+                            AverageHumidityText = $"{AverageHumidity:F0}%";
+                        }
+                        break;
+
+                    case AlertCategory.Accelerometer:
+                        UpdateMiniChart(VibrationSeries, e.NewValue);
+                        var accSensors2 = _mock.Sensors.Where(s => s.Category == AlertCategory.Accelerometer).ToList();
+                        if (accSensors2.Count > 0)
+                        {
+                            AverageVibration     = Math.Round(accSensors2.Average(s => s.CurrentValue), 2);
+                            AverageVibrationText = $"{AverageVibration:F2} m/s²";
+                        }
+                        break;
+
+                    case AlertCategory.Light:
+                        UpdateMiniChart(LightSeries, e.NewValue);
+                        break;
+
+                    case AlertCategory.Radar:
+                    case AlertCategory.Infrared:
+                        UpdateMiniChart(WaterLevelSeries, e.NewValue);
+                        var radSensors2 = _mock.Sensors.Where(s => s.Category == AlertCategory.Radar).ToList();
+                        if (radSensors2.Count > 0)
+                        {
+                            AverageGasLevel     = Math.Round(radSensors2.Average(s => s.CurrentValue), 1);
+                            AverageGasLevelText = $"{AverageGasLevel:F0}%";
+                        }
+                        break;
+
+                    default:
+                        UpdateMiniChart(LightSeries, e.NewValue);
+                        break;
+                }
+            });
+        }
+
+        private void OnAlertGenerated(object? sender, AlertGeneratedEventArgs e)
+        {
+            _dispatcherQueue?.TryEnqueue(() =>
+            {
+                RefreshAlertCounts();
+                AnomalyCount = _mock.Sensors.Count(s => s.CurrentLevel >= SensorAlertLevel.Warning);
+                ActiveAlertCount = _mock.ActiveAlerts.Count;
+                InitializeCharts();
+                OnPropertyChanged(nameof(AlertDistributionSeries));
+
+                RealtimeAlerts.Insert(0, new RealtimeAlert
+                {
+                    Source = e.Alert.NodeId,
+                    Message = e.Alert.Title,
+                    Timestamp = e.Alert.CreatedAt.DateTime,
+                    Severity = SeverityToString(e.Alert.Severity)
+                });
+                if (RealtimeAlerts.Count > 10)
+                    RealtimeAlerts.RemoveAt(RealtimeAlerts.Count - 1);
+
+                SystemStatus = CriticalAlerts > 0 ? "Có cảnh báo khẩn cấp" : "Hoạt động bình thường";
+            });
+        }
+
+        // ── Clock + system metrics (still simulated) ─────────────────
+
+        private async void StartClockUpdates()
+        {
             while (true)
             {
-                await System.Threading.Tasks.Task.Delay(2000); // Update every 2 seconds
-
-                CurrentTime = DateTime.Now.ToString("HH:mm:ss");
-                CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
-
-                // Update metrics
-                CpuUsage = 40 + random.Next(20) + random.NextDouble();
-                MemoryUsage = 65 + random.Next(10) + random.NextDouble();
-                AverageTemperature = 26 + random.Next(6) + random.NextDouble();
-                MaxTemperature = 38 + random.Next(8) + random.NextDouble();
-
-                // Update alert counts with random variations
-                if (random.Next(100) < 20) // 20% chance
+                await System.Threading.Tasks.Task.Delay(2000);
+                _dispatcherQueue?.TryEnqueue(() =>
                 {
-                    IntruAlerts = Math.Max(1, IntruAlerts + random.Next(-1, 2));
-                    MotionAlerts = Math.Max(1, MotionAlerts + random.Next(-1, 2));
-                    FireAlerts = Math.Max(1, FireAlerts + random.Next(-1, 2));
-                    SmokeAlerts = Math.Max(1, SmokeAlerts + random.Next(-1, 2));
-                    
-                    // Refresh pie chart
-                    InitializeCharts();
-                    OnPropertyChanged(nameof(AlertDistributionSeries));
-                }
+                    CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+                    CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
 
-                // Update mini charts - shift data and add new point
-                UpdateMiniChart(TemperatureSeries, 26 + random.NextDouble() * 6);
-                UpdateMiniChart(HumiditySeries, 60 + random.NextDouble() * 15);
-                UpdateMiniChart(VibrationSeries, 0.1 + random.NextDouble() * 0.5);
-                UpdateMiniChart(WaterLevelSeries, 5 + random.NextDouble() * 15);
-                UpdateMiniChart(LightSeries, 150 + random.NextDouble() * 50);
-
-                // Update node statuses
-                foreach (var node in Nodes)
-                {
-                    if (random.Next(100) < 10) // 10% chance to update
-                    {
-                        node.Temperature = 20 + random.Next(25) + random.NextDouble();
-                        node.LastUpdate = DateTime.Now;
-                    }
-                }
-
-                // Random alerts
-                if (random.Next(100) < 8) // 8% chance per update
-                {
-                    var messages = new[]
-                    {
-                        "Phát hiện chuyển động",
-                        "Cảnh báo nhiệt độ",
-                        "Tín hiệu yếu",
-                        "Kết nối không ổn định",
-                        "Độ ẩm cao bất thường",
-                        "Rung động vượt ngưỡng",
-                        "Mất kết nối cảm biến",
-                        "Camera mờ hình"
-                    };
-                    var severities = new[] { "warning", "high", "critical", "low" };
-
-                    AddRealtimeAlert(
-                        $"NODE-{random.Next(1, 13):D3}",
-                        messages[random.Next(messages.Length)],
-                        severities[random.Next(severities.Length)]
-                    );
-
-                    TodayAlerts++;
-                }
+                    // CPU/RAM are OS-level — keep as simulated approximation
+                    CpuUsage = Math.Round(40 + _rng.NextDouble() * 20, 1);
+                    MemoryUsage = Math.Round(65 + _rng.NextDouble() * 10, 1);
+                    NetworkLatency = $"{10 + _rng.Next(10)}ms";
+                });
             }
+        }
+
+        // ── Chart builders ────────────────────────────────────────────
+
+        private void InitializeCharts()
+        {
+            var seriesList = new System.Collections.Generic.List<ISeries>();
+
+            if (IntruAlerts > 0)
+                seriesList.Add(MakePieSeries("Thấp", IntruAlerts, new SKColor(34, 197, 94)));
+
+            if (MotionAlerts > 0)
+                seriesList.Add(MakePieSeries("Trung bình", MotionAlerts, new SKColor(234, 179, 8)));
+
+            if (FireAlerts > 0)
+                seriesList.Add(MakePieSeries("Cao", FireAlerts, new SKColor(249, 115, 22)));
+
+            if (SmokeAlerts > 0)
+                seriesList.Add(MakePieSeries("Nghiêm trọng", SmokeAlerts, new SKColor(239, 68, 68)));
+
+            // Show a placeholder if there are no alerts yet
+            if (seriesList.Count == 0)
+                seriesList.Add(MakePieSeries("Không có cảnh báo", 1, new SKColor(75, 85, 99)));
+
+            AlertDistributionSeries = seriesList.ToArray();
+        }
+
+        private static PieSeries<int> MakePieSeries(string name, int value, SKColor color) =>
+            new()
+            {
+                Name = name,
+                Values = new int[] { value },
+                Fill = new SolidColorPaint(color),
+                DataLabelsPaint = new SolidColorPaint(new SKColor(255, 255, 255)),
+                DataLabelsSize = 16,
+                DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                DataLabelsFormatter = point => $"{point.Coordinate.PrimaryValue}",
+                HoverPushout = 15,
+                MaxRadialColumnWidth = double.MaxValue
+            };
+
+        private void InitializeMiniCharts()
+        {
+            HiddenXAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            {
+                new Axis { IsVisible = false, MinLimit = 0, MaxLimit = 24 }
+            };
+            HiddenYAxis = new LiveChartsCore.Kernel.Sketches.ICartesianAxis[]
+            {
+                new Axis { IsVisible = false }
+            };
+
+            TemperatureSeries = MakeMiniChart(FillArray(24, 24.0), new SKColor(239, 68, 68));
+            HumiditySeries    = MakeMiniChart(FillArray(24, 55.0), new SKColor(59, 130, 246));
+            VibrationSeries   = MakeMiniChart(FillArray(24, 5.0),  new SKColor(245, 158, 11));
+            WaterLevelSeries  = MakeMiniChart(FillArray(24, 8.0),  new SKColor(239, 68, 68));
+            LightSeries       = MakeMiniChart(FillArray(24, 150.0),new SKColor(139, 92, 246));
+        }
+
+        private static ISeries[] MakeMiniChart(double[] values, SKColor color) =>
+            new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Values = values,
+                    Fill = new SolidColorPaint(new SKColor(color.Red, color.Green, color.Blue, 30)),
+                    Stroke = new SolidColorPaint(color) { StrokeThickness = 2 },
+                    GeometrySize = 0,
+                    LineSmoothness = 0.65
+                }
+            };
+
+        private static double[] FillArray(int length, double value)
+        {
+            var arr = new double[length];
+            Array.Fill(arr, value);
+            return arr;
         }
 
         private void UpdateMiniChart(ISeries[] series, double newValue)
         {
             if (series == null || series.Length == 0) return;
-
-            var lineSeries = series[0] as LineSeries<double>;
-            if (lineSeries?.Values is double[] values)
+            if (series[0] is LineSeries<double> line && line.Values is double[] values)
             {
-                // Shift all values left and add new value at the end
                 var newValues = new double[values.Length];
                 Array.Copy(values, 1, newValues, 0, values.Length - 1);
                 newValues[values.Length - 1] = newValue;
-                
-                lineSeries.Values = newValues;
+                line.Values = newValues;
             }
         }
+
+        // ── Helpers ───────────────────────────────────────────────────
+
+        private static string SeverityToString(AlertSeverity severity) => severity switch
+        {
+            AlertSeverity.Critical => "critical",
+            AlertSeverity.High     => "high",
+            AlertSeverity.Medium   => "warning",
+            _                      => "low"
+        };
     }
 
     public class NodeStatus
@@ -470,12 +501,12 @@ namespace Station.ViewModels
         public DateTime LastUpdate { get; set; }
 
         public SolidColorBrush StatusBrush => IsOnline
-       ? new SolidColorBrush(Color.FromArgb(255, 63, 207, 142)) // #3FCF8E
-          : new SolidColorBrush(Color.FromArgb(255, 123, 126, 133)); // #7B7E85
+            ? new SolidColorBrush(Color.FromArgb(255, 63, 207, 142))
+            : new SolidColorBrush(Color.FromArgb(255, 123, 126, 133));
 
         public SolidColorBrush TemperatureBrush => Temperature > 35
-               ? new SolidColorBrush(Color.FromArgb(255, 240, 98, 93)) // #F0625D
-               : new SolidColorBrush(Color.FromArgb(255, 154, 166, 178)); // #9AA6B2
+            ? new SolidColorBrush(Color.FromArgb(255, 240, 98, 93))
+            : new SolidColorBrush(Color.FromArgb(255, 154, 166, 178));
 
         public string StatusText => IsOnline ? "Online" : "Offline";
         public string TemperatureText => $"{Temperature:F1}°C";
@@ -493,18 +524,18 @@ namespace Station.ViewModels
 
         public SolidColorBrush SeverityBrush => Severity switch
         {
-            "critical" => new SolidColorBrush(Color.FromArgb(255, 240, 98, 93)), // #F0625D
-            "high" => new SolidColorBrush(Color.FromArgb(255, 255, 209, 102)), // #FFD166
-            "warning" => new SolidColorBrush(Color.FromArgb(255, 255, 209, 102)), // #FFD166
-            _ => new SolidColorBrush(Color.FromArgb(255, 154, 166, 178)) // #9AA6B2
+            "critical" => new SolidColorBrush(Color.FromArgb(255, 240, 98, 93)),
+            "high"     => new SolidColorBrush(Color.FromArgb(255, 255, 209, 102)),
+            "warning"  => new SolidColorBrush(Color.FromArgb(255, 255, 209, 102)),
+            _          => new SolidColorBrush(Color.FromArgb(255, 154, 166, 178))
         };
 
         public string SeverityIcon => Severity switch
         {
             "critical" => "🔴",
-            "high" => "⚠️",
-            "warning" => "⚡",
-            _ => "ℹ️"
+            "high"     => "⚠️",
+            "warning"  => "⚡",
+            _          => "ℹ️"
         };
     }
 
@@ -524,8 +555,8 @@ namespace Station.ViewModels
         public string Resolution { get; set; } = string.Empty;
 
         public SolidColorBrush StatusBrush => IsRecording
-     ? new SolidColorBrush(Color.FromArgb(255, 63, 207, 142)) // #3FCF8E
-    : new SolidColorBrush(Color.FromArgb(255, 123, 126, 133)); // #7B7E85
+            ? new SolidColorBrush(Color.FromArgb(255, 63, 207, 142))
+            : new SolidColorBrush(Color.FromArgb(255, 123, 126, 133));
 
         public string StatusText => IsRecording ? $"Recording • {Fps} FPS" : "Offline";
     }
