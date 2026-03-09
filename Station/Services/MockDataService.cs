@@ -37,6 +37,8 @@ namespace Station.Services
         public string Location { get; set; } = string.Empty;       // e.g. "Hầm A1 - Cửa van số 3"
         public string NodeId { get; set; } = string.Empty;
         public string NodeName { get; set; } = string.Empty;
+        public string LineId { get; set; } = string.Empty;
+        public string LineName { get; set; } = string.Empty;
         public string Unit { get; set; } = string.Empty;
 
         // Simulation parameters
@@ -88,6 +90,8 @@ namespace Station.Services
         public string Location { get; set; } = string.Empty;
         public string NodeId { get; set; } = string.Empty;
         public string NodeName { get; set; } = string.Empty;
+        public string LineId { get; set; } = string.Empty;
+        public string LineName { get; set; } = string.Empty;
         public bool IsOnline { get; set; } = true;
     }
 
@@ -111,6 +115,7 @@ namespace Station.Services
         // ── Public state ───────────────────────────────────────────────
         public IReadOnlyList<SimulatedSensor> Sensors { get; }
         public IReadOnlyList<SimulatedCamera> Cameras { get; }
+        public IReadOnlyList<TunnelLine> Lines { get; }
         public ObservableCollection<Alert> ActiveAlerts { get; } = new();
         public ObservableCollection<Alert> AlertHistory { get; } = new();
 
@@ -132,6 +137,7 @@ namespace Station.Services
         {
             Sensors = BuildSensors();
             Cameras = BuildCameras();
+            Lines = BuildLines();
 
             // Sensor tick: every 1.5s — updates readings & fires SensorTick
             _sensorTimer = new Timer(1500);
@@ -294,8 +300,8 @@ namespace Station.Services
                 Category = sensor.Category,
                 Severity = sensor.CurrentAlertSeverity,
                 State = AlertState.Unprocessed,
-                LineId = "LINE-01",
-                LineName = "Tuyến hầm chính",
+                LineId   = sensor.LineId,
+                LineName = sensor.LineName,
                 NodeId = sensor.NodeId,
                 NodeName = sensor.NodeName,
                 SensorId = sensor.SensorId,
@@ -320,8 +326,8 @@ namespace Station.Services
                 Category = AlertCategory.Intrusion,
                 Severity = scenario.Severity,
                 State = AlertState.Unprocessed,
-                LineId = "LINE-01",
-                LineName = "Tuyến hầm chính",
+                LineId   = cam.LineId,
+                LineName = cam.LineName,
                 NodeId = cam.NodeId,
                 NodeName = cam.NodeName,
                 CameraId = cam.CameraId,
@@ -411,235 +417,167 @@ namespace Station.Services
         }
 
         // ══════════════════════════════════════════════════════════════
-        //  Sensor definitions (16 sensors across 4 tunnel segments)
+        //  Line / Node hierarchy (derived from sensor data)
         // ══════════════════════════════════════════════════════════════
 
-        private List<SimulatedSensor> BuildSensors() => new()
+        private IReadOnlyList<TunnelLine> BuildLines()
         {
-            // ─── Segment A1: Cửa vào hầm ─────────────────────────────
-            new SimulatedSensor
+            var lineIds = Sensors.Select(s => s.LineId).Distinct().ToList();
+            return lineIds.Select(lid =>
             {
-                SensorId = "SNS-A1-T01", SensorName = "Cảm biến nhiệt độ A1",
-                Category = AlertCategory.Temperature,
-                Location = "Hầm A1 - Cửa vào", NodeId = "NODE-A1", NodeName = "Nút A1",
-                Unit = "°C",
-                NominalValue = 24, CurrentValue = 24,
-                MinNormal = 18, MaxNormal = 30,
-                WarnThreshold = 38, CriticalThreshold = 50,
-                AbsoluteMin = -5, AbsoluteMax = 80,
-                DriftSpeed = 0.4
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-A1-H01", SensorName = "Cảm biến độ ẩm A1",
-                Category = AlertCategory.Humidity,
-                Location = "Hầm A1 - Cửa vào", NodeId = "NODE-A1", NodeName = "Nút A1",
-                Unit = "%RH",
-                NominalValue = 55, CurrentValue = 55,
-                MinNormal = 40, MaxNormal = 70,
-                WarnThreshold = 80, CriticalThreshold = 90,
-                AbsoluteMin = 10, AbsoluteMax = 99,
-                DriftSpeed = 0.8
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-A1-G01", SensorName = "Cảm biến CO A1",
-                Category = AlertCategory.Gas,
-                Location = "Hầm A1 - Cửa vào", NodeId = "NODE-A1", NodeName = "Nút A1",
-                Unit = "ppm",
-                NominalValue = 15, CurrentValue = 15,
-                MinNormal = 0, MaxNormal = 50,
-                WarnThreshold = 80, CriticalThreshold = 150,
-                AbsoluteMin = 0, AbsoluteMax = 500,
-                DriftSpeed = 1.5
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-A1-W01", SensorName = "Cảm biến mực nước A1",
-                Category = AlertCategory.WaterLevel,
-                Location = "Hầm A1 - Rãnh thoát nước", NodeId = "NODE-A1", NodeName = "Nút A1",
-                Unit = "cm",
-                NominalValue = 8, CurrentValue = 8,
-                MinNormal = 0, MaxNormal = 25,
-                WarnThreshold = 40, CriticalThreshold = 60,
-                AbsoluteMin = 0, AbsoluteMax = 120,
-                DriftSpeed = 0.6
-            },
+                var firstSensor = Sensors.First(s => s.LineId == lid);
+                var nodeIds = Sensors
+                    .Where(s => s.LineId == lid)
+                    .Select(s => s.NodeId)
+                    .Distinct()
+                    .ToList();
+                return new TunnelLine
+                {
+                    LineId = lid,
+                    LineName = firstSensor.LineName,
+                    Nodes = nodeIds.Select(nid =>
+                    {
+                        var ns = Sensors.First(s => s.NodeId == nid);
+                        return new TunnelNode
+                        {
+                            NodeId = nid,
+                            NodeName = ns.NodeName,
+                            LineId = lid,
+                            LineName = firstSensor.LineName
+                        };
+                    }).ToList()
+                };
+            }).ToList();
+        }
 
-            // ─── Segment B2: Giữa hầm ─────────────────────────────────
-            new SimulatedSensor
-            {
-                SensorId = "SNS-B2-T01", SensorName = "Cảm biến nhiệt độ B2",
-                Category = AlertCategory.Temperature,
-                Location = "Hầm B2 - Đường ống chính", NodeId = "NODE-B2", NodeName = "Nút B2",
-                Unit = "°C",
-                NominalValue = 26, CurrentValue = 26,
-                MinNormal = 18, MaxNormal = 32,
-                WarnThreshold = 38, CriticalThreshold = 52,
-                AbsoluteMin = -5, AbsoluteMax = 80,
-                DriftSpeed = 0.5
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-B2-G01", SensorName = "Cảm biến CO₂ B2",
-                Category = AlertCategory.Gas,
-                Location = "Hầm B2 - Khu vực trung tâm", NodeId = "NODE-B2", NodeName = "Nút B2",
-                Unit = "ppm",
-                NominalValue = 600, CurrentValue = 600,
-                MinNormal = 400, MaxNormal = 800,
-                WarnThreshold = 1200, CriticalThreshold = 2000,
-                AbsoluteMin = 300, AbsoluteMax = 5000,
-                DriftSpeed = 20
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-B2-M01", SensorName = "Cảm biến rung B2",
-                Category = AlertCategory.Motion,
-                Location = "Hầm B2 - Kết cấu hầm", NodeId = "NODE-B2", NodeName = "Nút B2",
-                Unit = "mm/s",
-                NominalValue = 5, CurrentValue = 5,
-                MinNormal = 0, MaxNormal = 15,
-                WarnThreshold = 25, CriticalThreshold = 40,
-                AbsoluteMin = 0, AbsoluteMax = 100,
-                DriftSpeed = 0.8
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-B2-H01", SensorName = "Cảm biến độ ẩm B2",
-                Category = AlertCategory.Humidity,
-                Location = "Hầm B2 - Đường ống chính", NodeId = "NODE-B2", NodeName = "Nút B2",
-                Unit = "%RH",
-                NominalValue = 60, CurrentValue = 60,
-                MinNormal = 45, MaxNormal = 72,
-                WarnThreshold = 82, CriticalThreshold = 92,
-                AbsoluteMin = 10, AbsoluteMax = 99,
-                DriftSpeed = 1.0
-            },
+        // ══════════════════════════════════════════════════════════════
+        //  Sensor definitions (3 lines x 4 nodes x 6 sensors)
+        // ══════════════════════════════════════════════════════════════
 
-            // ─── Segment C3: Phòng điều khiển ────────────────────────
-            new SimulatedSensor
+        private List<SimulatedSensor> BuildSensors()
+        {
+            var sensors = new List<SimulatedSensor>();
+            var lines = new[]
             {
-                SensorId = "SNS-C3-T01", SensorName = "Cảm biến nhiệt độ tủ điện C3",
-                Category = AlertCategory.Temperature,
-                Location = "Phòng điều khiển C3 - Tủ điện", NodeId = "NODE-C3", NodeName = "Nút C3",
-                Unit = "°C",
-                NominalValue = 22, CurrentValue = 22,
-                MinNormal = 16, MaxNormal = 28,
-                WarnThreshold = 35, CriticalThreshold = 45,
-                AbsoluteMin = 5, AbsoluteMax = 80,
-                DriftSpeed = 0.3
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-C3-A01", SensorName = "Cảm biến âm thanh C3",
-                Category = AlertCategory.Other,
-                Location = "Phòng điều khiển C3", NodeId = "NODE-C3", NodeName = "Nút C3",
-                Unit = "dB",
-                NominalValue = 45, CurrentValue = 45,
-                MinNormal = 30, MaxNormal = 65,
-                WarnThreshold = 85, CriticalThreshold = 95,
-                AbsoluteMin = 20, AbsoluteMax = 120,
-                DriftSpeed = 2.0
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-C3-W01", SensorName = "Cảm biến mực nước C3",
-                Category = AlertCategory.WaterLevel,
-                Location = "Phòng điều khiển C3 - Hố thu nước", NodeId = "NODE-C3", NodeName = "Nút C3",
-                Unit = "cm",
-                NominalValue = 5, CurrentValue = 5,
-                MinNormal = 0, MaxNormal = 20,
-                WarnThreshold = 35, CriticalThreshold = 55,
-                AbsoluteMin = 0, AbsoluteMax = 100,
-                DriftSpeed = 0.4
-            },
+                ("LINE-01", "Tuyến Bắc"),
+                ("LINE-02", "Tuyến Trung"),
+                ("LINE-03", "Tuyến Nam"),
+            };
 
-            // ─── Segment D4: Cửa ra hầm ──────────────────────────────
-            new SimulatedSensor
+            for (int li = 0; li < lines.Length; li++)
             {
-                SensorId = "SNS-D4-T01", SensorName = "Cảm biến nhiệt độ D4",
-                Category = AlertCategory.Temperature,
-                Location = "Hầm D4 - Cửa ra", NodeId = "NODE-D4", NodeName = "Nút D4",
-                Unit = "°C",
-                NominalValue = 23, CurrentValue = 23,
-                MinNormal = 17, MaxNormal = 31,
-                WarnThreshold = 37, CriticalThreshold = 50,
-                AbsoluteMin = -5, AbsoluteMax = 80,
-                DriftSpeed = 0.4
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-D4-G01", SensorName = "Cảm biến CO D4",
-                Category = AlertCategory.Gas,
-                Location = "Hầm D4 - Cửa ra", NodeId = "NODE-D4", NodeName = "Nút D4",
-                Unit = "ppm",
-                NominalValue = 12, CurrentValue = 12,
-                MinNormal = 0, MaxNormal = 50,
-                WarnThreshold = 80, CriticalThreshold = 150,
-                AbsoluteMin = 0, AbsoluteMax = 500,
-                DriftSpeed = 1.2
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-D4-M01", SensorName = "Cảm biến chuyển động D4",
-                Category = AlertCategory.Motion,
-                Location = "Hầm D4 - Khu vực cấm", NodeId = "NODE-D4", NodeName = "Nút D4",
-                Unit = "%",
-                NominalValue = 5, CurrentValue = 5,
-                MinNormal = 0, MaxNormal = 30,
-                WarnThreshold = 60, CriticalThreshold = 85,
-                AbsoluteMin = 0, AbsoluteMax = 100,
-                DriftSpeed = 2.5
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-D4-H01", SensorName = "Cảm biến độ ẩm D4",
-                Category = AlertCategory.Humidity,
-                Location = "Hầm D4 - Cửa ra", NodeId = "NODE-D4", NodeName = "Nút D4",
-                Unit = "%RH",
-                NominalValue = 58, CurrentValue = 58,
-                MinNormal = 42, MaxNormal = 72,
-                WarnThreshold = 82, CriticalThreshold = 92,
-                AbsoluteMin = 10, AbsoluteMax = 99,
-                DriftSpeed = 0.9
-            },
-            new SimulatedSensor
-            {
-                SensorId = "SNS-D4-W01", SensorName = "Cảm biến mực nước D4",
-                Category = AlertCategory.WaterLevel,
-                Location = "Hầm D4 - Rãnh thoát nước", NodeId = "NODE-D4", NodeName = "Nút D4",
-                Unit = "cm",
-                NominalValue = 10, CurrentValue = 10,
-                MinNormal = 0, MaxNormal = 25,
-                WarnThreshold = 42, CriticalThreshold = 62,
-                AbsoluteMin = 0, AbsoluteMax = 120,
-                DriftSpeed = 0.7
+                var (lineId, lineName) = lines[li];
+                for (int ni = 1; ni <= 4; ni++)
+                {
+                    string nodeId   = $"NODE-L{li + 1}-{ni:D2}";
+                    string nodeName = $"Nút {li + 1}-{ni:D2}";
+                    string loc      = $"{lineName} - Nút {ni:D2}";
+
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"RAD-L{li+1}-N{ni:D2}", SensorName = $"Radar phát hiện người {nodeName}",
+                        Category = AlertCategory.Radar,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "%",
+                        NominalValue = 5, CurrentValue = 5,
+                        MinNormal = 0, MaxNormal = 50,
+                        WarnThreshold = 60, CriticalThreshold = 85,
+                        AbsoluteMin = 0, AbsoluteMax = 100, DriftSpeed = 2.0
+                    });
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"PIR-L{li+1}-N{ni:D2}", SensorName = $"Cảm biến hồng ngoại {nodeName}",
+                        Category = AlertCategory.Infrared,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "%",
+                        NominalValue = 5, CurrentValue = 5,
+                        MinNormal = 0, MaxNormal = 50,
+                        WarnThreshold = 60, CriticalThreshold = 85,
+                        AbsoluteMin = 0, AbsoluteMax = 100, DriftSpeed = 3.0
+                    });
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"TMP-L{li+1}-N{ni:D2}", SensorName = $"Cảm biến nhiệt độ {nodeName}",
+                        Category = AlertCategory.Temperature,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "°C",
+                        NominalValue = 24 + li, CurrentValue = 24 + li,
+                        MinNormal = 18, MaxNormal = 32,
+                        WarnThreshold = 38, CriticalThreshold = 50,
+                        AbsoluteMin = -5, AbsoluteMax = 80, DriftSpeed = 0.4
+                    });
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"HUM-L{li+1}-N{ni:D2}", SensorName = $"Cảm biến độ ẩm {nodeName}",
+                        Category = AlertCategory.Humidity,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "%RH",
+                        NominalValue = 55, CurrentValue = 55,
+                        MinNormal = 40, MaxNormal = 70,
+                        WarnThreshold = 80, CriticalThreshold = 90,
+                        AbsoluteMin = 10, AbsoluteMax = 99, DriftSpeed = 0.8
+                    });
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"LUX-L{li+1}-N{ni:D2}", SensorName = $"Cảm biến ánh sáng {nodeName}",
+                        Category = AlertCategory.Light,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "lux",
+                        NominalValue = 150, CurrentValue = 150,
+                        MinNormal = 50, MaxNormal = 500,
+                        WarnThreshold = 600, CriticalThreshold = 900,
+                        AbsoluteMin = 0, AbsoluteMax = 1200, DriftSpeed = 10.0
+                    });
+                    sensors.Add(new SimulatedSensor
+                    {
+                        SensorId = $"ACC-L{li+1}-N{ni:D2}", SensorName = $"Cảm biến gia tốc {nodeName}",
+                        Category = AlertCategory.Accelerometer,
+                        LineId = lineId, LineName = lineName, NodeId = nodeId, NodeName = nodeName,
+                        Location = loc, Unit = "m/s²",
+                        NominalValue = 0.5, CurrentValue = 0.5,
+                        MinNormal = 0, MaxNormal = 2.0,
+                        WarnThreshold = 3.0, CriticalThreshold = 5.0,
+                        AbsoluteMin = 0, AbsoluteMax = 20, DriftSpeed = 0.1
+                    });
+                }
             }
-        };
+            return sensors;
+        }
 
         // ══════════════════════════════════════════════════════════════
         //  Camera definitions (16 cameras matching LiveVideoViewModel)
         // ══════════════════════════════════════════════════════════════
 
-        private List<SimulatedCamera> BuildCameras() => new()
+        private List<SimulatedCamera> BuildCameras()
         {
-            new SimulatedCamera { CameraId = "CAM-01", CameraName = "Camera #1", Location = "Hầm A1 - Cửa vào",     NodeId = "NODE-A1", NodeName = "Nút A1" },
-            new SimulatedCamera { CameraId = "CAM-02", CameraName = "Camera #2", Location = "Hầm A1 - Hành lang",   NodeId = "NODE-A1", NodeName = "Nút A1" },
-            new SimulatedCamera { CameraId = "CAM-03", CameraName = "Camera #3", Location = "Hầm A1 - Cửa van số 3",NodeId = "NODE-A1", NodeName = "Nút A1" },
-            new SimulatedCamera { CameraId = "CAM-04", CameraName = "Camera #4", Location = "Hầm A2 - Kho thiết bị",NodeId = "NODE-A1", NodeName = "Nút A1" },
-            new SimulatedCamera { CameraId = "CAM-05", CameraName = "Camera #5", Location = "Hầm B1 - Đường ống",   NodeId = "NODE-B2", NodeName = "Nút B2" },
-            new SimulatedCamera { CameraId = "CAM-06", CameraName = "Camera #6", Location = "Hầm B1 - Trung tâm",   NodeId = "NODE-B2", NodeName = "Nút B2" },
-            new SimulatedCamera { CameraId = "CAM-07", CameraName = "Camera #7", Location = "Hầm B2 - Đường ống chính", NodeId = "NODE-B2", NodeName = "Nút B2" },
-            new SimulatedCamera { CameraId = "CAM-08", CameraName = "Camera #8", Location = "Hầm B2 - Cửa phụ",     NodeId = "NODE-B2", NodeName = "Nút B2" },
-            new SimulatedCamera { CameraId = "CAM-09", CameraName = "Camera #9", Location = "Phòng điều khiển C3",  NodeId = "NODE-C3", NodeName = "Nút C3" },
-            new SimulatedCamera { CameraId = "CAM-10", CameraName = "Camera #10",Location = "Phòng điều khiển C3 - Tủ điện", NodeId = "NODE-C3", NodeName = "Nút C3" },
-            new SimulatedCamera { CameraId = "CAM-11", CameraName = "Camera #11",Location = "Hầm C3 - Lối thoát hiểm",NodeId = "NODE-C3", NodeName = "Nút C3" },
-            new SimulatedCamera { CameraId = "CAM-12", CameraName = "Camera #12",Location = "Hầm C3 - Cửa phụ",    NodeId = "NODE-C3", NodeName = "Nút C3" },
-            new SimulatedCamera { CameraId = "CAM-13", CameraName = "Camera #13",Location = "Hầm D4 - Cửa ra",     NodeId = "NODE-D4", NodeName = "Nút D4", IsOnline = false },
-            new SimulatedCamera { CameraId = "CAM-14", CameraName = "Camera #14",Location = "Hầm D4 - Khu vực cấm",NodeId = "NODE-D4", NodeName = "Nút D4", IsOnline = false },
-            new SimulatedCamera { CameraId = "CAM-15", CameraName = "Camera #15",Location = "Hầm D4 - Hành lang",  NodeId = "NODE-D4", NodeName = "Nút D4", IsOnline = false },
-            new SimulatedCamera { CameraId = "CAM-16", CameraName = "Camera #16",Location = "Hầm D4 - Đầu hầm",    NodeId = "NODE-D4", NodeName = "Nút D4", IsOnline = false },
-        };
+            var cams = new List<SimulatedCamera>();
+            var lines = new[]
+            {
+                ("LINE-01", "Tuyến Bắc"),
+                ("LINE-02", "Tuyến Trung"),
+                ("LINE-03", "Tuyến Nam"),
+            };
+
+            for (int li = 0; li < lines.Length; li++)
+            {
+                var (lineId, lineName) = lines[li];
+                for (int ni = 1; ni <= 4; ni++)
+                {
+                    cams.Add(new SimulatedCamera
+                    {
+                        CameraId   = $"CAM-L{li+1}-N{ni:D2}",
+                        CameraName = $"Camera Nút {li+1}-{ni:D2}",
+                        Location   = $"{lineName} - Nút {ni:D2}",
+                        LineId     = lineId,
+                        LineName   = lineName,
+                        NodeId     = $"NODE-L{li + 1}-{ni:D2}",
+                        NodeName   = $"Nút {li + 1}-{ni:D2}",
+                        IsOnline   = true
+                    });
+                }
+            }
+            return cams;
+        }
 
         // ══════════════════════════════════════════════════════════════
         //  Alert text templates
@@ -652,22 +590,25 @@ namespace Station.Services
             {
                 AlertCategory.Temperature => (
                     $"Nhiệt độ {level} tại {s.NodeName}",
-                    $"Cảm biến {s.SensorName} ghi nhận nhiệt độ {s.CurrentValue:F1}{s.Unit} — vượt ngưỡng {(s.CurrentAlertSeverity == AlertSeverity.Critical ? s.CriticalThreshold : s.WarnThreshold)}{s.Unit}. Kiểm tra hệ thống thông gió và thiết bị làm mát ngay lập tức."),
+                    $"Cảm biến {s.SensorName} ghi nhận {s.CurrentValue:F1}{s.Unit} — vượt ngưỡng {(s.CurrentAlertSeverity == AlertSeverity.Critical ? s.CriticalThreshold : s.WarnThreshold)}{s.Unit}. Kiểm tra thông gió ngay."),
                 AlertCategory.Humidity => (
                     $"Độ ẩm {level} tại {s.NodeName}",
-                    $"Cảm biến {s.SensorName} ghi nhận độ ẩm {s.CurrentValue:F1}{s.Unit}. Nguy cơ ăn mòn thiết bị điện và ảnh hưởng đến kết cấu hầm. Kích hoạt hệ thống hút ẩm."),
-                AlertCategory.WaterLevel => (
-                    $"Mực nước {level} tại {s.NodeName}",
-                    $"Mực nước tại {s.Location} đạt {s.CurrentValue:F1}{s.Unit}. {(s.CurrentAlertSeverity == AlertSeverity.Critical ? "NGUY HIỂM NGHIÊM TRỌNG: Kích hoạt bơm thoát nước khẩn cấp và sơ tán khu vực!" : "Kích hoạt bơm thoát nước và theo dõi sát.")}"),
-                AlertCategory.Gas => (
-                    $"Nồng độ khí {level} tại {s.NodeName}",
-                    $"Cảm biến {s.SensorName} phát hiện nồng độ khí {s.CurrentValue:F0}{s.Unit}. {(s.CurrentAlertSeverity == AlertSeverity.Critical ? "KHẨN CẤP: Kích hoạt hệ thống thông gió, cấm người vào khu vực!" : "Tăng cường thông gió và giám sát liên tục.")}"),
-                AlertCategory.Motion => (
-                    $"Rung chấn {level} tại {s.NodeName}",
-                    $"Cảm biến {s.SensorName} ghi nhận rung động {s.CurrentValue:F1}{s.Unit}. Kiểm tra kết cấu hầm và các thiết bị cơ khí trong khu vực."),
+                    $"Cảm biến {s.SensorName} ghi nhận {s.CurrentValue:F1}{s.Unit}. Nguy cơ ăn mòn thiết bị điện. Kích hoạt hệ thống hút ẩm."),
+                AlertCategory.Radar => (
+                    $"Radar phát hiện người tại {s.NodeName}",
+                    $"Radar {s.SensorName} ghi nhận xác suất hiện diện {s.CurrentValue:F0}{s.Unit}. {(s.CurrentAlertSeverity == AlertSeverity.Critical ? "KHẨN CẤP: Xác nhận xâm nhập trái phép, điều phối bảo vệ ngay!" : "Cần xác minh hiện diện bất thường trong khu vực.")}"),
+                AlertCategory.Infrared => (
+                    $"Cảm biến hồng ngoại kích hoạt tại {s.NodeName}",
+                    $"Cảm biến PIR {s.SensorName} phát hiện chuyển động nhiệt. Kết hợp với camera để xác nhận."),
+                AlertCategory.Light => (
+                    $"Ánh sáng bất thường tại {s.NodeName}",
+                    $"Cảm biến ánh sáng ghi nhận {s.CurrentValue:F0}{s.Unit}. Kiểm tra nguồn sáng lạ hoặc hệ thống chiếu sáng."),
+                AlertCategory.Accelerometer => (
+                    $"Rung động {level} tại {s.NodeName}",
+                    $"Gia tốc kế {s.SensorName} ghi nhận {s.CurrentValue:F2}{s.Unit}. {(s.CurrentAlertSeverity == AlertSeverity.Critical ? "NGUY HIỂM: Kiểm tra kết cấu cống ngay lập tức!" : "Theo dõi kết cấu cống và thiết bị cơ khí.")}"),
                 _ => (
                     $"Cảnh báo cảm biến tại {s.NodeName}",
-                    $"Cảm biến {s.SensorName} ghi nhận giá trị bất thường: {s.CurrentValue:F2}{s.Unit}. Cần kiểm tra và đánh giá ngay.")
+                    $"Cảm biến {s.SensorName} ghi nhận giá trị bất thường: {s.CurrentValue:F2}{s.Unit}.")
             };
         }
 
