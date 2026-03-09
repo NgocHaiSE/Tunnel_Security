@@ -131,142 +131,93 @@ namespace Station.ViewModels
 
         private void LoadMockData()
         {
-            // Mock status filters
             StatusFilters.Add("Tất cả trạng thái");
             StatusFilters.Add("Hoạt động");
             StatusFilters.Add("Ngoại tuyến");
             StatusFilters.Add("Lỗi");
             StatusFilters.Add("Tắt");
 
-            // Mock line filters
             LineFilters.Add("Tất cả tuyến");
-            LineFilters.Add("Tuyến A1");
-            LineFilters.Add("Tuyến A2");
-            LineFilters.Add("Tuyến A3");
+            var mock = Station.Services.MockDataService.Instance;
+            foreach (var line in mock.Lines)
+                LineFilters.Add(line.LineName);
 
-            // Mock devices
-            var mockDevices = new[]
-     {
-      new DeviceItemViewModel
-      {
-   Name = "Camera 01",
- DeviceId = "CAM-001",
-       Type = "Camera",
-  TypeDisplay = "Camera hồng ngoại",
-      Location = "A1 / R1 / N1",
-        IpAddress = "192.168.1.101",
-             Status = DeviceStatus.Online,
-            LastOnline = DateTimeOffset.Now.AddMinutes(-2),
-             Manufacturer = "Hikvision",
-FirmwareVersion = "V5.7.3",
-AlertCount = 3
-     },
-            new DeviceItemViewModel
-     {
-     Name = "Camera 02",
-          DeviceId = "CAM-002",
-       Type = "Camera",
-           TypeDisplay = "Camera AI",
-         Location = "A1 / R2 / N3",
-   IpAddress = "192.168.1.102",
-           Status = DeviceStatus.Online,
-       LastOnline = DateTimeOffset.Now.AddMinutes(-5),
-  Manufacturer = "Dahua",
-          FirmwareVersion = "V4.2.1",
-             AlertCount = 1
-    },
-           new DeviceItemViewModel
-     {
-    Name = "Sensor 01",
-         DeviceId = "SEN-001",
-         Type = "Sensor",
-         TypeDisplay = "Cảm biến chuyển động",
-            Location = "A2 / R3 / N5",
-           IpAddress = "192.168.1.201",
-      Status = DeviceStatus.Online,
-         LastOnline = DateTimeOffset.Now.AddMinutes(-1),
-    Manufacturer = "Bosch",
-              FirmwareVersion = "V3.1.0",
-        AlertCount = 5
-},
-            new DeviceItemViewModel
-        {
-    Name = "Radar 01",
-       DeviceId = "RAD-001",
-        TypeDisplay = "Radar phát hiện",
-         Location = "A2 / R4 / N7",
-        IpAddress = "192.168.1.301",
-   Status = DeviceStatus.Offline,
-    LastOnline = DateTimeOffset.Now.AddHours(-2),
-              Manufacturer = "Siemens",
-  FirmwareVersion = "V2.5.4",
-               AlertCount = 0
-        },
-     new DeviceItemViewModel
-     {
-  Name = "Sensor 02",
-        DeviceId = "SEN-002",
-              Type = "Sensor",
-     TypeDisplay = "Cảm biến nhiệt độ",
-  Location = "A1 / R1 / N2",
-           IpAddress = "192.168.1.202",
-       Status = DeviceStatus.Fault,
-          LastOnline = DateTimeOffset.Now.AddMinutes(-30),
-       Manufacturer = "Honeywell",
-         FirmwareVersion = "V1.8.2",
-        AlertCount = 2
-      },
-      new DeviceItemViewModel
- {
-    Name = "Camera 03",
-       DeviceId = "CAM-003",
-   Type = "Camera",
-    TypeDisplay = "Camera 360°",
-          Location = "A3 / R5 / N9",
-       IpAddress = "192.168.1.103",
-     Status = DeviceStatus.Online,
-    LastOnline = DateTimeOffset.Now.AddMinutes(-3),
-          Manufacturer = "Axis",
- FirmwareVersion = "V6.1.2",
-            AlertCount = 0
-          },
-        new DeviceItemViewModel
-       {
-            Name = "Camera 04",
-           DeviceId = "CAM-004",
-          Type = "Camera",
-  TypeDisplay = "Camera PTZ",
-   Location = "A2 / R3 / N6",
-         IpAddress = "192.168.1.104",
-          Status = DeviceStatus.Disabled,
-             LastOnline = DateTimeOffset.Now.AddDays(-1),
-    Manufacturer = "Samsung",
-          FirmwareVersion = "V4.0.3",
-        AlertCount = 0
-         },
-  new DeviceItemViewModel
-       {
-            Name = "Sensor 03",
-        DeviceId = "SEN-003",
-Type = "Sensor",
-             TypeDisplay = "Cảm biến rung động",
-              Location = "A1 / R2 / N4",
-     IpAddress = "192.168.1.203",
-       Status = DeviceStatus.Online,
-        LastOnline = DateTimeOffset.Now.AddMinutes(-7),
-        Manufacturer = "Bosch",
-     FirmwareVersion = "V2.9.1",
-    AlertCount = 1
-                }
-      };
+            AllDevices.Clear();
 
-            foreach (var device in mockDevices)
+            // Add cameras
+            foreach (var cam in mock.Cameras)
             {
-                AllDevices.Add(device);
+                AllDevices.Add(new DeviceItemViewModel
+                {
+                    Name            = cam.CameraName,
+                    DeviceId        = cam.CameraId,
+                    Type            = "Camera",
+                    TypeDisplay     = "Camera giám sát",
+                    Location        = $"{cam.LineName} / {cam.NodeName}",
+                    IpAddress       = string.Empty,
+                    Status          = cam.IsOnline ? DeviceStatus.Online : DeviceStatus.Offline,
+                    LastOnline      = DateTimeOffset.Now.AddMinutes(-1),
+                    Manufacturer    = "Hikvision",
+                    FirmwareVersion = "V5.7.3",
+                    AlertCount      = 0
+                });
+            }
+
+            // Add sensors
+            foreach (var s in mock.Sensors)
+            {
+                AllDevices.Add(new DeviceItemViewModel
+                {
+                    Name            = s.SensorName,
+                    DeviceId        = s.SensorId,
+                    Type            = "Sensor",
+                    TypeDisplay     = CategoryToDisplay(s.Category),
+                    Location        = $"{s.LineName} / {s.NodeName}",
+                    IpAddress       = string.Empty,
+                    Status          = s.IsOnline ? DeviceStatus.Online : DeviceStatus.Offline,
+                    LastOnline      = DateTimeOffset.Now.AddSeconds(-5),
+                    Manufacturer    = "Bosch",
+                    FirmwareVersion = "V3.1.0",
+                    AlertCount      = 0
+                });
             }
 
             TotalDevices = AllDevices.Count;
         }
+
+        private static string CategoryToDisplay(Station.Models.AlertCategory cat) => cat switch
+        {
+            Station.Models.AlertCategory.Radar         => "Radar phát hiện người",
+            Station.Models.AlertCategory.Infrared      => "Cảm biến hồng ngoại",
+            Station.Models.AlertCategory.Temperature   => "Cảm biến nhiệt độ",
+            Station.Models.AlertCategory.Humidity      => "Cảm biến độ ẩm",
+            Station.Models.AlertCategory.Light         => "Cảm biến ánh sáng",
+            Station.Models.AlertCategory.Accelerometer => "Cảm biến gia tốc",
+            _                                          => "Cảm biến"
+        };
+
+        private static string FormatSensorValue(Station.Services.SimulatedSensor s) =>
+            s.Category switch
+            {
+                Station.Models.AlertCategory.Radar         => $"{s.CurrentValue:F0}%",
+                Station.Models.AlertCategory.Infrared      => $"{s.CurrentValue:F0}%",
+                Station.Models.AlertCategory.Temperature   => $"{s.CurrentValue:F1}°C",
+                Station.Models.AlertCategory.Humidity      => $"{s.CurrentValue:F1}%RH",
+                Station.Models.AlertCategory.Light         => $"{s.CurrentValue:F0} lux",
+                Station.Models.AlertCategory.Accelerometer => $"{s.CurrentValue:F2} m/s²",
+                _ => $"{s.CurrentValue:F2}"
+            };
+
+        private static string CategoryIcon(Station.Models.AlertCategory cat) => cat switch
+        {
+            Station.Models.AlertCategory.Radar         => "\uE701",
+            Station.Models.AlertCategory.Infrared      => "\uE7C1",
+            Station.Models.AlertCategory.Temperature   => "\uE9CA",
+            Station.Models.AlertCategory.Humidity      => "\uE81E",
+            Station.Models.AlertCategory.Light         => "\uE706",
+            Station.Models.AlertCategory.Accelerometer => "\uEDA4",
+            _                                          => "\uE957"
+        };
 
         private void ApplyFilters()
         {
@@ -294,7 +245,7 @@ Type = "Sensor",
             // Filter by line
             if (!string.IsNullOrEmpty(SelectedLine) && SelectedLine != "Tất cả tuyến")
             {
-                filtered = filtered.Where(d => d.Location.StartsWith(SelectedLine.Replace("Tuyến ", "")));
+                filtered = filtered.Where(d => d.Location.StartsWith(SelectedLine));
             }
 
             // Filter by search text
@@ -314,171 +265,81 @@ Type = "Sensor",
             }
 
             // Group by nodes (location-based grouping)
+            var mock = Station.Services.MockDataService.Instance;
+
             var nodeGroups = filtered.GroupBy(d =>
             {
                 var parts = d.Location.Split('/');
-                return parts.Length >= 3 ? $"{parts[0].Trim()}/{parts[1].Trim()}/{parts[2].Trim()}" : d.Location;
+                return parts.Length >= 2
+                    ? $"{parts[0].Trim()} / {parts[1].Trim()}"
+                    : d.Location;
             });
 
             foreach (var group in nodeGroups)
             {
-                var nodeDevices = group.ToList();
-                var firstDevice = nodeDevices.First();
-                var parts = firstDevice.Location.Split('/');
+                var items    = group.ToList();
+                var first    = items.First();
+                var locParts = first.Location.Split('/');
+                string lineName = locParts.Length >= 1 ? locParts[0].Trim() : "?";
+                string nodeName = locParts.Length >= 2 ? locParts[1].Trim() : "?";
 
-                var node = new NodeItemViewModel
+                var line = mock.Lines.FirstOrDefault(l => l.LineName == lineName);
+                var node = line?.Nodes.FirstOrDefault(n => n.NodeName == nodeName);
+
+                var nodeVm = new NodeItemViewModel
                 {
-                    NodeName = parts.Length >= 3 ? parts[2].Trim() : "Unknown Node",
-                    LineName = parts.Length >= 1 ? parts[0].Trim() : "Unknown Line",
-                    Location = string.Join(" / ", parts.Take(2).Select(p => p.Trim())),
-                    Status = nodeDevices.Any(d => d.Status == DeviceStatus.Fault) ? DeviceStatus.Fault :
-                             nodeDevices.Any(d => d.Status == DeviceStatus.Offline) ? DeviceStatus.Offline :
-                             DeviceStatus.Online
+                    NodeName = nodeName,
+                    LineName = lineName,
+                    Location = $"{lineName} / {nodeName}",
+                    Status   = items.Any(d => d.Status == DeviceStatus.Fault)   ? DeviceStatus.Fault   :
+                               items.Any(d => d.Status == DeviceStatus.Offline) ? DeviceStatus.Offline :
+                               DeviceStatus.Online
                 };
 
-                // Add all 6 sensor types to each node
-                var random = new Random();
-                var nodeLocation = string.Join("/", parts.Select(p => p.Trim()));
-
-                // 1. Radar phát hiện người
-                node.Sensors.Add(new SensorItemViewModel
+                if (node != null)
                 {
-                    SensorId = $"RAD-{parts[2].Trim()}-001",
-                    SensorName = "Radar phát hiện người",
-                    SensorType = "Radar Detection",
-                    CurrentValue = random.Next(0, 2) == 0 ? "Không phát hiện" : "Phát hiện",
-                    Unit = "",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE701", // Radar
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
+                    var nodeSensors = mock.Sensors.Where(s => s.NodeId == node.NodeId).ToList();
+                    var nodeCam     = mock.Cameras.FirstOrDefault(c => c.NodeId == node.NodeId);
 
-                // 2. Camera hồng ngoại
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"CAM-{parts[2].Trim()}-001",
-                    SensorName = "Camera hồng ngoại",
-                    SensorType = "Infrared Camera",
-                    CurrentValue = "Online",
-                    Unit = "",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE714", // Camera
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
+                    if (nodeCam != null)
+                        nodeVm.Sensors.Add(new SensorItemViewModel
+                        {
+                            SensorId       = nodeCam.CameraId,
+                            SensorName     = nodeCam.CameraName,
+                            SensorType     = "Camera",
+                            CurrentValue   = nodeCam.IsOnline ? "Online" : "Offline",
+                            Unit           = string.Empty,
+                            LastUpdateText = "Vừa xong",
+                            SensorStatus   = nodeCam.IsOnline ? DeviceStatus.Online : DeviceStatus.Offline,
+                            TypeIcon       = "\uE714",
+                            LineName       = lineName,
+                            NodeName       = nodeName,
+                            Location       = $"{lineName} / {nodeName}"
+                        });
 
-                // 3. Cảm biến hồng ngoại phát hiện người
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"PIR-{parts[2].Trim()}-001",
-                    SensorName = "Cảm biến hồng ngoại",
-                    SensorType = "PIR Motion Sensor",
-                    CurrentValue = random.Next(0, 2) == 0 ? "Không chuyển động" : "Có chuyển động",
-                    Unit = "",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE7C1", // Motion
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
+                    foreach (var s in nodeSensors)
+                    {
+                        nodeVm.Sensors.Add(new SensorItemViewModel
+                        {
+                            SensorId       = s.SensorId,
+                            SensorName     = s.SensorName,
+                            SensorType     = s.Category.ToString(),
+                            CurrentValue   = FormatSensorValue(s),
+                            Unit           = s.Unit,
+                            LastUpdateText = "Vừa xong",
+                            SensorStatus   = s.IsOnline ? DeviceStatus.Online : DeviceStatus.Offline,
+                            TypeIcon       = CategoryIcon(s.Category),
+                            LineName       = lineName,
+                            NodeName       = nodeName,
+                            Location       = $"{lineName} / {nodeName}"
+                        });
+                    }
+                }
 
-                // 4. Cảm biến nhiệt độ, độ ẩm
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"THM-{parts[2].Trim()}-001",
-                    SensorName = "Cảm biến nhiệt độ & độ ẩm",
-                    SensorType = "Temperature & Humidity Sensor",
-                    CurrentValue = $"{20 + random.Next(15)}.{random.Next(10)}°C / {40 + random.Next(40)}%",
-                    Unit = "",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE9CA", // Temperature
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
-
-                // 5. Cảm biến ánh sáng
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"LUX-{parts[2].Trim()}-001",
-                    SensorName = "Cảm biến ánh sáng",
-                    SensorType = "Light Sensor",
-                    CurrentValue = $"{100 + random.Next(400)}",
-                    Unit = "lux",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE706", // Light
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
-
-                // 6. Cảm biến đo mực nước
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"WTR-{parts[2].Trim()}-001",
-                    SensorName = "Cảm biến mực nước",
-                    SensorType = "Water Level Sensor",
-                    CurrentValue = $"{random.Next(50, 150)}.{random.Next(10)}",
-                    Unit = "cm",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uE9F2", // Water
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
-
-                // 7. Cảm biến gia tốc (rung động)
-                node.Sensors.Add(new SensorItemViewModel
-                {
-                    SensorId = $"ACC-{parts[2].Trim()}-001",
-                    SensorName = "Cảm biến gia tốc",
-                    SensorType = "Accelerometer Sensor",
-                    CurrentValue = $"{random.Next(1, 10)}.{random.Next(10)}",
-                    Unit = "m/s²",
-                    LastUpdateText = "Vừa xong",
-                    SensorStatus = DeviceStatus.Online,
-                    TypeIcon = "\uEDA4", // Vibration
-                    LineName = node.LineName,
-                    NodeName = node.NodeName,
-                    Location = node.Location
-                });
-
-                FilteredNodes.Add(node);
+                FilteredNodes.Add(nodeVm);
             }
 
             UpdateStatistics();
-        }
-
-        private string GetMockSensorValue(string type)
-        {
-            var random = new Random();
-            return type switch
-            {
-                "Camera" => "Online",
-                "Sensor" => $"{20 + random.Next(15)}.{random.Next(10)}",
-                "Radar" => $"{random.Next(100)}",
-                _ => "N/A"
-            };
-        }
-
-        private string GetSensorUnit(string type)
-        {
-            return type switch
-            {
-                "Camera" => "",
-                "Sensor" => "°C",
-                "Radar" => "%",
-                _ => ""
-            };
         }
 
         private void UpdateStatistics()
