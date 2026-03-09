@@ -22,12 +22,13 @@ namespace Station.Models
 
     public enum AlertCategory
     {
-        WaterLevel,      // Mực nước
-        Gas,             // Khí gas
-        Temperature,     // Nhiệt độ  
+        Temperature,     // Nhiệt độ
         Humidity,        // Độ ẩm
-        Motion,          // Chuyển động
-        Intrusion,       // Xâm nhập
+        Radar,           // Radar phát hiện người
+        Infrared,        // Cảm biến hồng ngoại (PIR)
+        Light,           // Cảm biến ánh sáng
+        Accelerometer,   // Cảm biến gia tốc
+        Intrusion,       // Xâm nhập (camera AI)
         Equipment,       // Thiết bị
         Connection,      // Kết nối
         Other            // Khác
