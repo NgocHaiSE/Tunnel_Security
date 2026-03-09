@@ -367,3 +367,6 @@ FodyWeavers.xsd
 .env.local
 .env.development
 .env.production
+
+# Git worktrees
+.worktrees/
