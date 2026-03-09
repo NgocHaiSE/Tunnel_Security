@@ -459,9 +459,9 @@ namespace Station.Services
             var sensors = new List<SimulatedSensor>();
             var lines = new[]
             {
-                ("LINE-01", "Tuyến Bắc"),
-                ("LINE-02", "Tuyến Trung"),
-                ("LINE-03", "Tuyến Nam"),
+                ("LINE-01", "Tuyến cống Hoàng Quốc Việt"),
+                ("LINE-02", "Tuyến cống Nghĩa Đô"),
+                ("LINE-03", "Tuyến cống Xuân La"),
             };
 
             for (int li = 0; li < lines.Length; li++)
@@ -553,9 +553,9 @@ namespace Station.Services
             var cams = new List<SimulatedCamera>();
             var lines = new[]
             {
-                ("LINE-01", "Tuyến Bắc"),
-                ("LINE-02", "Tuyến Trung"),
-                ("LINE-03", "Tuyến Nam"),
+                ("LINE-01", "Tuyến cống Hoàng Quốc Việt"),
+                ("LINE-02", "Tuyến cống Nghĩa Đô"),
+                ("LINE-03", "Tuyến cống Xuân La"),
             };
 
             for (int li = 0; li < lines.Length; li++)
