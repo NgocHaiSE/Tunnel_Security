@@ -139,8 +139,8 @@ namespace Station.Services
             Cameras = BuildCameras();
             Lines = BuildLines();
 
-            // Sensor tick: every 1.5s — updates readings & fires SensorTick
-            _sensorTimer = new Timer(1500);
+            // Sensor tick: every 1s — updates readings & fires SensorTick
+            _sensorTimer = new Timer(1000);
             _sensorTimer.Elapsed += OnSensorTick;
             _sensorTimer.AutoReset = true;
 
@@ -220,9 +220,11 @@ namespace Station.Services
 
         private void OnAlertEvaluation(object? sender, ElapsedEventArgs e)
         {
+            // Only evaluate real threshold-based alerts
+            // Auto-generated random alerts have been disabled
             EvaluateSensorAlerts();
-            MaybeFireCameraAlert();
-            MaybeFireRandomSensorAlert();
+            // MaybeFireCameraAlert();     // DISABLED - was generating fake camera alerts
+            // MaybeFireRandomSensorAlert(); // DISABLED - was generating fake sensor alerts
         }
 
         private void EvaluateSensorAlerts()

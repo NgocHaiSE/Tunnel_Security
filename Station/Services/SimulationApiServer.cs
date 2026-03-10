@@ -115,11 +115,22 @@ namespace Station.Services
         // ── REST router ───────────────────────────────────────────────────
         private async Task RouteAsync(HttpListenerContext ctx, string path, string method)
         {
-            // GET /api/sensors
+            // GET /api/sensors với optional filters
             if (method == "GET" && path == "/api/sensors")
             {
+                var query = ctx.Request.QueryString;
+                var lineId = query["lineId"];
+                var nodeId = query["nodeId"];
+                var type = query["type"];
+
                 var list = new List<object>();
                 foreach (var s in _mock.Sensors)
+                {
+                    // Apply filters
+                    if (!string.IsNullOrEmpty(lineId) && s.LineId != lineId) continue;
+                    if (!string.IsNullOrEmpty(nodeId) && s.NodeId != nodeId) continue;
+                    if (!string.IsNullOrEmpty(type) && s.Category.ToString().ToLower() != type.ToLower()) continue;
+
                     list.Add(new {
                         s.SensorId, s.SensorName,
                         Category = s.Category.ToString(),
@@ -131,6 +142,7 @@ namespace Station.Services
                         Level = s.CurrentLevel.ToString(),
                         s.StatusText
                     });
+                }
                 await WriteJsonAsync(ctx.Response, 200, list);
                 return;
             }

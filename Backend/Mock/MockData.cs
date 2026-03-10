@@ -41,7 +41,7 @@ public static class MockData
         // ========== HUB TRUNG TÂM ==========
         var hubLine = new Line
         {
-            Id = "L0",
+            Id = "LINE-00",
             StationId = "ST01",
             Code = "HUB",
             Name = "Trung tâm điều khiển",
@@ -57,7 +57,7 @@ public static class MockData
 
         var hubNode = new Node
         {
-            Id = "HUB-01",
+            Id = "NODE-L0-01",
             LineId = "L0",
             Code = "HUB",
             Name = "Trung tâm điều khiển",
@@ -81,10 +81,10 @@ public static class MockData
         // Cống chính dọc đường Xuân Thủy hướng về ĐH Quốc Gia
         var line1 = new Line
         {
-            Id = "L1",
+            Id = "LINE-01",
             StationId = "ST01",
             Code = "XT",
-            Name = "Cống Xuân Thủy",
+            Name = "Tuyến cống Hoàng Quốc Việt",
             Description = "Tuyến cống chính dọc đường Xuân Thủy",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -102,7 +102,7 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"XT-{i}",
+                Id = $"NODE-L1-0{i}",
                 LineId = "L1",
                 Code = $"XT{i}",
                 Name = $"Cống Xuân Thủy {i}",
@@ -126,10 +126,10 @@ public static class MockData
         // ========== TUYẾN 2: Đường Cầu Giấy (Bắc - về phía Hoàng Quốc Việt) ==========
         var line2 = new Line
         {
-            Id = "L2",
+            Id = "LINE-02",
             StationId = "ST01",
             Code = "CG",
-            Name = "Cống Cầu Giấy",
+            Name = "Tuyến cống Nghĩa Đô",
             Description = "Tuyến cống dọc đường Cầu Giấy",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -147,7 +147,7 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"CG-{i}",
+                Id = $"NODE-L2-0{i}",
                 LineId = "L2",
                 Code = $"CG{i}",
                 Name = $"Cống Cầu Giấy {i}",
@@ -171,10 +171,10 @@ public static class MockData
         // ========== TUYẾN 3: Đường Trần Thái Tông (Nam) ==========
         var line3 = new Line
         {
-            Id = "L3",
+            Id = "LINE-03",
             StationId = "ST01",
             Code = "TTT",
-            Name = "Cống Trần Thái Tông",
+            Name = "Tuyến cống Xuân La",
             Description = "Tuyến cống dọc đường Trần Thái Tông",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -192,7 +192,7 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"TTT-{i}",
+                Id = $"NODE-L3-0{i}",
                 LineId = "L3",
                 Code = $"TTT{i}",
                 Name = $"Cống Trần Thái Tông {i}",
@@ -214,12 +214,14 @@ public static class MockData
         }
 
         // ========== TUYẾN 4: Đường Duy Tân (Tây) ==========
+        // Note: Only 3 lines (LINE-01, LINE-02, LINE-03) to match Station app
+        // Keeping structure for future expansion but using LINE-01 format
         var line4 = new Line
         {
-            Id = "L4",
+            Id = "LINE-01", // Reuse LINE-01 for consistency with app
             StationId = "ST01",
             Code = "DT",
-            Name = "Cống Duy Tân",
+            Name = "Tuyến cống Hoàng Quốc Việt",
             Description = "Tuyến cống dọc đường Duy Tân",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -237,8 +239,8 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"DT-{i}",
-                LineId = "L4",
+                Id = $"NODE-L1-0{i + 3}",
+                LineId = "LINE-01",
                 Code = $"DT{i}",
                 Name = $"Cống Duy Tân {i}",
                 Description = $"Hố ga số {i} - Đường Duy Tân",
@@ -260,10 +262,10 @@ public static class MockData
         // ========== TUYẾN 5: Đường Phạm Văn Đồng (Đông Bắc - tuyến lớn) ==========
         var line5 = new Line
         {
-            Id = "L5",
+            Id = "LINE-02", // Reuse LINE-02 for consistency with app
             StationId = "ST01",
             Code = "PVD",
-            Name = "Cống Phạm Văn Đồng",
+            Name = "Tuyến cống Nghĩa Đô",
             Description = "Tuyến cống chính dọc đường Phạm Văn Đồng",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -281,8 +283,8 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"PVD-{i}",
-                LineId = "L5",
+                Id = $"NODE-L2-0{i + 3}",
+                LineId = "LINE-02",
                 Code = $"PVD{i}",
                 Name = $"Cống Phạm Văn Đồng {i}",
                 Description = $"Hố ga số {i} - Đường Phạm Văn Đồng",
@@ -305,10 +307,10 @@ public static class MockData
         // ========== TUYẾN 6: Đường Nguyễn Phong Sắc (Tây Nam) ==========
         var line6 = new Line
         {
-            Id = "L6",
+            Id = "LINE-03", // Reuse LINE-03 for consistency with app
             StationId = "ST01",
             Code = "NPS",
-            Name = "Cống Nguyễn Phong Sắc",
+            Name = "Tuyến cống Xuân La",
             Description = "Tuyến cống dọc đường Nguyễn Phong Sắc",
             StartLng = hubLng,
             StartLat = hubLat,
@@ -326,8 +328,8 @@ public static class MockData
 
             var node = new Node
             {
-                Id = $"NPS-{i}",
-                LineId = "L6",
+                Id = $"NODE-L3-0{i + 3}",
+                LineId = "LINE-03",
                 Code = $"NPS{i}",
                 Name = $"Cống Nguyễn Phong Sắc {i}",
                 Description = $"Hố ga số {i} - Đường Nguyễn Phong Sắc",
@@ -346,7 +348,8 @@ public static class MockData
             line6.Nodes.Add(node);
         }
 
-        station.Lines = new List<Line> { hubLine, line1, line2, line3, line4, line5, line6 };
+        // Only use 3 lines to match Station app
+        station.Lines = new List<Line> { hubLine, line1, line2, line3 };
         
         return new List<Station> { station };
     }

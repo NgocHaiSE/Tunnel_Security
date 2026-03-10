@@ -55,11 +55,12 @@ public class SensorsController : ControllerBase
         sensor.CurrentValue = req.Value;
         sensor.LastReading = DateTime.UtcNow;
 
-        // Cập nhật trạng thái node dựa vào sensor values
-        if (parentNode != null)
-        {
-            UpdateNodeStatus(parentNode);
-        }
+        // NOTE: Node status update removed - alerts are generated only on frontend
+        // This allows frontend to handle alert generation based on threshold crossings
+        // if (parentNode != null)
+        // {
+        //     UpdateNodeStatus(parentNode);
+        // }
 
         // Gửi realtime cho client
         await _hub.Clients.All.SendAsync("SensorUpdated", new

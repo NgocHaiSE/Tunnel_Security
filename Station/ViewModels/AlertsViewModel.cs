@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Media;
 using Station.Models;
+using Station.Services;
 using Windows.UI;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -177,13 +178,67 @@ namespace Station.ViewModels
 
         #endregion
 
-        public AlertsViewModel()
+        // API mode support
+        private ApiSensorClient? _apiClient;
+        private bool _useApiMode;
+
+        public AlertsViewModel() : this(useApi: false)
         {
+        }
+
+        public AlertsViewModel(bool useApi)
+        {
+            _useApiMode = useApi;
+
+            if (_useApiMode)
+            {
+                InitializeApiMode();
+            }
+            else
+            {
+                InitializeLocalMode();
+            }
+
             InitializeFilters();
             LoadMockAlerts();
             ApplyFilters();
             CalculateStatistics();
             InitializeCharts();
+        }
+
+        private async void InitializeApiMode()
+        {
+            try
+            {
+                _apiClient = new ApiSensorClient();
+                _apiClient.SensorUpdated += OnApiSensorUpdated;
+                await _apiClient.ConnectAsync();
+                System.Diagnostics.Debug.WriteLine("[AlertsViewModel] Connected to API for real-time updates");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AlertsViewModel] Failed to connect to API: {ex.Message}");
+                // Fall back to local mode
+                InitializeLocalMode();
+            }
+        }
+
+        private void InitializeLocalMode()
+        {
+            // Subscribe to local MockDataService (existing behavior)
+            MockDataService.Instance.AlertGenerated += OnLocalAlertGenerated;
+        }
+
+        private void OnApiSensorUpdated(object? sender, ApiSensorUpdate e)
+        {
+            // Check thresholds and generate alert if needed
+            // This requires threshold info - for now we just track the updates
+            System.Diagnostics.Debug.WriteLine($"[AlertsViewModel] API Sensor update: {e.Name} = {e.CurrentValue} {e.Unit}");
+        }
+
+        private void OnLocalAlertGenerated(object? sender, AlertGeneratedEventArgs e)
+        {
+            // Handle local alert generation (existing behavior)
         }
 
         private void InitializeFilters()
@@ -239,217 +294,217 @@ namespace Station.ViewModels
             var mockAlerts = new List<AlertItemViewModel>
             {
                 // Critical alerts
-                new()
-                {
-                    Id = "ALR-001",
-                    Title = "Rung động bất thường tại Nút 2-03",
-                    Description = "Gia tốc kế ghi nhận 3.8 m/s².",
-                    Category = AlertCategory.Accelerometer,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.Unprocessed,
-                    LineId = "LINE-02", LineName = "Tuyến cống Nghĩa Đô",
-                    NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
-                    SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
-                    SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-12)
-                },
-                new()
-                {
-                    Id = "ALR-002",
-                    Title = "Radar phát hiện người tại Nút 1-01",
-                    Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
-                    Category = AlertCategory.Radar,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.Unprocessed,
-                    LineId = "LINE-01", LineName = "Tuyến cống Hoàng Quốc Việt",
-                    NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
-                    SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
-                    SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-5)
-                },
+                // new()
+                // {
+                //     Id = "ALR-001",
+                //     Title = "Rung động bất thường tại Nút 2-03",
+                //     Description = "Gia tốc kế ghi nhận 3.8 m/s².",
+                //     Category = AlertCategory.Accelerometer,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "LINE-02", LineName = "Tuyến cống Nghĩa Đô",
+                //     NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
+                //     SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
+                //     SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-12)
+                // },
+                // new()
+                // {
+                //     Id = "ALR-002",
+                //     Title = "Radar phát hiện người tại Nút 1-01",
+                //     Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
+                //     Category = AlertCategory.Radar,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "LINE-01", LineName = "Tuyến cống Hoàng Quốc Việt",
+                //     NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
+                //     SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
+                //     SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-5)
+                // },
 
-                // High alerts
-                new()
-                {
-                    Id = "ALR-003",
-                    Title = "Nhiệt độ cao bất thường",
-                    Description = "Nhiệt độ tại cống XT-2 tăng cao bất thường (45°C > 40°C), có thể do cháy hoặc sự cố.",
-                    Category = AlertCategory.Temperature,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.InProgress,
-                    LineId = "L1", LineName = "Cống Xuân Thủy",
-                    NodeId = "XT-2", NodeName = "Cống Xuân Thủy 2",
-                    SensorId = "S-XT2-TEMP", SensorName = "Temperature Sensor",
-                    SensorType = "Temperature", SensorValue = 45, SensorUnit = "°C", Threshold = 40,
-                    CameraId = "CAM-XT-3",
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-25),
-                    AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-20),
-                    AcknowledgedBy = "Trần Văn B",
-                    Notes = new List<AlertNote>
-                    {
-                        new() { Content = "Đã cử đội kỹ thuật kiểm tra", Author = "Trần Văn B", CreatedAt = DateTimeOffset.Now.AddMinutes(-18) }
-                    },
-                    Lng = 105.8025, Lat = 21.0375
-                },
-                new()
-                {
-                    Id = "ALR-004",
-                    Title = "Phát hiện xâm nhập",
-                    Description = "Camera phát hiện đối tượng lạ tại khu vực hố ga CG-2.",
-                    Category = AlertCategory.Intrusion,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.Unprocessed,
-                    LineId = "L2", LineName = "Cống Cầu Giấy",
-                    NodeId = "CG-2", NodeName = "Cống Cầu Giấy 2",
-                    CameraId = "CAM-CG-2",
-                    SnapshotPath = "/snapshots/intrusion_cg2_001.jpg",
-                    VideoClipPath = "/videos/intrusion_cg2_001.mp4",
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-8),
-                    Lng = 105.7985, Lat = 21.0445
-                },
+                // // High alerts
+                // new()
+                // {
+                //     Id = "ALR-003",
+                //     Title = "Nhiệt độ cao bất thường",
+                //     Description = "Nhiệt độ tại cống XT-2 tăng cao bất thường (45°C > 40°C), có thể do cháy hoặc sự cố.",
+                //     Category = AlertCategory.Temperature,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.InProgress,
+                //     LineId = "L1", LineName = "Cống Xuân Thủy",
+                //     NodeId = "XT-2", NodeName = "Cống Xuân Thủy 2",
+                //     SensorId = "S-XT2-TEMP", SensorName = "Temperature Sensor",
+                //     SensorType = "Temperature", SensorValue = 45, SensorUnit = "°C", Threshold = 40,
+                //     CameraId = "CAM-XT-3",
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-25),
+                //     AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-20),
+                //     AcknowledgedBy = "Trần Văn B",
+                //     Notes = new List<AlertNote>
+                //     {
+                //         new() { Content = "Đã cử đội kỹ thuật kiểm tra", Author = "Trần Văn B", CreatedAt = DateTimeOffset.Now.AddMinutes(-18) }
+                //     },
+                //     Lng = 105.8025, Lat = 21.0375
+                // },
+                // new()
+                // {
+                //     Id = "ALR-004",
+                //     Title = "Phát hiện xâm nhập",
+                //     Description = "Camera phát hiện đối tượng lạ tại khu vực hố ga CG-2.",
+                //     Category = AlertCategory.Intrusion,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "L2", LineName = "Cống Cầu Giấy",
+                //     NodeId = "CG-2", NodeName = "Cống Cầu Giấy 2",
+                //     CameraId = "CAM-CG-2",
+                //     SnapshotPath = "/snapshots/intrusion_cg2_001.jpg",
+                //     VideoClipPath = "/videos/intrusion_cg2_001.mp4",
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-8),
+                //     Lng = 105.7985, Lat = 21.0445
+                // },
 
-                // Medium alerts
-                new()
-                {
-                    Id = "ALR-005",
-                    Title = "Độ ẩm tăng cao",
-                    Description = "Độ ẩm tại PVD-1 vượt ngưỡng cảnh báo (92% > 85%).",
-                    Category = AlertCategory.Humidity,
-                    Severity = AlertSeverity.Medium,
-                    State = AlertState.Resolved,
-                    LineId = "L5", LineName = "Cống Phạm Văn Đồng",
-                    NodeId = "PVD-1", NodeName = "Cống Phạm Văn Đồng 1",
-                    SensorId = "S-PVD1-HUM", SensorName = "Humidity Sensor",
-                    SensorType = "Humidity", SensorValue = 92, SensorUnit = "%", Threshold = 85,
-                    CreatedAt = DateTimeOffset.Now.AddHours(-2),
-                    AcknowledgedAt = DateTimeOffset.Now.AddHours(-1).AddMinutes(-50),
-                    ResolvedAt = DateTimeOffset.Now.AddHours(-1),
-                    ResolvedBy = "Lê Văn C",
-                    Notes = new List<AlertNote>
-                    {
-                        new() { Content = "Kiểm tra - do mưa lớn tối qua", Author = "Lê Văn C", CreatedAt = DateTimeOffset.Now.AddHours(-1).AddMinutes(-30) },
-                        new() { Content = "Độ ẩm đã giảm về mức bình thường", Author = "Lê Văn C", CreatedAt = DateTimeOffset.Now.AddHours(-1) }
-                    },
-                    Lng = 105.8030, Lat = 21.0445
-                },
-                new()
-                {
-                    Id = "ALR-006",
-                    Title = "Rung động bất thường tại Nút 2-03",
-                    Description = "Gia tốc kế ghi nhận 3.8 m/s².",
-                    Category = AlertCategory.Accelerometer,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.Unprocessed,
-                    LineId = "LINE-02", LineName = "Tuyến cống Nghĩa Đô",
-                    NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
-                    SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
-                    SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-35)
-                },
-                new()
-                {
-                    Id = "ALR-007",
-                    Title = "Cảm biến hồng ngoại kích hoạt tại Nút 3-02",
-                    Description = "PIR phát hiện chuyển động nhiệt trong khu vực hạn chế.",
-                    Category = AlertCategory.Infrared,
-                    Severity = AlertSeverity.Medium,
-                    State = AlertState.Acknowledged,
-                    LineId = "LINE-03", LineName = "Tuyến cống Xuân La",
-                    NodeId = "NODE-L3-02", NodeName = "Nút 3-02",
-                    SensorId = "PIR-L3-N02", SensorName = "Hồng ngoại Nút 3-02",
-                    SensorType = "Infrared", SensorValue = 65, SensorUnit = "%", Threshold = 60,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-28)
-                },
+                // // Medium alerts
+                // new()
+                // {
+                //     Id = "ALR-005",
+                //     Title = "Độ ẩm tăng cao",
+                //     Description = "Độ ẩm tại PVD-1 vượt ngưỡng cảnh báo (92% > 85%).",
+                //     Category = AlertCategory.Humidity,
+                //     Severity = AlertSeverity.Medium,
+                //     State = AlertState.Resolved,
+                //     LineId = "L5", LineName = "Cống Phạm Văn Đồng",
+                //     NodeId = "PVD-1", NodeName = "Cống Phạm Văn Đồng 1",
+                //     SensorId = "S-PVD1-HUM", SensorName = "Humidity Sensor",
+                //     SensorType = "Humidity", SensorValue = 92, SensorUnit = "%", Threshold = 85,
+                //     CreatedAt = DateTimeOffset.Now.AddHours(-2),
+                //     AcknowledgedAt = DateTimeOffset.Now.AddHours(-1).AddMinutes(-50),
+                //     ResolvedAt = DateTimeOffset.Now.AddHours(-1),
+                //     ResolvedBy = "Lê Văn C",
+                //     Notes = new List<AlertNote>
+                //     {
+                //         new() { Content = "Kiểm tra - do mưa lớn tối qua", Author = "Lê Văn C", CreatedAt = DateTimeOffset.Now.AddHours(-1).AddMinutes(-30) },
+                //         new() { Content = "Độ ẩm đã giảm về mức bình thường", Author = "Lê Văn C", CreatedAt = DateTimeOffset.Now.AddHours(-1) }
+                //     },
+                //     Lng = 105.8030, Lat = 21.0445
+                // },
+                // new()
+                // {
+                //     Id = "ALR-006",
+                //     Title = "Rung động bất thường tại Nút 2-03",
+                //     Description = "Gia tốc kế ghi nhận 3.8 m/s².",
+                //     Category = AlertCategory.Accelerometer,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "LINE-02", LineName = "Tuyến cống Nghĩa Đô",
+                //     NodeId = "NODE-L2-03", NodeName = "Nút 2-03",
+                //     SensorId = "ACC-L2-N03", SensorName = "Gia tốc kế Nút 2-03",
+                //     SensorType = "Accelerometer", SensorValue = 3.8, SensorUnit = "m/s²", Threshold = 3.0,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-35)
+                // },
+                // new()
+                // {
+                //     Id = "ALR-007",
+                //     Title = "Cảm biến hồng ngoại kích hoạt tại Nút 3-02",
+                //     Description = "PIR phát hiện chuyển động nhiệt trong khu vực hạn chế.",
+                //     Category = AlertCategory.Infrared,
+                //     Severity = AlertSeverity.Medium,
+                //     State = AlertState.Acknowledged,
+                //     LineId = "LINE-03", LineName = "Tuyến cống Xuân La",
+                //     NodeId = "NODE-L3-02", NodeName = "Nút 3-02",
+                //     SensorId = "PIR-L3-N02", SensorName = "Hồng ngoại Nút 3-02",
+                //     SensorType = "Infrared", SensorValue = 65, SensorUnit = "%", Threshold = 60,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-28)
+                // },
 
-                // Low alerts
-                new()
-                {
-                    Id = "ALR-008",
-                    Title = "Pin yếu - Nút NPS-1",
-                    Description = "Pin của nút NPS-1 còn 15%, cần thay thế sớm.",
-                    Category = AlertCategory.Equipment,
-                    Severity = AlertSeverity.Low,
-                    State = AlertState.Closed,
-                    LineId = "L6", LineName = "Cống Nguyễn Phong Sắc",
-                    NodeId = "NPS-1", NodeName = "Cống Nguyễn Phong Sắc 1",
-                    CreatedAt = DateTimeOffset.Now.AddDays(-1),
-                    AcknowledgedAt = DateTimeOffset.Now.AddDays(-1).AddHours(2),
-                    ResolvedAt = DateTimeOffset.Now.AddHours(-5),
-                    ClosedAt = DateTimeOffset.Now.AddHours(-4),
-                    ClosedBy = "Admin",
-                    Notes = new List<AlertNote>
-                    {
-                        new() { Content = "Đã thay pin mới", Author = "Kỹ thuật viên", CreatedAt = DateTimeOffset.Now.AddHours(-5) }
-                    },
-                    Lng = 105.7920, Lat = 21.0325
-                },
-                new()
-                {
-                    Id = "ALR-009",
-                    Title = "Mất kết nối tạm thời",
-                    Description = "Nút DT-1 mất kết nối trong 5 phút.",
-                    Category = AlertCategory.Connection,
-                    Severity = AlertSeverity.Low,
-                    State = AlertState.Resolved,
-                    LineId = "L4", LineName = "Cống Duy Tân",
-                    NodeId = "DT-1", NodeName = "Cống Duy Tân 1",
-                    CreatedAt = DateTimeOffset.Now.AddHours(-3),
-                    ResolvedAt = DateTimeOffset.Now.AddHours(-2).AddMinutes(-55),
-                    Notes = new List<AlertNote>
-                    {
-                        new() { Content = "Kết nối đã tự phục hồi", Author = "System", CreatedAt = DateTimeOffset.Now.AddHours(-2).AddMinutes(-55) }
-                    },
-                    Lng = 105.7892, Lat = 21.0345
-                },
-                new()
-                {
-                    Id = "ALR-010",
-                    Title = "Nhiệt độ tăng nhẹ",
-                    Description = "Nhiệt độ tại XT-1 tăng nhẹ trên mức bình thường (32°C > 30°C).",
-                    Category = AlertCategory.Temperature,
-                    Severity = AlertSeverity.Low,
-                    State = AlertState.Unprocessed,
-                    LineId = "L1", LineName = "Cống Xuân Thủy",
-                    NodeId = "XT-1", NodeName = "Cống Xuân Thủy 1",
-                    SensorId = "S-XT1-TEMP", SensorName = "Temperature Sensor",
-                    SensorType = "Temperature", SensorValue = 32, SensorUnit = "°C", Threshold = 30,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-50),
-                    Lng = 105.8005, Lat = 21.0371
-                },
+                // // Low alerts
+                // new()
+                // {
+                //     Id = "ALR-008",
+                //     Title = "Pin yếu - Nút NPS-1",
+                //     Description = "Pin của nút NPS-1 còn 15%, cần thay thế sớm.",
+                //     Category = AlertCategory.Equipment,
+                //     Severity = AlertSeverity.Low,
+                //     State = AlertState.Closed,
+                //     LineId = "L6", LineName = "Cống Nguyễn Phong Sắc",
+                //     NodeId = "NPS-1", NodeName = "Cống Nguyễn Phong Sắc 1",
+                //     CreatedAt = DateTimeOffset.Now.AddDays(-1),
+                //     AcknowledgedAt = DateTimeOffset.Now.AddDays(-1).AddHours(2),
+                //     ResolvedAt = DateTimeOffset.Now.AddHours(-5),
+                //     ClosedAt = DateTimeOffset.Now.AddHours(-4),
+                //     ClosedBy = "Admin",
+                //     Notes = new List<AlertNote>
+                //     {
+                //         new() { Content = "Đã thay pin mới", Author = "Kỹ thuật viên", CreatedAt = DateTimeOffset.Now.AddHours(-5) }
+                //     },
+                //     Lng = 105.7920, Lat = 21.0325
+                // },
+                // new()
+                // {
+                //     Id = "ALR-009",
+                //     Title = "Mất kết nối tạm thời",
+                //     Description = "Nút DT-1 mất kết nối trong 5 phút.",
+                //     Category = AlertCategory.Connection,
+                //     Severity = AlertSeverity.Low,
+                //     State = AlertState.Resolved,
+                //     LineId = "L4", LineName = "Cống Duy Tân",
+                //     NodeId = "DT-1", NodeName = "Cống Duy Tân 1",
+                //     CreatedAt = DateTimeOffset.Now.AddHours(-3),
+                //     ResolvedAt = DateTimeOffset.Now.AddHours(-2).AddMinutes(-55),
+                //     Notes = new List<AlertNote>
+                //     {
+                //         new() { Content = "Kết nối đã tự phục hồi", Author = "System", CreatedAt = DateTimeOffset.Now.AddHours(-2).AddMinutes(-55) }
+                //     },
+                //     Lng = 105.7892, Lat = 21.0345
+                // },
+                // new()
+                // {
+                //     Id = "ALR-010",
+                //     Title = "Nhiệt độ tăng nhẹ",
+                //     Description = "Nhiệt độ tại XT-1 tăng nhẹ trên mức bình thường (32°C > 30°C).",
+                //     Category = AlertCategory.Temperature,
+                //     Severity = AlertSeverity.Low,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "L1", LineName = "Cống Xuân Thủy",
+                //     NodeId = "XT-1", NodeName = "Cống Xuân Thủy 1",
+                //     SensorId = "S-XT1-TEMP", SensorName = "Temperature Sensor",
+                //     SensorType = "Temperature", SensorValue = 32, SensorUnit = "°C", Threshold = 30,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-50),
+                //     Lng = 105.8005, Lat = 21.0371
+                // },
 
-                // More alerts for statistics
-                new()
-                {
-                    Id = "ALR-011",
-                    Title = "Radar phát hiện người tại Nút 1-01",
-                    Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
-                    Category = AlertCategory.Radar,
-                    Severity = AlertSeverity.High,
-                    State = AlertState.InProgress,
-                    LineId = "LINE-01", LineName = "Tuyến cống Hoàng Quốc Việt",
-                    NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
-                    SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
-                    SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-15),
-                    AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-12),
-                    AcknowledgedBy = "Nguyễn Văn A"
-                },
-                new()
-                {
-                    Id = "ALR-012",
-                    Title = "Áp suất bất thường",
-                    Description = "Áp suất tại PVD-4 vượt ngưỡng cảnh báo.",
-                    Category = AlertCategory.Other,
-                    Severity = AlertSeverity.Medium,
-                    State = AlertState.Unprocessed,
-                    LineId = "L5", LineName = "Cống Phạm Văn Đồng",
-                    NodeId = "PVD-4", NodeName = "Cống Phạm Văn Đồng 4",
-                    SensorId = "S-PVD4-PRS", SensorName = "Pressure Sensor",
-                    SensorType = "Pressure", SensorValue = 2.8, SensorUnit = "bar", Threshold = 2.5,
-                    CameraId = "CAM-PVD-4",
-                    CreatedAt = DateTimeOffset.Now.AddMinutes(-28),
-                    Lng = 105.8095, Lat = 21.0525
-                }
+                // // More alerts for statistics
+                // new()
+                // {
+                //     Id = "ALR-011",
+                //     Title = "Radar phát hiện người tại Nút 1-01",
+                //     Description = "Radar ghi nhận xác suất hiện diện 78%. Cần xác minh.",
+                //     Category = AlertCategory.Radar,
+                //     Severity = AlertSeverity.High,
+                //     State = AlertState.InProgress,
+                //     LineId = "LINE-01", LineName = "Tuyến cống Hoàng Quốc Việt",
+                //     NodeId = "NODE-L1-01", NodeName = "Nút 1-01",
+                //     SensorId = "RAD-L1-N01", SensorName = "Radar Nút 1-01",
+                //     SensorType = "Radar", SensorValue = 78, SensorUnit = "%", Threshold = 60,
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-15),
+                //     AcknowledgedAt = DateTimeOffset.Now.AddMinutes(-12),
+                //     AcknowledgedBy = "Nguyễn Văn A"
+                // },
+                // new()
+                // {
+                //     Id = "ALR-012",
+                //     Title = "Áp suất bất thường",
+                //     Description = "Áp suất tại PVD-4 vượt ngưỡng cảnh báo.",
+                //     Category = AlertCategory.Other,
+                //     Severity = AlertSeverity.Medium,
+                //     State = AlertState.Unprocessed,
+                //     LineId = "L5", LineName = "Cống Phạm Văn Đồng",
+                //     NodeId = "PVD-4", NodeName = "Cống Phạm Văn Đồng 4",
+                //     SensorId = "S-PVD4-PRS", SensorName = "Pressure Sensor",
+                //     SensorType = "Pressure", SensorValue = 2.8, SensorUnit = "bar", Threshold = 2.5,
+                //     CameraId = "CAM-PVD-4",
+                //     CreatedAt = DateTimeOffset.Now.AddMinutes(-28),
+                //     Lng = 105.8095, Lat = 21.0525
+                // }
             };
 
             foreach (var alert in mockAlerts)

@@ -1,6 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
+using Station.Dialogs;
+using Station.Models;
+using Station.Services;
 using Station.ViewModels;
 using System;
 
@@ -14,95 +16,138 @@ namespace Station.Views
         {
             this.InitializeComponent();
             ViewModel = new AlertsViewModel();
+
+            // Subscribe to live alerts from simulation
+            MockDataService.Instance.AlertGenerated += OnLiveAlertGenerated;
         }
 
-        private void AlertItem_PointerPressed(object sender, PointerRoutedEventArgs e)
+        // ── MockDataService integration ─────────────────────────────────
+
+        private void OnLiveAlertGenerated(object? sender, AlertGeneratedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is AlertItemViewModel alert)
-            {
-                ViewModel.SelectAlertCommand.Execute(alert);
-            }
+            DispatcherQueue.TryEnqueue(() => ViewModel.AddLiveAlert(e.Alert));
         }
 
-        private void ViewDetailButton_Click(object sender, RoutedEventArgs e)
+        // ── Header buttons ──────────────────────────────────────────────
+
+        private void CurrentViewButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is AlertItemViewModel alert)
-            {
-                ViewModel.SelectAlertCommand.Execute(alert);
-            }
+            CurrentViewButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 20, 75, 184));
+            CurrentViewButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            HistoryViewButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(0, 0, 0, 0));
+            HistoryViewButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 148, 163, 184));
+            ViewModel.SelectedPeriod = "Hôm nay";
         }
 
-        private void AcknowledgeButton_Click(object sender, RoutedEventArgs e)
+        private void HistoryViewButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert != null)
-            {
-                ViewModel.AcknowledgeAlertCommand.Execute(ViewModel.SelectedAlert);
-            }
+            HistoryViewButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 20, 75, 184));
+            HistoryViewButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            CurrentViewButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(0, 0, 0, 0));
+            CurrentViewButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 148, 163, 184));
+            ViewModel.SelectedPeriod = "Tất cả";
         }
 
-        private void ProcessButton_Click(object sender, RoutedEventArgs e)
+        private async void ExportCsvButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert != null)
+            var dialog = new ContentDialog
             {
-                ViewModel.StartProcessingCommand.Execute(ViewModel.SelectedAlert);
-            }
+                Title = "Xuất CSV",
+                Content = $"Xuất {ViewModel.FilteredCount} cảnh báo ra file CSV...\n(Tính năng đang phát triển)",
+                CloseButtonText = "Đóng",
+                XamlRoot = this.XamlRoot,
+                RequestedTheme = ElementTheme.Dark
+            };
+            await dialog.ShowAsync();
         }
 
-        private void ResolveButton_Click(object sender, RoutedEventArgs e)
+        // ── Filter buttons ──────────────────────────────────────────────
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert != null)
-            {
-                ViewModel.ResolveAlertCommand.Execute(ViewModel.SelectedAlert);
-            }
+            ViewModel.RefreshAlertsCommand.Execute(null);
         }
 
-        private void CloseAlertButton_Click(object sender, RoutedEventArgs e)
+        private void ClearFiltersButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert != null)
-            {
-                ViewModel.CloseAlertCommand.Execute(ViewModel.SelectedAlert);
-            }
+            ViewModel.ClearFiltersCommand.Execute(null);
         }
 
-        private void AddNoteButton_Click(object sender, RoutedEventArgs e)
+        // ── Table row action buttons ────────────────────────────────────
+
+        private void AcknowledgeRowButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert != null && !string.IsNullOrWhiteSpace(NoteTextBox.Text))
-            {
-                ViewModel.AddNoteCommand.Execute(NoteTextBox.Text);
-                NoteTextBox.Text = string.Empty;
-            }
+            if (sender is Button btn && btn.Tag is AlertItemViewModel alert)
+                ViewModel.AcknowledgeAlertCommand.Execute(alert);
         }
 
-        private async void ViewCameraButton_Click(object sender, RoutedEventArgs e)
+        private async void DetailRowButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedAlert?.CameraId != null)
+            if (sender is Button btn && btn.Tag is AlertItemViewModel alertVm)
             {
-                // TODO: Open camera dialog with the alert's camera
-                var dialog = new ContentDialog
+                if (!string.IsNullOrEmpty(alertVm.CameraId))
                 {
-                    Title = $"Camera - {ViewModel.SelectedAlert.NodeName}",
-                    Content = $"Đang mở camera {ViewModel.SelectedAlert.CameraId}...",
-                    CloseButtonText = "Đóng",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
+                    // Has camera — open AlertVideoDialog
+                    var alert = new Alert
+                    {
+                        Title = alertVm.Title,
+                        Description = alertVm.Description,
+                        Severity = alertVm.Severity,
+                        CameraId = alertVm.CameraId,
+                        NodeId = alertVm.NodeId,
+                        NodeName = alertVm.NodeName,
+                        LineName = alertVm.LineName,
+                        CreatedAt = alertVm.CreatedAt,
+                        SensorValue = alertVm.SensorValue,
+                        SensorUnit = alertVm.SensorUnit,
+                        Threshold = alertVm.Threshold
+                    };
+                    var videoDialog = new AlertVideoDialog(alert) { XamlRoot = this.XamlRoot };
+                    await videoDialog.ShowAsync();
+                    if (videoDialog.WasAcknowledged)
+                        ViewModel.AcknowledgeAlertCommand.Execute(alertVm);
+                }
+                else
+                {
+                    // Text-only detail
+                    var dialog = new ContentDialog
+                    {
+                        Title = alertVm.Title,
+                        Content = BuildDetailContent(alertVm),
+                        CloseButtonText = "Đóng",
+                        PrimaryButtonText = alertVm.CanAcknowledge ? "Xác nhận" : null,
+                        XamlRoot = this.XamlRoot,
+                        RequestedTheme = ElementTheme.Dark
+                    };
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                        ViewModel.AcknowledgeAlertCommand.Execute(alertVm);
+                }
             }
         }
 
-        private async void ViewOnMapButton_Click(object sender, RoutedEventArgs e)
+        private static string BuildDetailContent(AlertItemViewModel a)
         {
-            if (ViewModel.SelectedAlert != null)
-            {
-                // TODO: Navigate to map and focus on alert location
-                var dialog = new ContentDialog
-                {
-                    Title = "Xem trên bản đồ",
-                    Content = $"Định vị: {ViewModel.SelectedAlert.NodeName}\nTọa độ: {ViewModel.SelectedAlert.Lat}, {ViewModel.SelectedAlert.Lng}",
-                    CloseButtonText = "Đóng",
-                    XamlRoot = this.XamlRoot
-                };
-                await dialog.ShowAsync();
-            }
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Mức độ:     {a.SeverityText}");
+            sb.AppendLine($"Loại:       {a.CategoryText}");
+            sb.AppendLine($"Tuyến:      {a.LineName}");
+            sb.AppendLine($"Nút:        {a.NodeName}");
+            sb.AppendLine($"Thời gian:  {a.CreatedAtFormatted}");
+            sb.AppendLine($"Trạng thái: {a.StateText}");
+            if (!string.IsNullOrEmpty(a.SensorId))
+                sb.AppendLine($"Cảm biến:   {a.SensorName} = {a.SensorValue:F1} {a.SensorUnit} (ngưỡng: {a.Threshold:F1})");
+            sb.AppendLine();
+            sb.Append(a.Description);
+            return sb.ToString();
         }
     }
 }

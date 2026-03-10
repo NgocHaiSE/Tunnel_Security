@@ -732,6 +732,256 @@
         <Setter Property="Margin" Value="8,4"/>
     </Style>
 
+    <!-- ====================================================
+    Dark UI Styles — dùng cho các trang monitoring (luôn dark)
+    ==================================================== -->
+
+    <!-- Header bar sticky -->
+    <Style x:Key="DkHeaderBarStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource DkSurfaceBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding"         Value="24,14,24,14"/>
+    </Style>
+
+    <!-- Generic surface card -->
+    <Style x:Key="DkCardStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource DkSurfaceBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="12"/>
+    </Style>
+
+    <!-- Inset / deeper surface (sensor grid bg, inputs) -->
+    <Style x:Key="DkInsetStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource DkBgBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Mini sensor card -->
+    <Style x:Key="DkSensorCardStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource DkSurfaceBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="8"/>
+        <Setter Property="Padding"         Value="10"/>
+    </Style>
+
+    <!-- Filter pill — inactive -->
+    <Style x:Key="FilterPillStyle" TargetType="Border">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="8"/>
+        <Setter Property="Padding"         Value="14,7"/>
+    </Style>
+
+    <!-- Filter pill — active -->
+    <Style x:Key="FilterPillActiveStyle" TargetType="Border">
+        <Setter Property="Background"      Value="{StaticResource DkBlueBgBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBlueBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="8"/>
+        <Setter Property="Padding"         Value="14,7"/>
+    </Style>
+
+    <!-- Dark primary button (#144BB8) -->
+    <Style x:Key="DkPrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Background"      Value="{StaticResource DkBlueDarkBrush}"/>
+        <Setter Property="Foreground"      Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius"    Value="8"/>
+        <Setter Property="Padding"         Value="16,9"/>
+        <Setter Property="FontSize"        Value="13"/>
+        <Setter Property="FontWeight"      Value="SemiBold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#1D4ED8"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#1E40AF"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark secondary button (outline) -->
+    <Style x:Key="DkSecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background"      Value="{StaticResource DkInputBgBrush}"/>
+        <Setter Property="Foreground"      Value="{StaticResource DkTextSecondaryBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius"    Value="8"/>
+        <Setter Property="Padding"         Value="16,9"/>
+        <Setter Property="FontSize"        Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background"  Value="#1C222D"/>
+                                        <Setter Target="Root.BorderBrush" Value="#475569"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#0F1526"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark icon button (transparent, square, hover highlight) -->
+    <Style x:Key="DkIconButtonStyle" TargetType="Button">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius"    Value="6"/>
+        <Setter Property="Width"           Value="34"/>
+        <Setter Property="Height"          Value="34"/>
+        <Setter Property="Padding"         Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#1C222D"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#2D3545"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark ghost button (text/link, no border, subtle hover) -->
+    <Style x:Key="DkGhostButtonStyle" TargetType="Button">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding"         Value="4,0"/>
+        <Setter Property="CornerRadius"    Value="4"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="#0D1D3B"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.8"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark ComboBox -->
+    <Style x:Key="DkComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="Background"          Value="{StaticResource DkInputBgBrush}"/>
+        <Setter Property="BorderBrush"         Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="Foreground"          Value="#E2E8F0"/>
+        <Setter Property="FontSize"            Value="13"/>
+        <Setter Property="CornerRadius"        Value="8"/>
+        <Setter Property="Padding"             Value="12,8"/>
+        <Setter Property="MinHeight"           Value="36"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- Dark search TextBox -->
+    <Style x:Key="DkSearchBoxStyle" TargetType="TextBox">
+        <Setter Property="Background"            Value="{StaticResource DkInputBgBrush}"/>
+        <Setter Property="BorderBrush"           Value="{StaticResource DkBorderBrush}"/>
+        <Setter Property="Foreground"            Value="#E2E8F0"/>
+        <Setter Property="FontSize"              Value="13"/>
+        <Setter Property="CornerRadius"          Value="8"/>
+        <Setter Property="Padding"               Value="36,8,8,8"/>
+        <Setter Property="MinHeight"             Value="36"/>
+        <Setter Property="PlaceholderForeground" Value="{StaticResource DkTextMutedBrush}"/>
+    </Style>
+
+    <!-- Dark label (uppercase muted caption) -->
+    <Style x:Key="DkLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize"         Value="10"/>
+        <Setter Property="FontWeight"       Value="Bold"/>
+        <Setter Property="Foreground"       Value="{StaticResource DkTextMutedBrush}"/>
+        <Setter Property="CharacterSpacing" Value="60"/>
+    </Style>
+
     <!-- ====================================
     ContentDialog Styles
     ==================================== -->

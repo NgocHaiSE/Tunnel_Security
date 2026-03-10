@@ -1,4 +1,5 @@
 using Backend.Hubs;
+using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,9 @@ builder.Services.AddCors(options =>
         p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
 
+// Register background sensor simulation service
+builder.Services.AddSingleton<BackgroundSensorSimulation>();
+
 var app = builder.Build();
 
 // Enable Swagger
@@ -25,6 +29,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+
+// Register and start background sensor simulation
+var sensorSimulation = app.Services.GetRequiredService<BackgroundSensorSimulation>();
+sensorSimulation.Start();
 
 // Root endpoint
 app.MapGet("/", () => new

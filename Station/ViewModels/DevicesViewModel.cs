@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
 using Station.Models;
+using Station.Services;
 using System.Threading.Tasks;
 using Windows.UI;
 
@@ -20,6 +21,9 @@ namespace Station.ViewModels
 
     public partial class DevicesViewModel : ObservableObject
     {
+        // Mock data service for real-time updates
+        private readonly MockDataService _mock = MockDataService.Instance;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsSidebarSummaryVisible))]
         [NotifyPropertyChangedFor(nameof(IsSidebarDetailVisible))]
@@ -127,6 +131,81 @@ namespace Station.ViewModels
             LoadMockData();
             ApplyFilters();
             UpdateStatistics();
+
+            // Subscribe to MockDataService for realtime updates (every 1 second)
+            _mock.SensorTick += OnSensorTick;
+        }
+
+        private void OnSensorTick(object? sender, SensorTickEventArgs e)
+        {
+            // Update device value in real-time
+            try
+            {
+                // Find sensor in MockDataService to get updated value
+                var sensor = _mock.Sensors.FirstOrDefault(s => s.SensorId == e.Sensor.SensorId);
+                if (sensor == null) return;
+
+                // Find matching device in our list
+                var device = AllDevices.FirstOrDefault(d => d.DeviceId == e.Sensor.SensorId);
+                if (device != null)
+                {
+                    // Update status based on sensor level
+                    device.Status = sensor.CurrentLevel switch
+                    {
+                        SensorAlertLevel.Critical => DeviceStatus.Fault,
+                        SensorAlertLevel.Warning => DeviceStatus.Online,
+                        SensorAlertLevel.Offline => DeviceStatus.Offline,
+                        _ => DeviceStatus.Online
+                    };
+
+                    device.LastOnline = DateTimeOffset.Now;
+                }
+
+                // Update the filtered nodes with new sensor values
+                RefreshNodeSensorValues(e.Sensor.SensorId, sensor.CurrentValue, sensor.Category, sensor.CurrentLevel);
+
+                // Update statistics
+                UpdateStatistics();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DevicesVM] Error updating sensor: {ex.Message}");
+            }
+        }
+
+        private void RefreshNodeSensorValues(string sensorId, double newValue, AlertCategory category, SensorAlertLevel level)
+        {
+            // Update sensor value in NodeItemViewModel
+            foreach (var node in FilteredNodes)
+            {
+                foreach (var sensor in node.Sensors)
+                {
+                    if (sensor.SensorId == sensorId)
+                    {
+                        // Format value based on category
+                        sensor.CurrentValue = category switch
+                        {
+                            AlertCategory.Temperature => $"{newValue:F1}°C",
+                            AlertCategory.Humidity => $"{newValue:F1}%RH",
+                            AlertCategory.Radar => $"{newValue:F0}%",
+                            AlertCategory.Infrared => $"{newValue:F0}%",
+                            AlertCategory.Light => $"{newValue:F0} lux",
+                            AlertCategory.Accelerometer => $"{newValue:F2} m/s²",
+                            _ => $"{newValue:F2}"
+                        };
+
+                        // Update status
+                        sensor.SensorStatus = level switch
+                        {
+                            SensorAlertLevel.Critical => DeviceStatus.Fault,
+                            SensorAlertLevel.Warning => DeviceStatus.Online,
+                            SensorAlertLevel.Offline => DeviceStatus.Offline,
+                            _ => DeviceStatus.Online
+                        };
+                        break;
+                    }
+                }
+            }
         }
 
         private void LoadMockData()
@@ -685,6 +764,18 @@ namespace Station.ViewModels
 
         [ObservableProperty]
         private string _sensorType = string.Empty;
+
+        public string SensorTypeDisplay => SensorType switch
+        {
+            "Radar"         => "RADAR",
+            "Infrared"      => "HỒNG NGOẠI",
+            "Temperature"   => "NHIỆT ĐỘ",
+            "Humidity"      => "ĐỘ ẨM",
+            "Light"         => "ÁNH SÁNG",
+            "Accelerometer" => "GIA TỐC",
+            "Camera"        => "CAMERA",
+            _               => SensorType.ToUpper()
+        };
 
         [ObservableProperty]
         private string _currentValue = string.Empty;

@@ -71,13 +71,13 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="0,0,20,0">
                             <TextBlock Text="Tuyến:" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
                                        VerticalAlignment="Center"/>
-                            <ComboBox x:Name="LineFilterComboBox" MinWidth="140"
+                            <ComboBox x:Name="LineFilterComboBox" MinWidth="200"
                                       Style="{StaticResource ComboBoxStyle}"
                                       SelectionChanged="LineFilter_SelectionChanged">
                                 <ComboBoxItem Content="Tất cả tuyến" IsSelected="True"/>
-                                <ComboBoxItem Content="Tuyến A"/>
-                                <ComboBoxItem Content="Tuyến B"/>
-                                <ComboBoxItem Content="Tuyến C"/>
+                                <ComboBoxItem Content="Tuyến cống Hoàng Quốc Việt"/>
+                                <ComboBoxItem Content="Tuyến cống Nghĩa Đô"/>
+                                <ComboBoxItem Content="Tuyến cống Xuân La"/>
                             </ComboBox>
                         </StackPanel>
 

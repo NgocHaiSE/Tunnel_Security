@@ -299,7 +299,7 @@ MinLimit = 0
                    {
                        UpdateRealtimeData();
                    });
-            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
 
         private void UpdateRealtimeData()

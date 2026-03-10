@@ -169,9 +169,9 @@ VerticalAlignment="Center"/>
        CornerRadius="6"
                 Padding="8"
              Height="250">
-    <lvc:CartesianChart Series="{x:Bind TemperatureSeries, Mode=OneWay}"
-         XAxes="{x:Bind TemperatureXAxes, Mode=OneWay}"
-         YAxes="{x:Bind TemperatureYAxes, Mode=OneWay}"
+    <lvc:CartesianChart Series="{x:Bind TemperatureSeries, Mode=OneTime}"
+         XAxes="{x:Bind TemperatureXAxes, Mode=OneTime}"
+         YAxes="{x:Bind TemperatureYAxes, Mode=OneTime}"
  TooltipPosition="Top"/>
            </Border>
 
@@ -277,9 +277,9 @@ VerticalAlignment="Center"/>
             CornerRadius="6"
             Padding="8"
           Height="250">
-      <lvc:CartesianChart Series="{x:Bind HumiditySeries, Mode=OneWay}"
-     XAxes="{x:Bind HumidityXAxes, Mode=OneWay}"
-   YAxes="{x:Bind HumidityYAxes, Mode=OneWay}"
+      <lvc:CartesianChart Series="{x:Bind HumiditySeries, Mode=OneTime}"
+     XAxes="{x:Bind HumidityXAxes, Mode=OneTime}"
+   YAxes="{x:Bind HumidityYAxes, Mode=OneTime}"
          TooltipPosition="Top"/>
          </Border>
 
@@ -385,9 +385,9 @@ VerticalAlignment="Center"/>
        CornerRadius="6"
          Padding="8"
        Height="250">
-          <lvc:CartesianChart Series="{x:Bind VibrationSeries, Mode=OneWay}"
-   XAxes="{x:Bind VibrationXAxes, Mode=OneWay}"
-           YAxes="{x:Bind VibrationYAxes, Mode=OneWay}"
+          <lvc:CartesianChart Series="{x:Bind VibrationSeries, Mode=OneTime}"
+   XAxes="{x:Bind VibrationXAxes, Mode=OneTime}"
+           YAxes="{x:Bind VibrationYAxes, Mode=OneTime}"
                   TooltipPosition="Top"/>
                   </Border>
 
@@ -493,9 +493,9 @@ VerticalAlignment="Center"/>
     CornerRadius="6"
                 Padding="8"
     Height="250">
-            <lvc:CartesianChart Series="{x:Bind MotionSeries, Mode=OneWay}"
-         XAxes="{x:Bind MotionXAxes, Mode=OneWay}"
-         YAxes="{x:Bind MotionYAxes, Mode=OneWay}"
+            <lvc:CartesianChart Series="{x:Bind MotionSeries, Mode=OneTime}"
+         XAxes="{x:Bind MotionXAxes, Mode=OneTime}"
+         YAxes="{x:Bind MotionYAxes, Mode=OneTime}"
          TooltipPosition="Top"/>
         </Border>
 

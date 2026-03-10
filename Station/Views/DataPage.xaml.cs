@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WinUI;
@@ -13,6 +14,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using Windows.UI;
 using Station.Controls;
+using Station.Services;
 
 namespace Station.Views
 {
@@ -24,13 +26,20 @@ namespace Station.Views
         private int _timeRangeHours = 6;
         private string _searchText = "";
         private HashSet<string> _selectedNodeIds = new();
-        private HashSet<string> _selectedTypes = new() { "radar", "camera", "temperature", "humidity", "light", "water", "vibration" };
+        private HashSet<string> _selectedTypes = new() { "radar", "vibration", "temperature", "humidity", "water", "smoke", "gas" };
         private int _columnsPerRow = 2;
         private DispatcherTimer _realtimeTimer;
         private Random _random = new Random();
         private Dictionary<string, List<double>> _sensorHistoricalData = new();
         private Dictionary<string, CartesianChart> _chartInstances = new();
         private Dictionary<string, TextBlock> _sensorValueTexts = new();
+
+        // Mock data service for real-time updates
+        private readonly MockDataService _mockData = MockDataService.Instance;
+
+        // Simulation WebSocket client (optional)
+        private SimulationWebSocketClient? _wsClient;
+        private bool _useSimulation = false;
 
         public DataPage()
         {
@@ -42,22 +51,165 @@ namespace Station.Views
 
         private void DataPage_Loaded(object sender, RoutedEventArgs e)
         {
+            // Subscribe to MockDataService for realtime updates (every 1 second)
+            _mockData.SensorTick += OnMockSensorTick;
+
+            // Initialize historical data for charts
+            InitializeHistoricalData();
+
             BuildNodeFilterComboBox();
             LoadChartsForAllNodes();
             StartRealtimeUpdates();
         }
 
+        private void InitializeHistoricalData()
+        {
+            // Pre-populate historical data with initial sensor values
+            foreach (var line in _lines)
+            {
+                foreach (var node in line.Nodes)
+                {
+                    foreach (var sensor in node.Sensors)
+                    {
+                        if (sensor.Value.HasValue && !_sensorHistoricalData.ContainsKey(sensor.Id))
+                        {
+                            // Initialize with 24 data points (2 seconds each = 48 seconds of history)
+                            var initialValue = sensor.Value.Value;
+                            _sensorHistoricalData[sensor.Id] = new List<double>();
+                            for (int i = 0; i < 24; i++)
+                            {
+                                _sensorHistoricalData[sensor.Id].Add(initialValue);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task TryConnectToSimulationAsync()
+        {
+            try
+            {
+                _wsClient = new SimulationWebSocketClient();
+                _wsClient.SensorUpdated += OnSimulationSensorUpdated;
+                _wsClient.ConnectionChanged += OnSimulationConnectionChanged;
+                await _wsClient.ConnectAsync();
+                _useSimulation = true;
+                Debug.WriteLine("[DataPage] Connected to Simulation WebSocket for real-time updates");
+            }
+            catch (Exception ex)
+            {
+                _useSimulation = false;
+                Debug.WriteLine($"[DataPage] Simulation WebSocket not available, using local mode: {ex.Message}");
+            }
+        }
+
+        private void OnSimulationConnectionChanged(object? sender, bool isConnected)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine($"[DataPage] Simulation connection changed: {isConnected}");
+            });
+        }
+
+        private void OnSimulationSensorUpdated(object? sender, SimulationSensorUpdate e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                UpdateChartWithSimulationData(e);
+            });
+        }
+
+        private void UpdateChartWithSimulationData(SimulationSensorUpdate update)
+        {
+            // Map sensorId format: "RAD-L1-N01" -> "NODE-L1-01-RADAR"
+            // Or directly use sensorId if matches
+            var sensorId = update.SensorId;
+
+            // Find matching sensor in local data
+            var sensorIdPart = update.SensorId.Replace("-", "");
+            var sensor = _lines.SelectMany(l => l.Nodes)
+                              .SelectMany(n => n.Sensors)
+                              .FirstOrDefault(s => s.Id == sensorId ||
+                                  (sensorIdPart.Length >= 3 && s.Id.Contains(sensorIdPart.Substring(0, 3))));
+
+            if (sensor != null)
+            {
+                // Update sensor value from simulation
+                sensor.Value = update.Value;
+
+                // Determine status based on level from simulation
+                sensor.Status = update.Level?.ToLower() switch
+                {
+                    "critical" => "critical",
+                    "warning" => "warning",
+                    _ => "normal"
+                };
+            }
+
+            // Update historical data for charts
+            if (!_sensorHistoricalData.ContainsKey(sensorId))
+            {
+                _sensorHistoricalData[sensorId] = new List<double>();
+            }
+
+            var history = _sensorHistoricalData[sensorId];
+            history.Add(update.Value);
+            if (history.Count > 50)
+            {
+                history.RemoveAt(0);
+            }
+
+            Debug.WriteLine($"[DataPage] Simulation update: {update.Name} = {update.Value:F2} {update.Unit}");
+        }
+
         private void DataPage_Unloaded(object sender, RoutedEventArgs e)
         {
             StopRealtimeUpdates();
+            // Unsubscribe from MockDataService
+            _mockData.SensorTick -= OnMockSensorTick;
         }
 
         private void StartRealtimeUpdates()
         {
             _realtimeTimer = new DispatcherTimer();
-            _realtimeTimer.Interval = TimeSpan.FromSeconds(2);
+            _realtimeTimer.Interval = TimeSpan.FromSeconds(1);
             _realtimeTimer.Tick += RealtimeTimer_Tick;
             _realtimeTimer.Start();
+        }
+
+        private void OnMockSensorTick(object? sender, SensorTickEventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                // Update chart with new sensor data from MockDataService
+                UpdateChartWithMockData(e.Sensor.SensorId, e.NewValue);
+            });
+        }
+
+        private void UpdateChartWithMockData(string sensorId, double newValue)
+        {
+            // Find matching sensor in local data
+            var sensorIdPart = sensorId.Replace("-", "");
+
+            if (!_sensorHistoricalData.ContainsKey(sensorId))
+            {
+                // Initialize if not exists
+                _sensorHistoricalData[sensorId] = new List<double>();
+                for (int i = 0; i < 24; i++)
+                {
+                    _sensorHistoricalData[sensorId].Add(newValue);
+                }
+            }
+
+            var history = _sensorHistoricalData[sensorId];
+            history.Add(newValue);
+            if (history.Count > 50)
+            {
+                history.RemoveAt(0);
+            }
+
+            Debug.WriteLine($"[DataPage] MockData update: {sensorId} = {newValue:F2}");
         }
 
         private void StopRealtimeUpdates()
@@ -71,7 +223,12 @@ namespace Station.Views
 
         private void RealtimeTimer_Tick(object sender, object e)
         {
-            UpdateSensorValues();
+            // Only update with random variations in local mode (not simulation mode)
+            if (!_useSimulation)
+            {
+                UpdateSensorValues();
+            }
+            // Always update charts - in simulation mode they get data from _sensorHistoricalData
             UpdateCharts();
         }
 
@@ -169,106 +326,164 @@ namespace Station.Views
 
         private void InitializeMockData()
         {
+            // Use matching IDs with Backend MockData: NODE-L{line#}-0{node#}-{SENSOR_TYPE}
             _lines = new List<LineData>
             {
                 new LineData
                 {
-                    Id = "LINE_A",
-                    Name = "Tuyến A",
+                    Id = "LINE-01",
+                    Name = "Tuyến cống Hoàng Quốc Việt",
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData 
-                        { 
-                            Id = "NODE_A1", 
-                            Name = "Node A1 - Cổng vào", 
+                        new NodeData
+                        {
+                            Id = "NODE-L1-01",
+                            Name = "Cống Xuân Thủy 1",
                             Status = "normal",
                             Sensors = new List<SensorData>
                             {
-                                new SensorData { Id = "S01", Name = "Radar", Type = "radar", Status = "normal", Value = 3 },
-                                new SensorData { Id = "S02", Name = "Camera IR", Type = "camera", Status = "normal", Value = 1 },
-                                new SensorData { Id = "S03", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.5 },
-                                new SensorData { Id = "S04", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
-                                new SensorData { Id = "S05", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 174 },
-                                new SensorData { Id = "S06", Name = "Mực nước", Type = "water", Status = "normal", Value = 5 }
+                                new SensorData { Id = "NODE-L1-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.2 },
+                                new SensorData { Id = "NODE-L1-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.5 },
+                                new SensorData { Id = "NODE-L1-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.5 },
+                                new SensorData { Id = "NODE-L1-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
+                                new SensorData { Id = "NODE-L1-01-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 45 }
                             }
                         },
-                        new NodeData 
-                        { 
-                            Id = "NODE_A2", 
-                            Name = "Node A2 - Giữa tuyến", 
+                        new NodeData
+                        {
+                            Id = "NODE-L1-02",
+                            Name = "Cống Xuân Thủy 2",
                             Status = "warning",
                             Sensors = new List<SensorData>
                             {
-                                new SensorData { Id = "S07", Name = "Radar", Type = "radar", Status = "warning", Value = 15 },
-                                new SensorData { Id = "S08", Name = "Camera IR", Type = "camera", Status = "normal", Value = 2 },
-                                new SensorData { Id = "S09", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 32.1 },
-                                new SensorData { Id = "S10", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
-                                new SensorData { Id = "S11", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 165 },
-                                new SensorData { Id = "S12", Name = "Rung động", Type = "vibration", Status = "warning", Value = 0.45 }
+                                new SensorData { Id = "NODE-L1-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "warning", Value = 2.5 },
+                                new SensorData { Id = "NODE-L1-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.8 },
+                                new SensorData { Id = "NODE-L1-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 32.1 },
+                                new SensorData { Id = "NODE-L1-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 72 },
+                                new SensorData { Id = "NODE-L1-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 15 },
+                                new SensorData { Id = "NODE-L1-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 80 }
+                            }
+                        },
+                        new NodeData
+                        {
+                            Id = "NODE-L1-03",
+                            Name = "Cống Xuân Thủy 3",
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "NODE-L1-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.8 },
+                                new SensorData { Id = "NODE-L1-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.3 },
+                                new SensorData { Id = "NODE-L1-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.0 },
+                                new SensorData { Id = "NODE-L1-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
+                                new SensorData { Id = "NODE-L1-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "normal", Value = 12 },
+                                new SensorData { Id = "NODE-L1-03-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 55 }
                             }
                         }
                     }
                 },
                 new LineData
                 {
-                    Id = "LINE_B",
-                    Name = "Tuyến B",
+                    Id = "LINE-02",
+                    Name = "Tuyến cống Nghĩa Đô",
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData 
-                        { 
-                            Id = "NODE_B1", 
-                            Name = "Node B1 - Điểm đo 1", 
+                        new NodeData
+                        {
+                            Id = "NODE-L2-01",
+                            Name = "Cống Cầu Giấy 1",
                             Status = "critical",
                             Sensors = new List<SensorData>
                             {
-                                new SensorData { Id = "S13", Name = "Radar", Type = "radar", Status = "normal", Value = 2 },
-                                new SensorData { Id = "S14", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
-                                new SensorData { Id = "S15", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 35.2 },
-                                new SensorData { Id = "S16", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 70 },
-                                new SensorData { Id = "S17", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 180 },
-                                new SensorData { Id = "S18", Name = "Mực nước", Type = "water", Status = "critical", Value = 25 }
+                                new SensorData { Id = "NODE-L2-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.0 },
+                                new SensorData { Id = "NODE-L2-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "critical", Value = 3.8 },
+                                new SensorData { Id = "NODE-L2-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 35.2 },
+                                new SensorData { Id = "NODE-L2-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 70 },
+                                new SensorData { Id = "NODE-L2-01-WATER", Name = "Mực nước", Type = "water", Status = "critical", Value = 180 }
                             }
                         },
-                        new NodeData 
-                        { 
-                            Id = "NODE_B2", 
-                            Name = "Node B2 - Điểm đo 2", 
+                        new NodeData
+                        {
+                            Id = "NODE-L2-02",
+                            Name = "Cống Cầu Giấy 2",
                             Status = "normal",
                             Sensors = new List<SensorData>
                             {
-                                new SensorData { Id = "S19", Name = "Radar", Type = "radar", Status = "normal", Value = 1 },
-                                new SensorData { Id = "S20", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
-                                new SensorData { Id = "S21", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.5 },
-                                new SensorData { Id = "S22", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 66 },
-                                new SensorData { Id = "S23", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 170 },
-                                new SensorData { Id = "S24", Name = "Rung động", Type = "vibration", Status = "normal", Value = 0.12 }
+                                new SensorData { Id = "NODE-L2-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.6 },
+                                new SensorData { Id = "NODE-L2-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.4 },
+                                new SensorData { Id = "NODE-L2-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.5 },
+                                new SensorData { Id = "NODE-L2-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 66 },
+                                new SensorData { Id = "NODE-L2-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 8 },
+                                new SensorData { Id = "NODE-L2-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 60 }
+                            }
+                        },
+                        new NodeData
+                        {
+                            Id = "NODE-L2-03",
+                            Name = "Cống Cầu Giấy 3",
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "NODE-L2-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.9 },
+                                new SensorData { Id = "NODE-L2-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.6 },
+                                new SensorData { Id = "NODE-L2-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 26.8 },
+                                new SensorData { Id = "NODE-L2-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 71 },
+                                new SensorData { Id = "NODE-L2-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "normal", Value = 18 },
+                                new SensorData { Id = "NODE-L2-03-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 75 }
                             }
                         }
                     }
                 },
                 new LineData
                 {
-                    Id = "LINE_C",
-                    Name = "Tuyến C",
+                    Id = "LINE-03",
+                    Name = "Tuyến cống Xuân La",
                     Status = "active",
                     Nodes = new List<NodeData>
                     {
-                        new NodeData 
-                        { 
-                            Id = "NODE_C1", 
-                            Name = "Node C1 - Khu vực 1", 
+                        new NodeData
+                        {
+                            Id = "NODE-L3-01",
+                            Name = "Cống Trần Thái Tông 1",
                             Status = "normal",
                             Sensors = new List<SensorData>
                             {
-                                new SensorData { Id = "S25", Name = "Radar", Type = "radar", Status = "normal", Value = 1 },
-                                new SensorData { Id = "S26", Name = "Camera IR", Type = "camera", Status = "normal", Value = 0 },
-                                new SensorData { Id = "S27", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.8 },
-                                new SensorData { Id = "S28", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
-                                new SensorData { Id = "S29", Name = "Ánh sáng", Type = "light", Status = "normal", Value = 165 },
-                                new SensorData { Id = "S30", Name = "Mực nước", Type = "water", Status = "normal", Value = 8 }
+                                new SensorData { Id = "NODE-L3-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.1 },
+                                new SensorData { Id = "NODE-L3-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.5 },
+                                new SensorData { Id = "NODE-L3-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.8 },
+                                new SensorData { Id = "NODE-L3-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
+                                new SensorData { Id = "NODE-L3-01-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 50 }
+                            }
+                        },
+                        new NodeData
+                        {
+                            Id = "NODE-L3-02",
+                            Name = "Cống Trần Thái Tông 2",
+                            Status = "normal",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "NODE-L3-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.7 },
+                                new SensorData { Id = "NODE-L3-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.4 },
+                                new SensorData { Id = "NODE-L3-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.2 },
+                                new SensorData { Id = "NODE-L3-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
+                                new SensorData { Id = "NODE-L3-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 12 },
+                                new SensorData { Id = "NODE-L3-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 70 }
+                            }
+                        },
+                        new NodeData
+                        {
+                            Id = "NODE-L3-03",
+                            Name = "Cống Trần Thái Tông 3",
+                            Status = "critical",
+                            Sensors = new List<SensorData>
+                            {
+                                new SensorData { Id = "NODE-L3-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "critical", Value = 3.2 },
+                                new SensorData { Id = "NODE-L3-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "warning", Value = 2.9 },
+                                new SensorData { Id = "NODE-L3-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "critical", Value = 42.5 },
+                                new SensorData { Id = "NODE-L3-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "warning", Value = 85 },
+                                new SensorData { Id = "NODE-L3-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "critical", Value = 95 },
+                                new SensorData { Id = "NODE-L3-03-WATER", Name = "Mực nước", Type = "water", Status = "warning", Value = 140 }
                             }
                         }
                     }
@@ -994,16 +1209,36 @@ namespace Station.Views
 
         private string GetUnit(string type)
         {
-            return type switch
+            return type?.ToLower() switch
             {
                 "temperature" => "°C",
-                "humidity" => "%",
+                "humidity" or "hum" => "%",
                 "light" => "lux",
-                "water" => "cm",
-                "vibration" => "m/s²",
-                "radar" => "phát hiện",
+                "water" or "waterlevel" => "cm",
+                "vibration" or "vib" => "mm/s",
+                "radar" => "mm",
                 "camera" => "người",
+                "smoke" or "smokefire" => "%",
+                "gas" => "ppm",
                 _ => ""
+            };
+        }
+
+        /// <summary>
+        /// Maps Backend sensor type to local sensor type
+        /// </summary>
+        private string MapSensorType(string apiType)
+        {
+            return apiType?.ToLower() switch
+            {
+                "radar" => "radar",
+                "vibration" => "vibration",
+                "temperature" => "temperature",
+                "humidity" => "humidity",
+                "waterlevel" => "water",
+                "smokefire" => "smoke",
+                "gas" => "gas",
+                _ => apiType?.ToLower() ?? ""
             };
         }
 
@@ -1014,12 +1249,12 @@ namespace Station.Views
             _selectedLineId = LineFilterComboBox.SelectedIndex switch
             {
                 0 => "all",
-                1 => "LINE_A",
-                2 => "LINE_B",
-                3 => "LINE_C",
+                1 => "LINE-01",
+                2 => "LINE-02",
+                3 => "LINE-03",
                 _ => "all"
             };
-            
+
             // Rebuild node dropdown based on selected line
             BuildNodeFilterComboBox();
             LoadChartsForAllNodes();

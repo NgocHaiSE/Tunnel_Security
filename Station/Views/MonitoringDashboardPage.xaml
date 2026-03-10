@@ -15,6 +15,25 @@
         <viewmodels:MonitoringDashboardViewModel/>
     </Page.DataContext>
 
+    <Page.Resources>
+        <!-- Red pulse overlay — loops until dismissed -->
+        <Storyboard x:Name="RedFlashStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="RedFlashOverlay"
+                Storyboard.TargetProperty="Opacity">
+                <DiscreteDoubleKeyFrame KeyTime="0:0:0.000" Value="0"/>
+                <LinearDoubleKeyFrame   KeyTime="0:0:0.150" Value="0.50"/>
+                <LinearDoubleKeyFrame   KeyTime="0:0:0.550" Value="0.35"/>
+                <LinearDoubleKeyFrame   KeyTime="0:0:0.900" Value="0"/>
+                <DiscreteDoubleKeyFrame KeyTime="0:0:1.600" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </Page.Resources>
+
+    <!-- Outer container — content + overlay layers -->
+    <Grid>
+
+    <!-- ─── MAIN CONTENT ─── -->
     <Grid Padding="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -627,245 +646,56 @@
                                 </Grid>
                             </Border>
 
-                            <!--Alert List Section-->
+                            <!--Alert List Section - live from MockDataService-->
                             <Border Background="{StaticResource MonitoringBackgroundBrush}"
                                     CornerRadius="8"
                                     Padding="12">
-                                <StackPanel Spacing="8">
-                                    <!--Critical Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="16,12"
-                                            BorderBrush="{StaticResource SeverityCriticalBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.RealtimeAlerts, Mode=OneWay}">
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="viewmodels:RealtimeAlert">
+                                            <Border Background="{StaticResource MonitoringBackgroundBrush}"
+                                                    CornerRadius="6"
+                                                    Padding="12,10"
+                                                    BorderBrush="{Binding SeverityBrush}"
+                                                    BorderThickness="1"
+                                                    Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource SeverityCriticalBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
+                                                    <Ellipse Grid.Column="0"
+                                                             Width="8"
+                                                             Height="8"
+                                                             Fill="{Binding SeverityBrush}"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,8,0"/>
 
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Nhiệt độ vượt ngưỡng"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="SEN-002 • A1/R1/N2"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding Message}"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{StaticResource MonitoringTextPrimaryBrush}"
+                                                                   TextWrapping="Wrap"/>
+                                                        <TextBlock Text="{Binding Source}"
+                                                                   FontSize="10"
+                                                                   Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                                                   Margin="0,2,0,0"/>
+                                                    </StackPanel>
 
-                                            <TextBlock Grid.Column="2"
-                                                       Text="2 phút"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <!--Warning Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="16,12"
-                                            BorderBrush="{StaticResource SeverityMediumBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource SeverityMediumBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
-
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Rung động bất thường"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="SEN-001 • A2/R3/N5"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="2"
-                                                       Text="5 phút"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <!--Info Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="{StaticResource MonitoringAccentButtonBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource MonitoringAccentButtonBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
-
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Thiết bị offline"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="RAD-001 • A2/R4/N7"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="2"
-                                                       Text="15 phút"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <!--Normal Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="{StaticResource MonitoringNodeNormalBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource MonitoringNodeNormalBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
-
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Đã xử lý cảnh báo"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="CAM-001 • A1/R1/N1"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="2"
-                                                       Text="30 phút"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <!--Camera Issue Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="16,12"
-                                            BorderBrush="{StaticResource SeverityHighBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource SeverityHighBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
-
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Camera mất kết nối"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="CAM-004 • A2/R3/N6"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="2"
-                                                       Text="1 giờ"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <!--Humidity Alert-->
-                                    <Border Background="{StaticResource MonitoringBackgroundBrush}"
-                                            CornerRadius="6"
-                                            Padding="12,8"
-                                            BorderBrush="{StaticResource MonitoringAccentButtonBrush}"
-                                            BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Ellipse Grid.Column="0"
-                                                     Width="8"
-                                                     Height="8"
-                                                     Fill="{StaticResource MonitoringAccentButtonBrush}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,8,0"/>
-
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Độ ẩm cao"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
-                                                <TextBlock Text="SEN-003 • A1/R2/N4"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="2"
-                                                       Text="2 giờ"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource MonitoringTextSecondaryBrush}"
-                                                       VerticalAlignment="Top"/>
-                                        </Grid>
-                                    </Border>
-                                </StackPanel>
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding TimeText}"
+                                                               FontSize="10"
+                                                               Foreground="{StaticResource MonitoringTextSecondaryBrush}"
+                                                               VerticalAlignment="Top"
+                                                               Margin="8,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -938,12 +768,12 @@
 
                                 <!-- Lines -->
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock Text="4"
+                                    <TextBlock Text="{x:Bind ViewModel.TotalNodes, Mode=OneWay}"
                                                FontSize="32"
                                                FontWeight="Bold"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Tuyến"
+                                    <TextBlock Text="Nút"
                                                FontSize="14"
                                                Foreground="{StaticResource TextSecondaryBrush}"
                                                HorizontalAlignment="Center"/>
@@ -951,7 +781,7 @@
 
                                 <!-- Healthy -->
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="45"
+                                    <TextBlock Text="{x:Bind ViewModel.OnlineSensors, Mode=OneWay}"
                                                FontSize="32"
                                                FontWeight="Bold"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
@@ -965,12 +795,12 @@
 
                                 <!-- Faulty -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                    <TextBlock Text="39"
+                                    <TextBlock Text="{x:Bind ViewModel.AnomalyCount, Mode=OneWay}"
                                                FontSize="32"
                                                FontWeight="Bold"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Lỗi"
+                                    <TextBlock Text="Bất thường"
                                                FontSize="14"
                                                Foreground="{StaticResource SeverityCriticalBrush}"
                                                HorizontalAlignment="Center"
@@ -979,12 +809,12 @@
 
                                 <!-- Active -->
                                 <StackPanel Grid.Column="3" HorizontalAlignment="Center">
-                                    <TextBlock Text="6"
+                                    <TextBlock Text="{x:Bind ViewModel.ActiveAlertCount, Mode=OneWay}"
                                                FontSize="32"
                                                FontWeight="Bold"
                                                Foreground="{StaticResource MonitoringTextPrimaryBrush}"
                                                HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Hoạt động"
+                                    <TextBlock Text="Cảnh báo"
                                                FontSize="14"
                                                Foreground="{StaticResource MonitoringAccentButtonBrush}"
                                                HorizontalAlignment="Center"
@@ -1015,7 +845,7 @@
                                                VerticalAlignment="Center"/>
 
                                     <TextBlock Grid.Column="2"
-                                               Text="3 / 4"
+                                               Text="{x:Bind ViewModel.CameraCountText, Mode=OneWay}"
                                                FontSize="14"
                                                FontWeight="SemiBold"
                                                Foreground="{StaticResource SeverityLowBrush}"/>
@@ -1042,7 +872,7 @@
                                                VerticalAlignment="Center"/>
 
                                     <TextBlock Grid.Column="2"
-                                               Text="2 / 3"
+                                               Text="{x:Bind ViewModel.SensorCountText, Mode=OneWay}"
                                                FontSize="14"
                                                FontWeight="SemiBold"
                                                Foreground="{StaticResource SeverityMediumBrush}"/>
@@ -1085,13 +915,13 @@
                                         <TextBlock Text="System Health"
                                                    FontSize="11"
                                                    Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                        <TextBlock Text="75%"
+                                        <TextBlock Text="{x:Bind ViewModel.SystemHealthText, Mode=OneWay}"
                                                    FontSize="11"
                                                    FontWeight="SemiBold"
                                                    Foreground="{StaticResource MonitoringNodeNormalBrush}"
                                                    HorizontalAlignment="Right"/>
                                     </Grid>
-                                    <ProgressBar Value="75"
+                                    <ProgressBar Value="{x:Bind ViewModel.SystemHealth, Mode=OneWay}"
                                                  Maximum="100"
                                                  Height="6"
                                                  Foreground="{StaticResource MonitoringNodeNormalBrush}"
@@ -1198,7 +1028,7 @@
                                 <TextBlock Text="Độ ẩm"
                                            FontSize="11"
                                            Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                <TextBlock Text="66%"
+                                <TextBlock Text="{x:Bind ViewModel.AverageHumidityText, Mode=OneWay}"
                                            FontSize="16"
                                            FontWeight="Bold"
                                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
@@ -1231,7 +1061,7 @@
                                 <TextBlock Text="Chuyển động"
                                            FontSize="11"
                                            Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                <TextBlock Text="2.5 mm/s"
+                                <TextBlock Text="{x:Bind ViewModel.AverageVibrationText, Mode=OneWay}"
                                            FontSize="16"
                                            FontWeight="Bold"
                                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
@@ -1297,7 +1127,7 @@
                                 <TextBlock Text="Nồng độ khí"
                                            FontSize="11"
                                            Foreground="{StaticResource MonitoringTextSecondaryBrush}"/>
-                                <TextBlock Text="0.8%"
+                                <TextBlock Text="{x:Bind ViewModel.AverageGasLevelText, Mode=OneWay}"
                                            FontSize="16"
                                            FontWeight="Bold"
                                            Foreground="{StaticResource MonitoringTextPrimaryBrush}"/>
@@ -1499,4 +1329,58 @@
             </Border>
         </Grid>
     </Grid>
+    <!-- ─── END MAIN CONTENT ─── -->
+
+    <!-- Red screen flash overlay (full coverage, pointer-transparent) -->
+    <Border x:Name="RedFlashOverlay"
+            Background="#FFEF4444"
+            Opacity="0"
+            IsHitTestVisible="False"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"/>
+
+    <!-- Floating alert notification badge (top-right, appears on alert) -->
+    <Button x:Name="AlertNotificationBadge"
+            Click="AlertNotificationBadge_Click"
+            PointerEntered="AlertBadge_PointerEntered"
+            PointerExited="AlertBadge_PointerExited"
+            Visibility="Collapsed"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Margin="0,20,24,0"
+            Background="#991B1B"
+            BorderBrush="#EF4444"
+            BorderThickness="1.5"
+            CornerRadius="12"
+            Padding="14,9"
+            ToolTipService.ToolTip="Nhấn để xem chi tiết cảnh báo">
+        <Button.Resources>
+            <!-- Keep solid background on hover/press, no transparency bleed -->
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#B91C1C"/>
+            <SolidColorBrush x:Key="ButtonBackgroundPressed"     Color="#7F1D1D"/>
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#EF4444"/>
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed"     Color="#FCA5A5"/>
+        </Button.Resources>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <!-- Pulsing dot -->
+            <Ellipse Width="8" Height="8" Fill="#FCA5A5" VerticalAlignment="Center"/>
+            <!-- Exclamation icon -->
+            <FontIcon Glyph="&#xE7BA;" FontSize="16" Foreground="#FECACA"/>
+            <!-- Alert count badge -->
+            <Border x:Name="AlertBadgeCountBorder"
+                    Background="#EF4444" CornerRadius="10"
+                    Padding="7,2" MinWidth="22"
+                    HorizontalAlignment="Center">
+                <TextBlock x:Name="AlertBadgeCountText"
+                           Text="1" FontSize="11" FontWeight="Bold"
+                           Foreground="White" HorizontalAlignment="Center"/>
+            </Border>
+            <!-- Label -->
+            <TextBlock Text="CẢNH BÁO" FontSize="12" FontWeight="Bold"
+                       Foreground="#FECACA" VerticalAlignment="Center"
+                       CharacterSpacing="60"/>
+        </StackPanel>
+    </Button>
+
+    </Grid><!-- outer container -->
 </Page>

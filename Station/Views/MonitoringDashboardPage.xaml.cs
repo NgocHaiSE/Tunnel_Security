@@ -4,6 +4,7 @@ using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -42,27 +43,17 @@ namespace Station.Views
         private int _rotationCountdown = 10;
         private bool _isPaused = false;
         private string _focusedCamera = null; // Camera to focus when alert detected
-        private readonly string[] _cameraList = { "CAM 01", "CAM 02", "CAM 03", "CAM 04", "CAM 05" };
-        private readonly Dictionary<string, string> _cameraLocations = new()
-        {
-            { "CAM 01", "Khu vực A - Cổng vào chính" },
-            { "CAM 02", "Khu vực B - Hành lang trung tâm" },
-            { "CAM 03", "Khu vực C - Lối ra khẩn cấp" },
-            { "CAM 04", "Khu vực D - Khu vực nguy hiểm" },
-            { "CAM 05", "Khu vực E - Phòng kiểm soát" }
-        };
-        private readonly Dictionary<string, bool> _cameraStatus = new()
-        {
-            { "CAM 01", true },
-            { "CAM 02", true },
-            { "CAM 03", true },
-            { "CAM 04", false }, // Offline
-            { "CAM 05", true }
-        };
+        // Cameras are loaded live from MockDataService
+        private readonly MockDataService _mockForCameras = MockDataService.Instance;
 
         // Alert filter variables
         private enum AlertFilterPeriod { Day, Week, Month }
         private AlertFilterPeriod _currentAlertFilter = AlertFilterPeriod.Day;
+
+        // Alert notification badge
+        private int _pendingAlertCount = 0;
+        private Station.Models.Alert? _latestAlert = null;
+        private bool _alertDialogOpen = false;
 
         public MonitoringDashboardPage()
         {
@@ -77,6 +68,9 @@ namespace Station.Views
 
             // Apply current theme to icons
             UpdateThemeIcons(_themeService.CurrentTheme);
+
+            // Subscribe to alert events for flash + badge
+            MockDataService.Instance.AlertGenerated += OnAlertGeneratedForUI;
 
             // Initialize WebView2 + Mapbox HTML
             InitializeSecurityMap();
@@ -711,19 +705,20 @@ namespace Station.Views
             if (_isPaused || _focusedCamera != null)
                 return;
 
+            var cameras = _mockForCameras.Cameras;
+            if (cameras.Count == 0) return;
+
             _rotationCountdown--;
 
             if (_rotationCountdown <= 0)
             {
-                // Switch to next camera
-                _currentCameraIndex = (_currentCameraIndex + 1) % _cameraList.Length;
+                _currentCameraIndex = (_currentCameraIndex + 1) % cameras.Count;
                 UpdateCurrentCamera();
                 _rotationCountdown = 10;
             }
 
-            // Update next camera info
-            var nextIndex = (_currentCameraIndex + 1) % _cameraList.Length;
-            NextCameraInfo.Text = $"Tiếp: {_cameraList[nextIndex]} ({_rotationCountdown}s)";
+            var nextIndex = (_currentCameraIndex + 1) % cameras.Count;
+            NextCameraInfo.Text = $"Tiếp: {cameras[nextIndex].CameraId} ({_rotationCountdown}s)";
         }
 
         private void CameraTimeTimer_Tick(object sender, object e)
@@ -733,15 +728,22 @@ namespace Station.Views
 
         private void UpdateCurrentCamera()
         {
-            var cameraName = _focusedCamera ?? _cameraList[_currentCameraIndex];
-            var isOnline = _cameraStatus[cameraName];
+            var cameras = _mockForCameras.Cameras;
+            if (cameras.Count == 0) return;
 
-            CurrentCameraName.Text = cameraName;
-
-            if (_cameraLocations.TryGetValue(cameraName, out var location))
+            Services.SimulatedCamera cam;
+            if (_focusedCamera != null)
             {
-                // Location info can be displayed if needed
+                cam = cameras.FirstOrDefault(c => c.CameraId == _focusedCamera)
+                      ?? cameras[_currentCameraIndex % cameras.Count];
             }
+            else
+            {
+                cam = cameras[_currentCameraIndex % cameras.Count];
+            }
+
+            CurrentCameraName.Text = $"{cam.CameraId} — {cam.Location}";
+            bool isOnline = cam.IsOnline;
 
             // Update status badge
             if (isOnline)
@@ -794,11 +796,12 @@ namespace Station.Views
 
         private async void SimulateAlertDetection()
         {
-            // Wait 15 seconds then simulate alert on CAM 03
             await System.Threading.Tasks.Task.Delay(15000);
 
-            // Focus on camera with alert
-            FocusOnCameraAlert("CAM 03", "Phát hiện chuyển động bất thường");
+            // Focus on first online camera from MockDataService
+            var firstOnline = _mockForCameras.Cameras.FirstOrDefault(c => c.IsOnline);
+            if (firstOnline == null) return;
+            FocusOnCameraAlert(firstOnline.CameraId, "Phát hiện chuyển động bất thường");
 
             // After 10 seconds, clear focus and resume rotation
             await System.Threading.Tasks.Task.Delay(10000);
@@ -808,7 +811,13 @@ namespace Station.Views
         private void FocusOnCameraAlert(string cameraName, string alertMessage)
         {
             _focusedCamera = cameraName;
-            _currentCameraIndex = Array.IndexOf(_cameraList, cameraName);
+            var cameras = _mockForCameras.Cameras;
+            int idx = 0;
+            for (int i = 0; i < cameras.Count; i++)
+            {
+                if (cameras[i].CameraId == cameraName) { idx = i; break; }
+            }
+            _currentCameraIndex = idx;
 
             UpdateCurrentCamera();
 
@@ -833,6 +842,82 @@ namespace Station.Views
 
         #region Alert Filter Handlers - Removed (UI redesigned)
         // Old alert filter methods removed as UI was redesigned
+        #endregion
+
+        #region Alert Notification (Flash + Badge)
+
+        private void OnAlertGeneratedForUI(object? sender, Station.Services.AlertGeneratedEventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _latestAlert = e.Alert;
+                _pendingAlertCount++;
+
+                // Trigger red flash
+                RedFlashStoryboard.Begin();
+
+                // Show / update badge
+                AlertBadgeCountText.Text = _pendingAlertCount.ToString();
+                AlertNotificationBadge.Visibility = Visibility.Visible;
+
+                // Also focus the alerting camera
+                if (!string.IsNullOrEmpty(e.Alert.CameraId))
+                    FocusOnCameraAlert(e.Alert.CameraId, e.Alert.Title);
+            });
+        }
+
+        private async void AlertNotificationBadge_Click(object sender, RoutedEventArgs e)
+        {
+            if (_alertDialogOpen || _latestAlert == null) return;
+            _alertDialogOpen = true;
+
+            // Stop pulsing while dialog is open
+            RedFlashStoryboard.Stop();
+            RedFlashOverlay.Opacity = 0;
+
+            var dialog = new Station.Dialogs.AlertVideoDialog(_latestAlert)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            await dialog.ShowAsync();
+
+            if (dialog.WasAcknowledged)
+            {
+                // Fully dismissed — clear everything
+                _pendingAlertCount = 0;
+                AlertNotificationBadge.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // Still has pending alerts — resume pulsing
+                if (_pendingAlertCount > 0) _pendingAlertCount--;
+                if (_pendingAlertCount == 0)
+                {
+                    AlertNotificationBadge.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    AlertBadgeCountText.Text = _pendingAlertCount.ToString();
+                    RedFlashStoryboard.Begin();
+                }
+            }
+
+            _alertDialogOpen = false;
+        }
+
+        private void AlertBadge_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            this.ProtectedCursor = Microsoft.UI.Input.InputSystemCursor.Create(
+                Microsoft.UI.Input.InputSystemCursorShape.Hand);
+        }
+
+        private void AlertBadge_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            this.ProtectedCursor = Microsoft.UI.Input.InputSystemCursor.Create(
+                Microsoft.UI.Input.InputSystemCursorShape.Arrow);
+        }
+
         #endregion
 
         public class SystemLogItem

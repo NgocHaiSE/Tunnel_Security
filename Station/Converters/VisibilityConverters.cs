@@ -61,6 +61,21 @@ namespace Station.Converters
     }
 
     /// <summary>
+    /// Converts int to Visibility (0 -> Visible, anything else -> Collapsed)
+    /// Used to show empty-state panels when a count is zero.
+    /// </summary>
+    public class ZeroToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is int n) return n == 0 ? Visibility.Visible : Visibility.Collapsed;
+            return Visibility.Collapsed;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+            => throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// Converts DateTimeOffset to formatted string
     /// </summary>
     public class DateTimeFormatConverter : IValueConverter

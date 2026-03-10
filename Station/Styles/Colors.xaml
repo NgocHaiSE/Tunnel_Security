@@ -347,4 +347,40 @@
     <Thickness x:Key="BorderThicknessNormal">1</Thickness>
     <Thickness x:Key="BorderThicknessMedium">2</Thickness>
 
+    <!-- ====================================
+    Dark UI Palette — dùng cho các trang monitoring (luôn dark, không phụ thuộc theme)
+    ==================================== -->
+
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="DkBgBrush"         Color="#111621"/>
+    <SolidColorBrush x:Key="DkSurfaceBrush"    Color="#1C222D"/>
+    <SolidColorBrush x:Key="DkDeepBrush"       Color="#0F1526"/>
+    <SolidColorBrush x:Key="DkInputBgBrush"    Color="#111621"/>
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="DkBorderBrush"     Color="#2D3545"/>
+    <SolidColorBrush x:Key="DkBorderSubtleBrush" Color="#1F2937"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="DkTextPrimaryBrush"   Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="DkTextSecondaryBrush" Color="#94A3B8"/>
+    <SolidColorBrush x:Key="DkTextMutedBrush"     Color="#64748B"/>
+    <SolidColorBrush x:Key="DkTextDimBrush"       Color="#475569"/>
+
+    <!-- Accent Blue -->
+    <SolidColorBrush x:Key="DkBlueBrush"       Color="#3B82F6"/>
+    <SolidColorBrush x:Key="DkBlueDarkBrush"   Color="#144BB8"/>
+    <SolidColorBrush x:Key="DkBlueBgBrush"     Color="#0D1D3B"/>
+    <SolidColorBrush x:Key="DkBlueBorderBrush" Color="#1D4ED8"/>
+
+    <!-- Status colors -->
+    <SolidColorBrush x:Key="DkGreenBrush"      Color="#22C55E"/>
+    <SolidColorBrush x:Key="DkGreenBgBrush"    Color="#0D2B1A"/>
+    <SolidColorBrush x:Key="DkYellowBrush"     Color="#F59E0B"/>
+    <SolidColorBrush x:Key="DkYellowBgBrush"   Color="#1C1407"/>
+    <SolidColorBrush x:Key="DkRedBrush"        Color="#EF4444"/>
+    <SolidColorBrush x:Key="DkRedBgBrush"      Color="#1F0E0E"/>
+    <SolidColorBrush x:Key="DkGrayBrush"       Color="#64748B"/>
+    <SolidColorBrush x:Key="DkGrayBgBrush"     Color="#1A1F2A"/>
+
 </ResourceDictionary>

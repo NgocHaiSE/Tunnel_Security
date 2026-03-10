@@ -1,12 +1,6 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(git restore Station/Views/MonitoringDashboardPage.xaml)"
-    ],
-    "deny": [],
-    "ask": []
-  },
   "env": {
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "60000"
   }
+ 
 }
