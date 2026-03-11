@@ -63,12 +63,26 @@
   <!-- LEFT: Sensor Grid + Manual Alert Form -->
   <div class="flex-1 overflow-y-auto p-5 space-y-5">
 
-    <!-- Sensor Grid -->
+    <!-- Sensor Grid + Search/Filter -->
     <section>
       <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
         Live Sensors
         <span id="sensorOnlineCount" class="ml-2 text-slate-500"></span>
       </h2>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <input id="sensorSearch" type="text" placeholder="Tìm kiếm theo tên, node, loại..." class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-sm text-slate-200 focus:outline-none focus:border-blue-500 w-64" oninput="renderSensorGrid()" />
+        <select id="sensorTypeFilter" class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-sm text-slate-200 focus:outline-none focus:border-blue-500" onchange="renderSensorGrid()">
+          <option value="">Tất cả loại</option>
+          <option value="Temperature">Nhiệt độ</option>
+          <option value="Humidity">Độ ẩm</option>
+          <option value="Gas">Khí gas</option>
+          <option value="WaterLevel">Mực nước</option>
+          <option value="Motion">Chuyển động</option>
+          <option value="Intrusion">Xâm nhập</option>
+          <option value="Equipment">Thiết bị</option>
+          <option value="Other">Khác</option>
+        </select>
+      </div>
       <div id="sensorGrid" class="grid grid-cols-2 xl:grid-cols-4 gap-3">
         <div class="col-span-full text-slate-500 text-sm py-8 text-center">Đang kết nối...</div>
       </div>
@@ -287,7 +301,29 @@ async function loadAlerts() {
 function renderSensorGrid() {
   const grid = document.getElementById('sensorGrid');
   grid.innerHTML = '';
-  Object.values(sensors).forEach(s => {
+  const search = (document.getElementById('sensorSearch')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('sensorTypeFilter')?.value || '';
+  let filtered = Object.values(sensors);
+  if (search) {
+    filtered = filtered.filter(s =>
+      (s.sensorName && s.sensorName.toLowerCase().includes(search)) ||
+      (s.nodeName && s.nodeName.toLowerCase().includes(search)) ||
+      (s.category && s.category.toLowerCase().includes(search)) ||
+      (s.sensorId && s.sensorId.toLowerCase().includes(search))
+    );
+  }
+  if (typeFilter) {
+    filtered = filtered.filter(s => (s.category || '').toLowerCase() === typeFilter.toLowerCase());
+  }
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="col-span-full text-slate-500 text-sm py-8 text-center">Không tìm thấy sensor phù hợp.</div>';
+    return;
+  }
+  filtered.forEach(s => {
+    // Đổi tên hiển thị nếu cần (ví dụ: thêm prefix, hoặc sửa tên mẫu)
+    if (s.sensorName && s.sensorName.startsWith('SNS-')) {
+      s.sensorName = s.sensorName.replace('SNS-', 'Cảm biến ');
+    }
     const card = makeSensorCard(s);
     grid.appendChild(card);
   });

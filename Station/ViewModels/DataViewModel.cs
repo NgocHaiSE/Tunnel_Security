@@ -21,7 +21,8 @@ namespace Station.ViewModels
         private readonly DispatcherQueue? _dispatcherQueue;
         private Timer? _realtimeUpdateTimer;
         private readonly Random _random = new();
-        private readonly MockDataService _mockData = MockDataService.Instance;
+        private readonly ApiSensorClient _apiClient = new();
+        private bool _apiConnected = false;
 
         // Real-time Statistics
         [ObservableProperty]
@@ -56,14 +57,26 @@ namespace Station.ViewModels
         public DataViewModel()
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-
             InitializeMockData();
             InitializeCharts();
-            StartRealtimeUpdates();
+            InitApiSensorClient();
+        }
 
-            // Subscribe to live sensor ticks from MockDataService
-            _mockData.SensorTick += OnMockSensorTick;
-            _mockData.AlertGenerated += OnMockAlertGenerated;
+        private async void InitApiSensorClient()
+        {
+            _apiClient.SensorUpdated += OnApiSensorUpdated;
+            _apiClient.ConnectionChanged += (s, connected) =>
+            {
+                _apiConnected = connected;
+            };
+            try
+            {
+                await _apiClient.ConnectAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DataViewModel] API connect failed: {ex.Message}");
+            }
         }
 
         private void InitializeMockData()
@@ -291,37 +304,40 @@ MinLimit = 0
             });
         }
 
-        private void StartRealtimeUpdates()
+        // Không dùng timer random nữa, cập nhật qua SignalR
+
+        private void OnApiSensorUpdated(object? sender, Station.Services.ApiSensorUpdate e)
         {
-            _realtimeUpdateTimer = new Timer(_ =>
+            _dispatcherQueue?.TryEnqueue(() =>
             {
-                _dispatcherQueue?.TryEnqueue(() =>
-                   {
-                       UpdateRealtimeData();
-                   });
-            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-        }
+                // Cập nhật hoặc thêm mới sensor reading
+                var existing = RealtimeSensorReadings.FirstOrDefault(r => r.DeviceName == e.Id);
+                if (existing != null)
+                {
+                    existing.Value = e.CurrentValue;
+                    existing.Timestamp = e.LastReading;
+                    existing.Unit = e.Unit;
+                    existing.SensorType = e.Type;
+                }
+                else
+                {
+                    RealtimeSensorReadings.Insert(0, new SensorReadingViewModel
+                    {
+                        DeviceName = e.Id,
+                        SensorType = e.Type,
+                        Value = e.CurrentValue,
+                        Unit = e.Unit,
+                        Timestamp = e.LastReading,
+                        IsAnomaly = false // Có thể cập nhật logic anomaly nếu API trả về
+                    });
+                    while (RealtimeSensorReadings.Count > 50)
+                        RealtimeSensorReadings.RemoveAt(RealtimeSensorReadings.Count - 1);
+                }
 
-        private void UpdateRealtimeData()
-        {
-            // Update statistics
-            TotalReadingsToday += _random.Next(1, 5);
-            CameraDetections += _random.Next(0, 2);
-
-            if (_random.Next(100) < 5)
-            {
-                AnomalyCount++;
-            }
-
-            // Update chart data
-            if (_temperatureData.Count >= 24)
-            {
-                _temperatureData.RemoveAt(0);
-                _motionData.RemoveAt(0);
-            }
-
-            _temperatureData.Add(20 + _random.Next(-3, 3));
-            _motionData.Add(_random.Next(0, 100));
+                // Cập nhật thống kê đơn giản (có thể mở rộng tuỳ ý)
+                TotalReadingsToday++;
+                ActiveSensors = RealtimeSensorReadings.Count;
+            });
         }
 
         public void RefreshData()
@@ -387,94 +403,7 @@ MinLimit = 0
         }
     }
 
-    // === VIEW MODELS FOR UI BINDING ===
 
-    public class SensorReadingViewModel : ObservableObject
-    {
-        private string _deviceName = string.Empty;
-        public string DeviceName
-        {
-            get => _deviceName;
-            set => SetProperty(ref _deviceName, value);
-        }
-
-        private string _sensorType = string.Empty;
-        public string SensorType
-        {
-            get => _sensorType;
-            set => SetProperty(ref _sensorType, value);
-        }
-
-        private double _value;
-        public double Value
-        {
-            get => _value;
-            set
-            {
-                if (SetProperty(ref _value, value))
-                {
-                    OnPropertyChanged(nameof(ValueText));
-                }
-            }
-        }
-
-        private string _unit = string.Empty;
-        public string Unit
-        {
-            get => _unit;
-            set
-            {
-                if (SetProperty(ref _unit, value))
-                {
-                    OnPropertyChanged(nameof(ValueText));
-                }
-            }
-        }
-
-        private DateTimeOffset _timestamp;
-        public DateTimeOffset Timestamp
-        {
-            get => _timestamp;
-            set
-            {
-                if (SetProperty(ref _timestamp, value))
-                {
-                    OnPropertyChanged(nameof(TimestampText));
-                }
-            }
-        }
-
-        private bool _isAnomaly;
-        public bool IsAnomaly
-        {
-            get => _isAnomaly;
-            set
-            {
-                if (SetProperty(ref _isAnomaly, value))
-                {
-                    OnPropertyChanged(nameof(BackgroundColor));
-                }
-            }
-        }
-
-        public string TimestampText
-        {
-            get
-            {
-                var diff = DateTimeOffset.Now - _timestamp;
-                return diff.TotalSeconds < 60
-        ? $"{(int)diff.TotalSeconds}s trước"
-      : $"{(int)diff.TotalMinutes}m trước";
-            }
-        }
-
-        public string ValueText => $"{_value:F1} {_unit}";
-
-        public SolidColorBrush BackgroundColor =>
-            _isAnomaly
-    ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 254, 226, 226))
-        : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 248, 250, 252));
-    }
 
     public class CameraDetectionViewModel : ObservableObject
     {

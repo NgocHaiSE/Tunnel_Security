@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Microsoft.UI.Dispatching;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,9 +27,8 @@ namespace Station.Views
         private int _timeRangeHours = 6;
         private string _searchText = "";
         private HashSet<string> _selectedNodeIds = new();
-        private HashSet<string> _selectedTypes = new() { "radar", "vibration", "temperature", "humidity", "water", "smoke", "gas" };
+        private HashSet<string> _selectedTypes = new() { "radar", "infrared", "temperature", "humidity", "light", "vibration" };
         private int _columnsPerRow = 2;
-        private DispatcherTimer _realtimeTimer;
         private Random _random = new Random();
         private Dictionary<string, List<double>> _sensorHistoricalData = new();
         private Dictionary<string, CartesianChart> _chartInstances = new();
@@ -37,9 +37,12 @@ namespace Station.Views
         // Mock data service for real-time updates
         private readonly MockDataService _mockData = MockDataService.Instance;
 
-        // Simulation WebSocket client (optional)
+        // Simulation WebSocket client
         private SimulationWebSocketClient? _wsClient;
         private bool _useSimulation = false;
+
+        // Timer to refresh chart visuals every 1 second
+        private DispatcherQueueTimer? _chartRefreshTimer;
 
         public DataPage()
         {
@@ -49,17 +52,30 @@ namespace Station.Views
             this.Unloaded += DataPage_Unloaded;
         }
 
-        private void DataPage_Loaded(object sender, RoutedEventArgs e)
+        private async void DataPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // Subscribe to MockDataService for realtime updates (every 1 second)
-            _mockData.SensorTick += OnMockSensorTick;
-
             // Initialize historical data for charts
             InitializeHistoricalData();
 
             BuildNodeFilterComboBox();
             LoadChartsForAllNodes();
-            StartRealtimeUpdates();
+
+            // Try connecting to Simulation WebSocket for real data
+            await TryConnectToSimulationAsync();
+
+            // If simulation not available, fallback to MockDataService
+            if (!_useSimulation)
+            {
+                _mockData.SensorTick += OnMockSensorTick;
+                Debug.WriteLine("[DataPage] Using MockDataService (local mode)");
+            }
+
+            // Start 1-second timer to refresh chart visuals
+            _chartRefreshTimer = DispatcherQueue.CreateTimer();
+            _chartRefreshTimer.Interval = TimeSpan.FromSeconds(1);
+            _chartRefreshTimer.Tick += ChartRefreshTimer_Tick;
+            _chartRefreshTimer.Start();
+            Debug.WriteLine("[DataPage] Chart refresh timer started (1s interval)");
         }
 
         private void InitializeHistoricalData()
@@ -95,6 +111,8 @@ namespace Station.Views
                 _wsClient.ConnectionChanged += OnSimulationConnectionChanged;
                 await _wsClient.ConnectAsync();
                 _useSimulation = true;
+                // Khi chuyển sang simulation, làm sạch lịch sử dữ liệu để tránh lẫn dữ liệu mock
+                _sensorHistoricalData.Clear();
                 Debug.WriteLine("[DataPage] Connected to Simulation WebSocket for real-time updates");
             }
             catch (Exception ex)
@@ -122,60 +140,62 @@ namespace Station.Views
 
         private void UpdateChartWithSimulationData(SimulationSensorUpdate update)
         {
-            // Map sensorId format: "RAD-L1-N01" -> "NODE-L1-01-RADAR"
-            // Or directly use sensorId if matches
+            // Map sensorId from simulation to local sensor.Id (case-insensitive, exact match)
             var sensorId = update.SensorId;
-
-            // Find matching sensor in local data
-            var sensorIdPart = update.SensorId.Replace("-", "");
             var sensor = _lines.SelectMany(l => l.Nodes)
                               .SelectMany(n => n.Sensors)
-                              .FirstOrDefault(s => s.Id == sensorId ||
-                                  (sensorIdPart.Length >= 3 && s.Id.Contains(sensorIdPart.Substring(0, 3))));
+                              .FirstOrDefault(s => string.Equals(s.Id, sensorId, StringComparison.OrdinalIgnoreCase));
 
             if (sensor != null)
             {
-                // Update sensor value from simulation
+                // Update sensor value from simulation (absolute value)
                 sensor.Value = update.Value;
-
-                // Determine status based on level from simulation
+                // Update status
                 sensor.Status = update.Level?.ToLower() switch
                 {
                     "critical" => "critical",
                     "warning" => "warning",
                     _ => "normal"
                 };
-            }
 
-            // Update historical data for charts
-            if (!_sensorHistoricalData.ContainsKey(sensorId))
-            {
-                _sensorHistoricalData[sensorId] = new List<double>();
-            }
-
-            var history = _sensorHistoricalData[sensorId];
-            history.Add(update.Value);
-            if (history.Count > 50)
-            {
-                history.RemoveAt(0);
+                // Update historical data for charts (absolute value, no delta)
+                if (!_sensorHistoricalData.ContainsKey(sensor.Id))
+                {
+                    _sensorHistoricalData[sensor.Id] = new List<double>();
+                }
+                var history = _sensorHistoricalData[sensor.Id];
+                history.Add(update.Value);
+                if (history.Count > 50)
+                {
+                    history.RemoveAt(0);
+                }
             }
 
             Debug.WriteLine($"[DataPage] Simulation update: {update.Name} = {update.Value:F2} {update.Unit}");
         }
 
-        private void DataPage_Unloaded(object sender, RoutedEventArgs e)
+        private async void DataPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            StopRealtimeUpdates();
+            // Stop chart refresh timer
+            _chartRefreshTimer?.Stop();
+            _chartRefreshTimer = null;
+
             // Unsubscribe from MockDataService
             _mockData.SensorTick -= OnMockSensorTick;
+
+            // Disconnect WebSocket if connected
+            if (_wsClient != null)
+            {
+                await _wsClient.DisposeAsync();
+                _wsClient = null;
+                _useSimulation = false;
+            }
+            Debug.WriteLine("[DataPage] Unloaded — all resources cleaned up");
         }
 
         private void StartRealtimeUpdates()
         {
-            _realtimeTimer = new DispatcherTimer();
-            _realtimeTimer.Interval = TimeSpan.FromSeconds(1);
-            _realtimeTimer.Tick += RealtimeTimer_Tick;
-            _realtimeTimer.Start();
+            // Xoá hoặc vô hiệu hoá StartRealtimeUpdates và các dòng gọi _realtimeTimer
         }
 
         private void OnMockSensorTick(object? sender, SensorTickEventArgs e)
@@ -189,8 +209,27 @@ namespace Station.Views
 
         private void UpdateChartWithMockData(string sensorId, double newValue)
         {
-            // Find matching sensor in local data
-            var sensorIdPart = sensorId.Replace("-", "");
+            // Update sensor value in local data structure
+            var sensor = _lines.SelectMany(l => l.Nodes)
+                               .SelectMany(n => n.Sensors)
+                               .FirstOrDefault(s => string.Equals(s.Id, sensorId, StringComparison.OrdinalIgnoreCase));
+
+            if (sensor != null)
+            {
+                sensor.Value = newValue;
+
+                // Also update status from MockDataService sensor
+                var mockSensor = _mockData.Sensors.FirstOrDefault(s => s.SensorId == sensorId);
+                if (mockSensor != null)
+                {
+                    sensor.Status = mockSensor.CurrentLevel switch
+                    {
+                        SensorAlertLevel.Critical => "critical",
+                        SensorAlertLevel.Warning => "warning",
+                        _ => "normal"
+                    };
+                }
+            }
 
             if (!_sensorHistoricalData.ContainsKey(sensorId))
             {
@@ -208,28 +247,28 @@ namespace Station.Views
             {
                 history.RemoveAt(0);
             }
-
-            Debug.WriteLine($"[DataPage] MockData update: {sensorId} = {newValue:F2}");
         }
 
         private void StopRealtimeUpdates()
         {
-            if (_realtimeTimer != null)
-            {
-                _realtimeTimer.Stop();
-                _realtimeTimer = null;
-            }
+            // Xoá hoặc vô hiệu hoá StopRealtimeUpdates
+        }
+
+        /// <summary>
+        /// Called every 1 second by DispatcherQueueTimer to refresh chart visuals.
+        /// </summary>
+        private void ChartRefreshTimer_Tick(DispatcherQueueTimer sender, object args)
+        {
+            // Only refresh chart visuals with latest data from _sensorHistoricalData.
+            // Data is populated by:
+            //   - MockDataService.SensorTick event → OnMockSensorTick → UpdateChartWithMockData (local mode)
+            //   - SimulationWebSocketClient.SensorUpdated event → OnSimulationSensorUpdated → UpdateChartWithSimulationData (simulation mode)
+            UpdateCharts();
         }
 
         private void RealtimeTimer_Tick(object sender, object e)
         {
-            // Only update with random variations in local mode (not simulation mode)
-            if (!_useSimulation)
-            {
-                UpdateSensorValues();
-            }
-            // Always update charts - in simulation mode they get data from _sensorHistoricalData
-            UpdateCharts();
+            // Legacy — kept for compatibility, no longer used
         }
 
         private void UpdateSensorValues()
@@ -255,9 +294,9 @@ namespace Station.Views
                                 "camera" => _random.Next(-1, 2),
                                 _ => 0
                             };
-                            
+
                             sensor.Value = Math.Max(0, baseValue + variation);
-                            
+
                             // Update historical data
                             if (!_sensorHistoricalData.ContainsKey(sensor.Id))
                             {
@@ -267,7 +306,7 @@ namespace Station.Views
                                     _sensorHistoricalData[sensor.Id].Add(baseValue);
                                 }
                             }
-                            
+
                             var history = _sensorHistoricalData[sensor.Id];
                             history.RemoveAt(0);
                             history.Add(sensor.Value.Value);
@@ -283,13 +322,13 @@ namespace Station.Views
             {
                 var sensorId = kvp.Key;
                 var chart = kvp.Value;
-                
+
                 if (_sensorHistoricalData.ContainsKey(sensorId))
                 {
                     var sensor = _lines.SelectMany(l => l.Nodes)
                                        .SelectMany(n => n.Sensors)
                                        .FirstOrDefault(s => s.Id == sensorId);
-                    
+
                     if (sensor != null && chart.Series != null)
                     {
                         var seriesArray = chart.Series.ToArray();
@@ -300,7 +339,7 @@ namespace Station.Views
                             {
                                 _sensorValueTexts[sensorId].Text = $"Giá trị: {sensor.Value:F1} {GetUnit(sensor.Type)}";
                             }
-                            
+
                             if (sensor.Type == "vibration" && seriesArray[0] is ColumnSeries<double> columnSeries)
                             {
                                 // Update vibration chart with more points
@@ -316,7 +355,7 @@ namespace Station.Views
                             else if (seriesArray[0] is LineSeries<double> lineSeries)
                             {
                                 // Update line chart
-                                lineSeries.Values = _sensorHistoricalData[sensorId].ToArray();
+                                lineSeries.Values = _sensorHistoricalData[sensor.Id].ToArray();
                             }
                         }
                     }
@@ -326,168 +365,73 @@ namespace Station.Views
 
         private void InitializeMockData()
         {
-            // Use matching IDs with Backend MockData: NODE-L{line#}-0{node#}-{SENSOR_TYPE}
-            _lines = new List<LineData>
+            // Build local data from MockDataService to ensure sensorId consistency
+            _lines = new List<LineData>();
+
+            // Group sensors by Line → Node using MockDataService
+            var mockSensors = _mockData.Sensors;
+            var lineGroups = mockSensors.GroupBy(s => s.LineId).OrderBy(g => g.Key);
+
+            foreach (var lineGroup in lineGroups)
             {
-                new LineData
+                var firstSensor = lineGroup.First();
+                var line = new LineData
                 {
-                    Id = "LINE-01",
-                    Name = "Tuyến cống Hoàng Quốc Việt",
+                    Id = lineGroup.Key,
+                    Name = firstSensor.LineName,
                     Status = "active",
-                    Nodes = new List<NodeData>
-                    {
-                        new NodeData
-                        {
-                            Id = "NODE-L1-01",
-                            Name = "Cống Xuân Thủy 1",
-                            Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L1-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.2 },
-                                new SensorData { Id = "NODE-L1-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.5 },
-                                new SensorData { Id = "NODE-L1-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.5 },
-                                new SensorData { Id = "NODE-L1-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
-                                new SensorData { Id = "NODE-L1-01-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 45 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L1-02",
-                            Name = "Cống Xuân Thủy 2",
-                            Status = "warning",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L1-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "warning", Value = 2.5 },
-                                new SensorData { Id = "NODE-L1-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.8 },
-                                new SensorData { Id = "NODE-L1-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 32.1 },
-                                new SensorData { Id = "NODE-L1-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 72 },
-                                new SensorData { Id = "NODE-L1-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 15 },
-                                new SensorData { Id = "NODE-L1-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 80 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L1-03",
-                            Name = "Cống Xuân Thủy 3",
-                            Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L1-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.8 },
-                                new SensorData { Id = "NODE-L1-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.3 },
-                                new SensorData { Id = "NODE-L1-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.0 },
-                                new SensorData { Id = "NODE-L1-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
-                                new SensorData { Id = "NODE-L1-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "normal", Value = 12 },
-                                new SensorData { Id = "NODE-L1-03-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 55 }
-                            }
-                        }
-                    }
-                },
-                new LineData
+                    Nodes = new List<NodeData>()
+                };
+
+                var nodeGroups = lineGroup.GroupBy(s => s.NodeId).OrderBy(g => g.Key);
+                foreach (var nodeGroup in nodeGroups)
                 {
-                    Id = "LINE-02",
-                    Name = "Tuyến cống Nghĩa Đô",
-                    Status = "active",
-                    Nodes = new List<NodeData>
+                    var firstNodeSensor = nodeGroup.First();
+                    var node = new NodeData
                     {
-                        new NodeData
-                        {
-                            Id = "NODE-L2-01",
-                            Name = "Cống Cầu Giấy 1",
-                            Status = "critical",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L2-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.0 },
-                                new SensorData { Id = "NODE-L2-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "critical", Value = 3.8 },
-                                new SensorData { Id = "NODE-L2-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "warning", Value = 35.2 },
-                                new SensorData { Id = "NODE-L2-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 70 },
-                                new SensorData { Id = "NODE-L2-01-WATER", Name = "Mực nước", Type = "water", Status = "critical", Value = 180 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L2-02",
-                            Name = "Cống Cầu Giấy 2",
-                            Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L2-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.6 },
-                                new SensorData { Id = "NODE-L2-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.4 },
-                                new SensorData { Id = "NODE-L2-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.5 },
-                                new SensorData { Id = "NODE-L2-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 66 },
-                                new SensorData { Id = "NODE-L2-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 8 },
-                                new SensorData { Id = "NODE-L2-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 60 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L2-03",
-                            Name = "Cống Cầu Giấy 3",
-                            Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L2-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.9 },
-                                new SensorData { Id = "NODE-L2-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.6 },
-                                new SensorData { Id = "NODE-L2-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 26.8 },
-                                new SensorData { Id = "NODE-L2-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 71 },
-                                new SensorData { Id = "NODE-L2-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "normal", Value = 18 },
-                                new SensorData { Id = "NODE-L2-03-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 75 }
-                            }
-                        }
-                    }
-                },
-                new LineData
-                {
-                    Id = "LINE-03",
-                    Name = "Tuyến cống Xuân La",
-                    Status = "active",
-                    Nodes = new List<NodeData>
+                        Id = nodeGroup.Key,
+                        Name = firstNodeSensor.NodeName,
+                        Status = "normal",
+                        Sensors = new List<SensorData>()
+                    };
+
+                    foreach (var mockSensor in nodeGroup)
                     {
-                        new NodeData
+                        node.Sensors.Add(new SensorData
                         {
-                            Id = "NODE-L3-01",
-                            Name = "Cống Trần Thái Tông 1",
+                            Id = mockSensor.SensorId,          // Use exact ID from MockDataService
+                            Name = mockSensor.SensorName,
+                            Type = MapCategoryToType(mockSensor.Category),
                             Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L3-01-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 1.1 },
-                                new SensorData { Id = "NODE-L3-01-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.5 },
-                                new SensorData { Id = "NODE-L3-01-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 27.8 },
-                                new SensorData { Id = "NODE-L3-01-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 68 },
-                                new SensorData { Id = "NODE-L3-01-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 50 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L3-02",
-                            Name = "Cống Trần Thái Tông 2",
-                            Status = "normal",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L3-02-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "normal", Value = 0.7 },
-                                new SensorData { Id = "NODE-L3-02-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "normal", Value = 0.4 },
-                                new SensorData { Id = "NODE-L3-02-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "normal", Value = 28.2 },
-                                new SensorData { Id = "NODE-L3-02-HUM", Name = "Độ ẩm", Type = "humidity", Status = "normal", Value = 65 },
-                                new SensorData { Id = "NODE-L3-02-SMOKE", Name = "Cảm biến khói/lửa", Type = "smoke", Status = "normal", Value = 12 },
-                                new SensorData { Id = "NODE-L3-02-WATER", Name = "Mực nước", Type = "water", Status = "normal", Value = 70 }
-                            }
-                        },
-                        new NodeData
-                        {
-                            Id = "NODE-L3-03",
-                            Name = "Cống Trần Thái Tông 3",
-                            Status = "critical",
-                            Sensors = new List<SensorData>
-                            {
-                                new SensorData { Id = "NODE-L3-03-RADAR", Name = "Radar biến dạng", Type = "radar", Status = "critical", Value = 3.2 },
-                                new SensorData { Id = "NODE-L3-03-VIB", Name = "Cảm biến rung", Type = "vibration", Status = "warning", Value = 2.9 },
-                                new SensorData { Id = "NODE-L3-03-TEMP", Name = "Nhiệt độ", Type = "temperature", Status = "critical", Value = 42.5 },
-                                new SensorData { Id = "NODE-L3-03-HUM", Name = "Độ ẩm", Type = "humidity", Status = "warning", Value = 85 },
-                                new SensorData { Id = "NODE-L3-03-GAS", Name = "Cảm biến khí gas", Type = "gas", Status = "critical", Value = 95 },
-                                new SensorData { Id = "NODE-L3-03-WATER", Name = "Mực nước", Type = "water", Status = "warning", Value = 140 }
-                            }
-                        }
+                            Value = mockSensor.CurrentValue     // Use initial value from service
+                        });
                     }
+
+                    line.Nodes.Add(node);
                 }
+                _lines.Add(line);
+            }
+
+            Debug.WriteLine($"[DataPage] Initialized {_lines.Count} lines, " +
+                $"{_lines.Sum(l => l.Nodes.Count)} nodes, " +
+                $"{_lines.Sum(l => l.Nodes.Sum(n => n.Sensors.Count))} sensors from MockDataService");
+        }
+
+        /// <summary>
+        /// Maps MockDataService AlertCategory enum to local sensor type string
+        /// </summary>
+        private string MapCategoryToType(Station.Models.AlertCategory category)
+        {
+            return category switch
+            {
+                Station.Models.AlertCategory.Radar => "radar",
+                Station.Models.AlertCategory.Infrared => "infrared",
+                Station.Models.AlertCategory.Temperature => "temperature",
+                Station.Models.AlertCategory.Humidity => "humidity",
+                Station.Models.AlertCategory.Light => "light",
+                Station.Models.AlertCategory.Accelerometer => "vibration",
+                Station.Models.AlertCategory.Intrusion => "camera",
+                _ => "other"
             };
         }
 
@@ -519,8 +463,8 @@ namespace Station.Views
             NodeFilterComboBox.Items.Add(allItem);
 
             // Get lines based on selected line filter
-            var linesToShow = _selectedLineId == "all" 
-                ? _lines 
+            var linesToShow = _selectedLineId == "all"
+                ? _lines
                 : _lines.Where(l => l.Id == _selectedLineId).ToList();
 
             // Add nodes from filtered lines
@@ -530,8 +474,8 @@ namespace Station.Views
                 {
                     var nodeItem = new ComboBoxItem
                     {
-                        Content = _selectedLineId == "all" 
-                            ? $"{line.Name} - {node.Name}" 
+                        Content = _selectedLineId == "all"
+                            ? $"{line.Name} - {node.Name}"
                             : node.Name, // If specific line selected, no need to show line name
                         Tag = node.Id
                     };
@@ -548,7 +492,7 @@ namespace Station.Views
             if (NodeFilterComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
             {
                 _selectedNodeIds.Clear();
-                
+
                 if (tag != "all")
                 {
                     _selectedNodeIds.Add(tag);
@@ -566,9 +510,9 @@ namespace Station.Views
             CameraPanel.Children.Clear();
             _chartInstances.Clear();
             _sensorValueTexts.Clear();
-            
+
             var filteredSensors = GetFilteredSensors();
-            
+
             // Separate cameras from other sensors
             var cameraSensors = filteredSensors.Where(s => s.Type == "camera").ToList();
             var chartSensors = filteredSensors.Where(s => s.Type != "camera").ToList();
@@ -661,7 +605,7 @@ namespace Station.Views
             // Filter by search text
             if (!string.IsNullOrEmpty(_searchText))
             {
-                allSensors = allSensors.Where(s => 
+                allSensors = allSensors.Where(s =>
                     s.Name.ToLower().Contains(_searchText.ToLower()) ||
                     s.Id.ToLower().Contains(_searchText.ToLower())
                 ).ToList();
@@ -704,10 +648,10 @@ namespace Station.Views
                 Foreground = (Brush)Application.Current.Resources["TextSecondaryBrush"],
                 Margin = new Thickness(0, 2, 0, 0)
             };
-            
+
             // Store subtitle reference for realtime updates
             _sensorValueTexts[sensor.Id] = subtitle;
-            
+
             titleStack.Children.Add(title);
             titleStack.Children.Add(subtitle);
             Grid.SetColumn(titleStack, 0);
@@ -757,7 +701,7 @@ namespace Station.Views
             }
 
             var radarChart = new RadarChartControl();
-            
+
             // Update detections after control is loaded
             radarChart.Loaded += async (s, e) =>
             {
@@ -1186,11 +1130,11 @@ namespace Station.Views
             return type switch
             {
                 "radar" => new SKColor(16, 185, 129, alpha),
+                "infrared" => new SKColor(220, 38, 127, alpha),
                 "camera" => new SKColor(59, 130, 246, alpha),
                 "temperature" => new SKColor(239, 68, 68, alpha),
                 "humidity" => new SKColor(6, 182, 212, alpha),
                 "light" => new SKColor(251, 191, 36, alpha),
-                "water" => new SKColor(14, 165, 233, alpha),
                 "vibration" => new SKColor(245, 158, 11, alpha),
                 _ => new SKColor(156, 163, 175, alpha)
             };
@@ -1212,14 +1156,12 @@ namespace Station.Views
             return type?.ToLower() switch
             {
                 "temperature" => "°C",
-                "humidity" or "hum" => "%",
+                "humidity" or "hum" => "%RH",
                 "light" => "lux",
-                "water" or "waterlevel" => "cm",
-                "vibration" or "vib" => "mm/s",
-                "radar" => "mm",
+                "infrared" => "%",
+                "vibration" or "vib" or "accelerometer" => "m/s²",
+                "radar" => "%",
                 "camera" => "người",
-                "smoke" or "smokefire" => "%",
-                "gas" => "ppm",
                 _ => ""
             };
         }
@@ -1288,7 +1230,7 @@ namespace Station.Views
             ChkTemperature.IsChecked = true;
             ChkHumidity.IsChecked = true;
             ChkLight.IsChecked = true;
-            ChkWater.IsChecked = true;
+            // ChkInfrared.IsChecked = true;
             ChkVibration.IsChecked = true;
         }
 
@@ -1299,7 +1241,7 @@ namespace Station.Views
             ChkTemperature.IsChecked = false;
             ChkHumidity.IsChecked = false;
             ChkLight.IsChecked = false;
-            ChkWater.IsChecked = false;
+            ChkInfrared.IsChecked = false;
             ChkVibration.IsChecked = false;
         }
 

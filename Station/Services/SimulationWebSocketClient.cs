@@ -25,7 +25,7 @@ namespace Station.Services
 
         public SimulationWebSocketClient(string? wsUrl = null)
         {
-            _wsUrl = wsUrl ?? "ws://localhost:5050";
+            _wsUrl = wsUrl ?? "ws://localhost:5050/ws";
         }
 
         public async Task ConnectAsync()
@@ -109,6 +109,11 @@ namespace Station.Services
             }
         }
 
+        private static readonly JsonSerializerOptions _jsonOpts = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         private void ProcessMessage(string json)
         {
             try
@@ -120,14 +125,14 @@ namespace Station.Services
                 switch (type)
                 {
                     case "sensorTick":
-                        var sensorUpdate = JsonSerializer.Deserialize<SimulationSensorUpdate>(json);
+                        var sensorUpdate = JsonSerializer.Deserialize<SimulationSensorUpdate>(json, _jsonOpts);
                         if (sensorUpdate != null)
                         {
                             SensorUpdated?.Invoke(this, sensorUpdate);
                         }
                         break;
                     case "alertGenerated":
-                        var alertUpdate = JsonSerializer.Deserialize<SimulationAlertUpdate>(json);
+                        var alertUpdate = JsonSerializer.Deserialize<SimulationAlertUpdate>(json, _jsonOpts);
                         if (alertUpdate != null)
                         {
                             AlertReceived?.Invoke(this, alertUpdate);

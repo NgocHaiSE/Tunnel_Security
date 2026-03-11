@@ -232,16 +232,16 @@
                                     </Grid>
                                 </Border>
 
-                                <!-- Water Level -->
+                                <!-- Infrared (PIR) -->
                                 <Border Background="{StaticResource BackgroundSecondaryBrush}" CornerRadius="8" Padding="10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="50"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0" x:Name="ChkWater" IsChecked="True"
-                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="water" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="Mực nước" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                        <CheckBox Grid.Column="0" x:Name="ChkInfrared" IsChecked="True"
+                                                  Checked="ChartType_CheckChanged" Unchecked="ChartType_CheckChanged" Tag="infrared" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="Hồng ngoại" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </Grid>
                                 </Border>
 
